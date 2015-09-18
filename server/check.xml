@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<idPkg:Story xmlns:idPkg="http://ns.adobe.com/AdobeInDesign/idml/1.0/packaging"  DOMVersion="11.0">
+    <Story Self="ued" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/" AppliedNamedGrid="n">
+
+        <StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType"
+                         StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+
+        <InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+        <XMLElement100>
+            <XMLElement Self="di2i3" MarkupTag="XMLTag/Story" XMLContent="ued">
+
+
+                <Custom>
+                    <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+
+                        <CharacterStyleRange100>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+
+
+                                <Content100>
+                                    <Content ParagraphStyleName="Basic-Paragraph" CharacterStyleName="" TagSelf="di2i3"
+                                             TagName="Story" contenteditable="true" seqNo="
+0">Hello1111
+                                    </Content>
+                                </Content100>
+                                <Content101>
+                                    <Content ParagraphStyleName="Basic-Paragraph" CharacterStyleName="" TagSelf="di2i3"
+                                             TagName="Story" contenteditable="true" seqNo="1">He
+                                        llo
+                                    </Content>
+                                </Content101>
+                                <Br100>
+                                    <Br ParagraphStyleName="Basic-Paragraph" CharacterStyleName="" TagSelf="di2i3"
+                                        TagName="Story" contenteditable="true" seqNo="2"/>
+                                </Br100>
+                                <Content102>
+                                    <Content ParagraphStyleName="Basic-Paragraph" CharacterStyleName="" TagSelf="di2i3"
+                                             TagName="Story" contenteditable="true" seqNo="3">Hello22222
+                                    </Content>
+                                </Content102>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange100>
+                        <br/>
+                        <CharacterStyleRange101>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character st
+yle]" OTFContextualAlternate="false">
+                                <Br101>
+                                    <Br ParagraphStyleName="Basic-Paragraph" CharacterStyleName="" TagSelf="di2i3"
+                                        TagName="Story" contenteditable="true" seqNo="4"/>
+                                </Br10
+                                        1>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange101>
+                    </ParagraphStyleRange>
+                </Custom>
+                <Custom>
+                    <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/Paragraph Style 2">
+                        <CharacterStyleRange102>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+
+                                <Content103>
+                                    <Content ParagraphStyleName="Paragraph-Style-2" CharacterStyleName=""
+                                             TagSelf="di2i3" TagName="Story" contenteditable="true" seqNo
+                                            ="5">This is the first textFrame. After tab.
+                                    </Content>
+                                </Content103>
+                                <Br102>
+                                    <Br ParagraphStyleName="Paragraph-Style-2" CharacterStyleName="" TagSelf="di2i3"
+                                        TagName="Story"
+                                        nteditable="true" seqNo="6"/>
+                                </Br102>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange102>
+                    </ParagraphStyleRange>
+                </Custom>
+                <ParagraphStyleRange102>
+                    <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+                        <CharacterStyleRange103>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+                                <Br103>
+                                    <Br ParagraphStyleName="Basic-Paragraph" CharacterStyleName="" TagSelf="di2i3"
+                                        TagName="Story" contenteditable="true" seqNo="7"/>
+                                </Br10>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange103>
+                    </ParagraphStyleRange>
+                </ParagraphStyleRange102>
+                <ParagraphStyleRange103>
+                    <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/Paragraph Style 1">
+                        <CharacterStyleRange104>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+
+
+                                <Br104>
+                                    <Br ParagraphStyleName="Paragraph-Style-1" CharacterStyleName="" TagSelf="di2i3i2"
+                                        TagName="Tag2" contenteditable="true" seqNo="8"/>
+                                </B
+                                        r104>
+                                <XMLElement101>
+                                    <XMLElement Self="di2i3i2" MarkupTag="XMLTag/Tag2">
+
+
+                                        <Content104>
+                                            <Content ParagraphStyleName="Paragraph-Style-1" CharacterStyleName=""
+                                                     TagSelf="di2i3i2" TagName="Tag2" contenteditable="tr
+ue" seqNo="9">Now
+                                            </Content>
+                                        </Content104>
+                                        <XMLElement102>
+                                            <XMLElement Self="di2i3i2i1" MarkupTag="XMLTag/Tag1">
+
+
+                                                <Content105>
+                                                    <Content ParagraphStyleName="Basic-Paragraph" CharacterStyleName=""
+                                                             TagSelf="di2i3i2i1" TagName="Tag1" contentedit
+                                                             able="true" seqNo="10">let
+                                                    </Content>
+                                                </Content105>
+                                                <XMLElement103>
+                                                    <XMLElement Self="di2i3i2i1i3" MarkupTag="XMLTag/Tag3">
+                                                        <Content106>
+                                                            <Content ParagraphStyleName="Paragraph-Style-1"
+                                                                     CharacterStyleName="" TagSelf="di2i3i2i1i3"
+                                                                     TagName="Tag3"
+                                                                     contenteditable="true" seqNo="11">s s
+                                                            </Content>
+                                                        </Content106>
+                                                    </XMLElement>
+                                                </XMLElement103>
+                                                <Content107>
+                                                    <Content ParagraphStyleName="Basic-Paragraph" CharacterStyleName=""
+                                                             TagSelf="di2i3i2i
+1" TagName="Tag1" contenteditable="true" seqNo="12">ee
+                                                    </Content>
+                                                </Content107>
+                                            </XMLElement>
+                                        </XMLElement102>
+                                        <Content108>
+                                            <Content ParagraphStyleName="Paragraph-Style-1" CharacterStyleName=""
+                                                     TagSelf="di2i3i2" TagNa
+                                                     me="Tag2" contenteditable="true" seqNo="13">how it works
+                                            </Content>
+                                        </Content108>
+                                    </XMLElement>
+                                </XMLElement101>
+                                <Content109>
+                                    <Content ParagraphStyleName="Paragraph-Style-1" CharacterStyleName=""
+                                             TagSelf="di2i3i2" TagName="Tag2
+" contenteditable="true" seqNo="14">with space.
+                                    </Content>
+                                </Content109>
+                                <Br105>
+                                    <Br ParagraphStyleName="Paragraph-Style-1" CharacterStyleName="" TagSelf="di2i3i2"
+                                        TagName="Tag2" contenteditable="true" seqNo="15"/>
+                                </Br105>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange104>
+                    </ParagraphStyleRange>
+                </ParagraphStyleRange103>
+                <ParagraphStyleRange104>
+                    <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/Paragraph Style 2">
+
+
+                        <CharacterStyleRange105>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+                                <Content110>
+                                    <Content ParagraphStyleName="Paragraph-Style-2" CharacterStyleName=""
+                                             TagSelf="di2i3" TagName="Story" contenteditable="true" seqNo
+                                            ="16">this
+                                    </Content>
+                                </Content110>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange105>
+                        <CharacterStyleRange106>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Character Style 2">
+                                <Content111>
+                                    <Content ParagraphStyleName="Paragraph-Style-2"
+                                             CharacterStyleName="Character-Style-2" TagSelf="di2i3" TagName="Story"
+                                             contentedit
+                                             able="true" seqNo="17">is new
+                                    </Content>
+                                </Content111>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange106>
+                        <CharacterStyleRange107>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character st
+yle]">
+                                <Content112>
+                                    <Content ParagraphStyleName="Paragraph-Style-2" CharacterStyleName=""
+                                             TagSelf="di2i3" TagName="Story" contenteditable="true" seqNo
+                                            ="18">line
+                                    </Content>
+                                </Content112>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange107>
+                        <CharacterStyleRange108>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Character Style 2">
+                                <Content113>
+                                    <Content ParagraphStyleName="Paragraph-Style-2"
+                                             CharacterStyleName="Character-Style-2" TagSelf="di2i3" TagName="Story"
+                                             contentedit
+                                             able="true" seqNo="19">with
+                                    </Content>
+                                </Content113>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange108>
+                        <CharacterStyleRange109>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character st
+yle]">
+                                <Content114>
+                                    <Content ParagraphStyleName="Paragraph-Style-2" CharacterStyleName=""
+                                             TagSelf="di2i3" TagName="Story" contenteditable="true" seqNo
+                                            ="20">new
+                                    </Content>
+                                </Content114>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange109>
+                        <CharacterStyleRange110>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/Character Style 1">
+                                <Content115>
+                                    <Content ParagraphStyleName="Paragraph-Style-2"
+                                             CharacterStyleName="Character-Style-1" TagSelf="di2i3" TagName="Story"
+                                             contentedit
+                                             able="true" seqNo="21">character style
+                                    </Content>
+                                </Content115>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange110>
+                        <CharacterStyleRange111>
+                            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character st
+yle]">
+                                <Content116>
+                                    <Content ParagraphStyleName="Paragraph-Style-2" CharacterStyleName=""
+                                             TagSelf="di2i3" TagName="Story" contenteditable="true" seqNo
+                                            ="22">.
+                                    </Content>
+                                </Content116>
+                            </CharacterStyleRange>
+                        </CharacterStyleRange111>
+                    </ParagraphStyleRange>
+                </ParagraphStyleRange104>
+            </XMLElement>
+        </XMLElement100>
+    </Story>
+</idPkg:Story>
