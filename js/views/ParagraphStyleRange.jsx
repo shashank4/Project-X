@@ -1,6 +1,6 @@
 var React = require("react");
 var CharacterStyleRange = require('./CharacterStyleRange.jsx');
-
+var XMLElement = require('./XMLElement.jsx');
 
 var ParagraphStyleRange = React.createClass({
 

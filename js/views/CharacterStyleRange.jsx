@@ -3,6 +3,8 @@ var React = require("react");
 var Content = require("./Content.jsx");
 var BrTag = require("./Br.jsx");
 
+
+
 var CharacterStyleRange = React.createClass({
 
     getCharacter: function (obj) {
