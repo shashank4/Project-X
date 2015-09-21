@@ -54,6 +54,23 @@ body * {
     border-right-color: rgba(153, 51, 255, 1);
 }
 
+.characterContainer{
+    display: inline-block;
+}
+
+.brContainer{
+    display: inline-block;
+}
+
+.xmlElementContainer{
+    display: inline-block;
+}
+
+.contentContainer{
+    display: inline-block;
+}
+
+
 p{
   text-color: rgba(0, 0, 0, 1);
   text-align: center;

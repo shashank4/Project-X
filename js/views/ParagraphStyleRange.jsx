@@ -1,4 +1,5 @@
 var React = require("react");
+var storyStore=require("../store/storyStore.js");
 var CharacterStyleRange = require('./CharacterStyleRange.jsx');
 var XMLElement = require('./XMLElement.jsx');
 
@@ -34,10 +35,17 @@ var ParagraphStyleRange = React.createClass({
 
     render: function () {
         console.log("in ParagraphStyleRange");
-        var aParagraph = this.getParagraph(this.props.data);
+        var obj=this.props.data;
+        var aParagraph = this.getParagraph(obj);
+
+        var AppliedParagraphStyle=obj[0].$.AppliedParagraphStyle;
+        var cssName=storyStore.getParaStyleName2(AppliedParagraphStyle);
+        console.log(cssName);
+        var className1="paragraphContainer "+cssName;
+
         return (
-            <div className="paragraphContainer">
-            {aParagraph}
+            <div className={className1}>
+                {aParagraph}
             </div>
         );
     }

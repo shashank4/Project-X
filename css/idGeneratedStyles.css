@@ -6,12 +6,12 @@ body, div, dl, dt, dd, h1, h2, h3, h4, h5, h6, p, pre, code, blockquote {
 body {
     -epub-hyphens:auto;
 }
-div.Basic-Text-Frame {
+.Basic-Text-Frame {
     border-style:solid;
 }
-p.Basic-Paragraph {
+.Basic-Paragraph {
     color:#000000;
-    font-family:"Minion Pro OTF", serif;
+    font-family:"Minion Pro", serif;
     font-size:12px;
     font-style:normal;
     font-variant:normal;
@@ -30,9 +30,9 @@ p.Basic-Paragraph {
     text-transform:none;
     widows:1;
 }
-p.Paragraph-Style-1 {
+.Paragraph-Style-1 {
     color:#25408f;
-    font-family:"Minion Pro OTF", serif;
+    font-family:"Minion Pro", serif;
     font-size:12px;
     font-style:normal;
     font-variant:normal;
@@ -51,6 +51,41 @@ p.Paragraph-Style-1 {
     text-transform:none;
     widows:1;
 }
-span.Character-Style-1 {
+.Paragraph-Style-2 {
+    color:#41ad49;
+    font-family:"Minion Pro", serif;
+    font-size:12px;
+    font-style:normal;
+    font-variant:normal;
+    font-weight:normal;
+    line-height:1.2;
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    orphans:1;
+    page-break-after:auto;
+    page-break-before:auto;
+    text-align:left;
+    text-decoration:none;
+    text-indent:0;
+    text-transform:none;
+    widows:1;
+}
+.Character-Style-1 {
     color:#00aeef;
+    font-family:"Birch Std", serif;
+    font-size:14px;
+    font-style:normal;
+    font-weight:normal;
+}
+.Character-Style-2 {
+    color:#ec008c;
+    font-family:"Birch Std", serif;
+    font-size:14px;
+    font-style:normal;
+    font-weight:normal;
+}
+.Character-Style-3 {
+    color:#fff200;
 }

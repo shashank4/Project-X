@@ -1,5 +1,6 @@
 var React = require("react");
 //var CharacterStyleRange = require('./CharacterStyleRange.jsx');
+var storyStore=require("../store/storyStore.js");
 var Content = require("./Content.jsx");
 var BrTag = require("./Br.jsx");
 
@@ -25,18 +26,14 @@ var CharacterStyleRange = React.createClass({
 
                 if ((obj[i].Custom[j]).hasOwnProperty("XMLElement")) {
                     var XMLElement = require('./XMLElement.jsx');
-                    //console.log("hasOwnProperty(XMLElement)");
                     var aToXMLElement = obj[i].Custom[j].XMLElement;
-                    //console.log("hasOwnProperty(XMLElement)2222222222222222222");
                     aStory.push(
                             <XMLElement data={aToXMLElement} key={uniq++}/>
                     );
-                    //console.log("hasOwnProperty(XMLElement)33333333333333333333333");
                 }
 
 
                 if ((obj[i].Custom[j].hasOwnProperty("Content"))) {
-                    //console.log("hasOwnProperty(Content)");
                     var aContent = obj[i].Custom[j].Content;
                     aStory.push(
                             <Content data={aContent} key={uniq++}/>
@@ -45,7 +42,6 @@ var CharacterStyleRange = React.createClass({
 
 
                 if ((obj[i].Custom[j].hasOwnProperty("Br"))) {
-                    //console.log("hasOwnProperty(Br)");
                     var aBr = obj[i].Custom[j].Br;
                     aStory.push(
                             <BrTag data={aBr} key={uniq++}/>
@@ -59,9 +55,16 @@ var CharacterStyleRange = React.createClass({
 
     render: function () {
         console.log("in CharacterStyleRange");
-        var aCharacter = this.getCharacter(this.props.data);
+        var obj=this.props.data;
+        var aCharacter = this.getCharacter(obj);
+
+        var AppliedCharacterStyle=obj[0].$.AppliedCharacterStyle;
+        var cssName=storyStore.getCharaStyleName2(AppliedCharacterStyle);
+        console.log(cssName);
+        var className1="characterContainer "+cssName;
+
         return (
-            <div className="characterContainer">
+            <div className={className1}>
             {aCharacter}
             </div>
         );

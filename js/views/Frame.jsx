@@ -130,53 +130,20 @@ var Frame = React.createClass({
                     zIndex: 100
                 };
 
-                /*var parentStory=obj.$.ParentStory;
-                //var filePath=storyStore.setFilePath(parentStory);
-                var filePath=storyStore.setFilePath('ud9');
-                var aXmlDom=storyStore.getXmlDom(filePath);
-*/
+
                 var oStyleLocal2={
                     zIndex:200
                 };
                 var keyVal=0;
                 var storyStoreData=storyStore.getStoreData();
                 var storyName=obj.$.ParentStory;
-                //console.log("11111111111111111111111111111111111111111111111111"+JSON.stringify(storyStoreData[storyName]));
 
                 aFr.push(<div className="frame" style={oStyle2} key={keyVal++}>
                             <Story data={storyStoreData[storyName]} />
-                        </div>);//<div dangerouslySetInnerHTML={{__html: storyData}} style={oStyleLocal2} contentEditable={true}/>
+                        </div>);
+                        //<div dangerouslySetInnerHTML={{__html: storyData}} style={oStyleLocal2} contentEditable={true}/>
             }
         }
-        /*console.log("in aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...");
-
-         var height = Math.abs(topLeft[1] - rightBottom[1]);
-         var width = Math.abs(topLeft[0] - rightBottom[0]);
-         var oStyle = {
-         height: height + "px",
-         width: width + "px",
-         position: "absolute",
-         left: topLeft[0] + "px",
-         top: topLeft[1] + "px",
-         zIndex: 1
-         };*/
-
-        // var containerOfParagraphs = [];
-        // var paragraph = [];
-        // var spans = [];
-        /*for (var j = 0; j < obj[i].FrameContentStyle.ParaStyleArray.length; j++) {
-         for (var k = 0; k < obj[i].FrameContentStyle.ParaStyleArray[j].CaraStyleArray.length; k++) {
-         spans.push(<span className={obj[i].FrameContentStyle.ParaStyleArray[j].CaraStyleArray[k].StyleClassName}>{obj[i].FrameContentStyle.ParaStyleArray[j].CaraStyleArray[k].textContent}</span>);
-         }
-         paragraph.push(<p className={obj[i].FrameContentStyle.ParaStyleArray[j].StyleClassName}>{spans}</p>);
-         spans = [];
-         }*/
-        //containerOfParagraphs.push(<div className="Basic-Text-Frame">{paragraph}</div>);
-        //paragraph = [];
-
-        //aFr.push(<div className="frame" style={oStyle}></div>);
-
-
         return (aFr);
     },
 

@@ -1,8 +1,8 @@
 var React = require("react");
 var uniq = 0;
-var BrTag = React.createClass({
+var Br = React.createClass({
 
-    getBr: function (obj) {
+   /* getBr: function (obj) {
         var aStory = [];
 
         var objLen = obj.length;
@@ -11,16 +11,14 @@ var BrTag = React.createClass({
 
         }
         return aStory;
-    },
+    },*/
 
     render: function () {
-        console.log("in Br");
+        //console.log("in Br");
         //var aBr = this.getBr(this.props.data);
-        return (
-            <br />
-        );
+        return (<div className="brContainer"><br /></div>);
     }
 
 });
 
-module.exports = BrTag;
+module.exports = Br;

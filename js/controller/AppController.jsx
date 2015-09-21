@@ -7,6 +7,10 @@ var AppController = React.createClass({
         return storyData;
     },*/
 
+    propTypes:{
+      store: React.PropTypes.object.isRequired
+    },
+
     render: function () {
         console.log("In app controller....\n");
         var storyData=(this.props.storyStore).getStoreData();

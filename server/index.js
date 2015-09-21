@@ -180,7 +180,6 @@ fs.readFile(dirPath + 'designmap.xml', function (err, data) {
 
                             var renderedComponent = React.renderToString(
                                 AppControllerFactory({
-                                    store: layoutStore,
                                     storyStore: storyStore,
                                     ref: "domReference"
                                 })
