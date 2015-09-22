@@ -2,10 +2,9 @@ var fs = require('fs');
 var xmldom = require('xmldom').DOMParser;
 var xpath = require('xpath');
 
-var data;
-var dirPath;
-
 var store = (function () {
+
+    var data = {};
 
     return {
         setStoreData: function (data1) {
@@ -17,15 +16,6 @@ var store = (function () {
         getStoreData: function () {
             //console.log("getStoreData of story:"+data);
             return data;
-        },
-
-        setDirPath: function (path1) {
-            dirPath = path1;
-        },
-
-        setFilePath: function (fName) {
-            fName = "Story_" + fName + ".xml";
-            return dirPath + fName;
         },
 
         getXmlDom: function (filePath) {
@@ -62,8 +52,6 @@ var store = (function () {
         getCharaStyleName: function (node) {
             var CharacterStyleRange = xpath.select("..", node);
 
-            /*var tempTest=xpath.select("../..", nodes[i]);
-             console.log("grandParent is:=="+tempTest);*/
             var thisParent = "/..";
             var temp2 = (CharacterStyleRange.toString());
             while (temp2.search('CharacterStyleRange') == (-1)) {
@@ -75,63 +63,40 @@ var store = (function () {
             var tempStr1 = CharacterStyleRange.toString();
             var styleName;
             if (tempStr1.search('CharacterStyleRange') != (-1)) {
-                styleName=this.getCharaStyleName2(tempStr1);
+                styleName = this.getCharaStyleName2(tempStr1);
             }
             return styleName;
-            /*var tempStr1=CharacterStyleRange.toString();
-             if(tempStr1.search('CharacterStyleRange')!=(-1))
-             {
-             var IDIndex=tempStr1.search('CharacterStyle/');
-             var reqIndex=IDIndex+15;
-             var startIndex=reqIndex;
-             while(tempStr1.charAt(reqIndex)!='"'){
-             reqIndex++;
-             }
-             var styleName=tempStr1.substring(startIndex,reqIndex);
-
-             if(styleName.search('No character style')!=(-1)){
-             styleName="";
-             }
-             else{
-             do{
-             styleName=styleName.replace(" ","-");
-             }while(styleName.search(" ")!=(-1));
-             }
-             //console.log("character styleName is:"+styleName);
-
-             }
-             return styleName;*/
 
         },
 
 
         getCharaStyleName2: function (tempStr1) {
 
-                console.log(tempStr1);
-                var IDIndex = tempStr1.search('CharacterStyle/');
-                var reqIndex = IDIndex + 15;
-                var startIndex = reqIndex;
+            console.log(tempStr1);
+            var IDIndex = tempStr1.search('CharacterStyle/');
+            var reqIndex = IDIndex + 15;
+            var startIndex = reqIndex;
 
-                if(tempStr1.search('"')!=-1){
-                    while (tempStr1.charAt(reqIndex) != '"') {
-                        reqIndex++;
-                    }
+            if (tempStr1.search('"') != -1) {
+                while (tempStr1.charAt(reqIndex) != '"') {
+                    reqIndex++;
                 }
-                else{
-                    reqIndex=tempStr1.length;
-                }
+            }
+            else {
+                reqIndex = tempStr1.length;
+            }
 
-                var styleName = tempStr1.substring(startIndex, reqIndex);
+            var styleName = tempStr1.substring(startIndex, reqIndex);
 
-                if (styleName.search('No character style') != (-1)) {
-                    styleName = "";
-                }
-                else {
-                    do {
-                        styleName = styleName.replace(" ", "-");
-                    } while (styleName.search(" ") != (-1));
-                }
-                //console.log("character styleName is:"+styleName);
+            if (styleName.search('No character style') != (-1)) {
+                styleName = "";
+            }
+            else {
+                do {
+                    styleName = styleName.replace(" ", "-");
+                } while (styleName.search(" ") != (-1));
+            }
+            //console.log("character styleName is:"+styleName);
 
             return styleName;
 
@@ -155,28 +120,6 @@ var store = (function () {
             }
             return styleName;
 
-            /*var tempStr1=ParagraphStyleRange.toString();
-             if(tempStr1.search('ParagraphStyleRange')!=(-1))
-             {
-             var IDIndex=tempStr1.search('ParagraphStyle/');
-             var reqIndex=IDIndex+15;
-             var startIndex=reqIndex;
-             while(tempStr1.charAt(reqIndex)!='"'){
-             reqIndex++;
-             }
-             var styleName=tempStr1.substring(startIndex,reqIndex);
-
-             if(styleName.search('NormalParagraphStyle')!=(-1)){
-             styleName="Basic-Paragraph";
-             }
-             else{
-             do{
-             styleName=styleName.replace(" ","-");
-             }while(styleName.search(" ")!=(-1));
-             }
-             //console.log("styleName is:"+styleName);
-             }
-             return styleName;*/
         },
 
 
@@ -185,13 +128,13 @@ var store = (function () {
             var reqIndex = IDIndex + 15;
             var startIndex = reqIndex;
 
-            if(tempStr1.search('"')!=-1){
+            if (tempStr1.search('"') != -1) {
                 while (tempStr1.charAt(reqIndex) != '"') {
                     reqIndex++;
                 }
             }
-            else{
-                reqIndex=tempStr1.length;
+            else {
+                reqIndex = tempStr1.length;
             }
             var styleName = tempStr1.substring(startIndex, reqIndex);
 
@@ -221,30 +164,6 @@ var store = (function () {
             }
 
             return this.getXmlTag2(XMLElement);
-
-            /* var tempStr1=XMLElement.toString();
-             if(tempStr1.search('XMLElement')!=(-1))
-             {
-             var IDIndex=tempStr1.search('Self=');
-             var reqIndex=IDIndex+6;
-             var startIndex=reqIndex;
-             while(tempStr1.charAt(reqIndex)!='"'){
-             reqIndex++;
-             }
-             var tagSelf=tempStr1.substring(startIndex,reqIndex);
-
-             var IDIndex2=tempStr1.search('XMLTag/');
-             var reqIndex2=IDIndex2+7;
-             var startIndex2=reqIndex2;
-             while(tempStr1.charAt(reqIndex2)!='"'){
-             reqIndex2++;
-             }
-             var tagName=tempStr1.substring(startIndex2,reqIndex2);
-             var aReturn=[];
-             aReturn[0]=tagSelf;
-             aReturn[1]=tagName;
-             }
-             return aReturn;*/
         },
 
         getXmlTag2: function (XMLElement) {

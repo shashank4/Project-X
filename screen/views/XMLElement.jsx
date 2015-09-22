@@ -1,5 +1,5 @@
 var React = require("react");
-var storyStore=require("../store/storyStore.js");
+//var storyStore=require("../store/storyStore.js");
 var ParagraphStyleRange = require("./ParagraphStyleRange.jsx");
 var CharacterStyleRange = require("./CharacterStyleRange.jsx");
 var Content = require("./Content.jsx");
@@ -66,7 +66,7 @@ var XMLElement = React.createClass({
         console.log("in XMLElement");
         var aXmlElements = this.getAXmlElements(this.props.data);
         return (
-            <div className="xmlElementContainer">
+            <div className="xmlElementContainer" >
                 {aXmlElements}
             </div>
         );

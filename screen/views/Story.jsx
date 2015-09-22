@@ -53,7 +53,7 @@ var Story =React.createClass({
         //console.log("Story Name is:"+this.props.storyName);
         var wrapperArray = this.renderStoryData(this.props.data);
         return (
-            <div className="storyContainer">
+            <div className="storyContainer" contentEditable={true}>
                 {wrapperArray}
             </div>
         );

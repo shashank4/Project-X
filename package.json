@@ -12,6 +12,8 @@
     "react-tools": "0.13.3"
   },
   "devDependencies": {
+    "adm-zip": "*",
+    "browserify": "^11.1.0",
     "css-loader": " 0.14.3",
     "express": "4.12.4",
     "file-loader": "0.8.4",
@@ -21,20 +23,29 @@
     "handlebars": "3.0.3",
     "jsx-loader": "0.13.2",
     "node-jsx": "0.13.3",
+    "reactify": "^1.1.1",
     "sass-loader": "1.0.2",
     "style-loader": "0.12.3",
     "url-loader": "0.5.6",
-    "adm-zip": "*",
-    "xml2js": "*",
     "util": "*",
+    "xml2js": "*",
+    "xml2json": "*",
     "xmldom": "*",
-    "xpath": "*",
-    "xml2json": "*"
+    "xpath": "*"
   },
-  "jest": {
-    "scriptPreprocessor": "./libraries/buildDependency/preprocessor.js",
-    "unmockedModulePathPatterns": [
-      "react"
+  "browserify": {
+    "transform": [
+      [
+        "reactify",
+        {
+          "es6": true
+        }
+      ]
     ]
+  },
+  "scripts": {
+    "make": "node server/makeData.js",
+    "build": "browserify client/index.jsx > built.js -d",
+    "server": "npm run make && npm run build && node server"
   }
 }

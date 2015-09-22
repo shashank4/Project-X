@@ -1,17 +1,13 @@
 var Spread = require('./Spread.jsx');
 
 var React = require('react');
-var layoutStore=require('../store/layoutStore.js')
+//var layoutStore=require('../store/layoutStore.js')
 
 var Canvas = React.createClass({
 
-    getStore: function () {
-        return this.props.store.getStoreData();
-    },
-
     render: function () {
-        var obj=layoutStore.getStoreData();
-        var pageDimObj=layoutStore.getPageDimension(obj[0],0);
+        var obj=(this.props.layoutStore).getStoreData();
+        var pageDimObj=(this.props.layoutStore).getPageDimension(obj[0],0);
         var pageHeight=pageDimObj.height;
         console.log("obj length is:"+obj.length);
         var spreadCount=obj.length;
@@ -32,7 +28,7 @@ var Canvas = React.createClass({
         return (
 
             <div className="canva" style={oCstyle}>
-                <Spread store={this.getStore}/>
+                <Spread layoutStore={this.props.layoutStore} storyStore={this.props.storyStore}/>
             </div>
         );
     }

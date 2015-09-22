@@ -7,12 +7,19 @@ var Content = React.createClass({
         var innerHtml;
         var uniq = 0;
         var objLen = obj.length;
-        for (var i = 0; i < objLen; i++) {
+        //console.log("obj data in content is:"+obj[i]["_"]);
+        innerHtml=obj;
+        aStory.push( <div  className="content" key={uniq++} dangerouslySetInnerHTML={{__html: innerHtml}} />);
+
+        /*for (var i = 0; i < objLen; i++) {
+            console.log("inside for");
+
             if (obj[i].hasOwnProperty("_")) {
+                console.log("inside ifffffffffffffffffffff");
                 innerHtml = obj[i]["_"];
                 aStory.push( <div  className="content" key={uniq++} dangerouslySetInnerHTML={{__html: innerHtml}} />);
             }
-        }
+        }*/
         return aStory;
 
     },

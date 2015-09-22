@@ -1,7 +1,7 @@
 var Frame = require('./Frame.jsx');
 var React = require('react');
 //var oUtils = require('../../utils.js');
-var layoutStore = require('../store/layoutStore.js');
+//var layoutStore = require('../store/layoutStore.js');
 
 var frameVisitCount=0;
 var Pages = React.createClass({
@@ -15,7 +15,7 @@ var Pages = React.createClass({
         var pageCount=(parseInt(obj['idPkg:Spread'].Spread[0].$.PageCount));
         for (var i = 0; i < pageCount; i++) {
 
-            var oPageDim = layoutStore.getPageDimension(obj, i);
+            var oPageDim = (this.props.layoutStore).getPageDimension(obj, i);
 
             var height = oPageDim.height;
             var width = oPageDim.width;
@@ -46,7 +46,6 @@ var Pages = React.createClass({
                 //zIndex: 0
             };
 
-        //}
             if(pageVisitCount==0/*(pageCount-1)*/) {
                 pageVisitCount++;
                 aPg.push(

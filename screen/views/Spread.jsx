@@ -2,7 +2,7 @@ var Pages = require('./Pages.jsx');
 var Frame = require('./Frame.jsx');
 //var oUtils = require('../../utils.js');
 var React = require('react');
-var layoutStore=require('../store/layoutStore.js');
+//var layoutStore=require('../store/layoutStore.js');
 
 var Spread = React.createClass({
 
@@ -11,17 +11,9 @@ var Spread = React.createClass({
     },
 
     getSpreadView: function (obj) {
-        //var obj2= layoutStore.getStoreData();
-        //console.log("heeehehehehehe");
-
-
-        //console.log("in getSpreadView ");
         var aSp = [];
         var height;
-        //var width = 2448;
-
         var gTop=0;
-        //console.log("spread length is:"+obj.length);
         for (var i = 0; i < obj.length; i++) {
 
             var pageCount=parseInt(obj[i]['idPkg:Spread'].Spread[0].$.PageCount);
@@ -31,12 +23,12 @@ var Spread = React.createClass({
             else {
                 for (var j = 1; j < pageCount; j++) {
 
-                    var tempPageDim = layoutStore.getPageDimension(obj[i], j);
+                    var tempPageDim = (this.props.layoutStore).getPageDimension(obj[i], j);
                     width = (width) + tempPageDim.width;
 
                 }
             }
-            var tempPageDim2 = layoutStore.getPageDimension(obj[i], 0);
+            var tempPageDim2 = (this.props.layoutStore).getPageDimension(obj[i], 0);
             height=tempPageDim2.height+144;
 
             if(i!=0)
@@ -57,8 +49,8 @@ var Spread = React.createClass({
             var bindingLocation = parseInt(obj[i]['idPkg:Spread'].Spread[0].$.BindingLocation);
             aSp.push(
                 <div className="spread" style={oStyle} key={i+1000}>
-                    <Pages data={obj[i]} />
-                    <Frame data={dataToFrame} bindingLocation={bindingLocation} />
+                    <Pages data={obj[i]} layoutStore={this.props.layoutStore}/>
+                    <Frame data={dataToFrame} bindingLocation={bindingLocation} storyStore={this.props.storyStore} layoutStore={this.props.layoutStore}/>
                 </div>
             );
 
@@ -68,7 +60,7 @@ var Spread = React.createClass({
     },
     render: function () {
         console.log("in Spread");
-        var aSpreads = this.getSpreadView(layoutStore.getStoreData());
+        var aSpreads = this.getSpreadView((this.props.layoutStore).getStoreData());
         return (
             <div className="spreadClass" >
                 {aSpreads}

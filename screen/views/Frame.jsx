@@ -1,8 +1,8 @@
 //var oUtils = require('../../utils.js');
 var React = require('react');
 var Story=require('./Story.jsx');
-var layoutStore = require('../store/layoutStore.js');
-var storyStore=require('../store/storyStore.js');
+//var layoutStore = require('../store/layoutStore.js');
+//var storyStore=require('../store/storyStore.js');
 
 var Frame = React.createClass({
 
@@ -13,14 +13,14 @@ var Frame = React.createClass({
     getFramesView: function (obj2) {
         //console.log("in getFramesView..."+JSON.stringify(obj2));
 
-        var storyData=JSON.stringify(storyStore.getStoreData());
+        var storyData=JSON.stringify((this.props.storyStore).getStoreData());
 
         var bindingLocation=this.getBindingLocation();
         var aFr = [];
-        var halfPageHeight = layoutStore.getHalfPageHeight(obj2);
+        var halfPageHeight = (this.props.layoutStore).getHalfPageHeight(obj2);
         var obj = {};
-        var jSonObject=layoutStore.getStoreData();
-        var pageDimObj=layoutStore.getPageDimension(jSonObject[0],0);
+        var jSonObject=(this.props.layoutStore).getStoreData();
+        var pageDimObj=(this.props.layoutStore).getPageDimension(jSonObject[0],0);
         var pageWidth=pageDimObj.width;
 
         var topLeftR = [], leftBottomR = [], rightBottomR = [], topRightR = [];
@@ -135,11 +135,11 @@ var Frame = React.createClass({
                     zIndex:200
                 };
                 var keyVal=0;
-                var storyStoreData=storyStore.getStoreData();
+                var storyStoreData=(this.props.storyStore).getStoreData();
                 var storyName=obj.$.ParentStory;
 
                 aFr.push(<div className="frame" style={oStyle2} key={keyVal++}>
-                            <Story data={storyStoreData[storyName]} />
+                            <Story data={storyStoreData[storyName]} storyStore={this.props.storyStore}/>
                         </div>);
                         //<div dangerouslySetInnerHTML={{__html: storyData}} style={oStyleLocal2} contentEditable={true}/>
             }
