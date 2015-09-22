@@ -1,6 +1,6 @@
 var React=require("react");
-var storyStore=require("../store/storyStore.js");
-
+//var storyStore=require("../store/storyStore.js");
+var utils=require("../store/utils");
 var XMLElement=require("./XMLElement.jsx");
 var ParagraphStyleRange=require("./ParagraphStyleRange.jsx");
 
@@ -11,7 +11,6 @@ var Story =React.createClass({
     },
 
     renderStoryData:function(obj){
-        //console.log("In the story"+JSON.stringify(obj));
         var uniq=0;
         var aStory=[];
         var storyLen=(obj['idPkg:Story'].Story.length);
@@ -31,7 +30,7 @@ var Story =React.createClass({
                     console.log("ïn 2nd if");
                     var aToParagraphStyleRange = obj['idPkg:Story'].Story[i].Custom[j].ParagraphStyleRange;
                     var AppliedParagraphStyle=obj['idPkg:Story'].Story[i].Custom[j].ParagraphStyleRange[0].$.obj['idPkg:Story'].Story[i].Custom[j].AppliedParagraphStyle;
-                    var cssName=storyStore.getParaStyleName2(AppliedParagraphStyle);
+                    var cssName=utils.getParaStyleName2(AppliedParagraphStyle);
                     console.log(cssName);
 
                     aStory.push(

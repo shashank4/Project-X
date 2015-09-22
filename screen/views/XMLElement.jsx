@@ -1,5 +1,4 @@
 var React = require("react");
-//var storyStore=require("../store/storyStore.js");
 var ParagraphStyleRange = require("./ParagraphStyleRange.jsx");
 var CharacterStyleRange = require("./CharacterStyleRange.jsx");
 var Content = require("./Content.jsx");
@@ -25,10 +24,6 @@ var XMLElement = React.createClass({
 
                 if ((obj[i].Custom[j]).hasOwnProperty("ParagraphStyleRange")) {
                     var aToParagraphStyleRange = obj[i].Custom[j].ParagraphStyleRange;
-                    /*var AppliedParagraphStyle=obj[i].Custom[j].ParagraphStyleRange[0].$.AppliedParagraphStyle;
-                    var cssName=storyStore.getParaStyleName2(AppliedParagraphStyle);
-                    console.log(AppliedParagraphStyle);*/
-                    /*styleName={cssName}*/
                     aStory.push(
                             <ParagraphStyleRange data={aToParagraphStyleRange} key={uniq++} />
                     );

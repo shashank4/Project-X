@@ -69,7 +69,6 @@ var store = (function () {
 
         },
 
-
         getCharaStyleName2: function (tempStr1) {
 
             console.log(tempStr1);
@@ -102,7 +101,6 @@ var store = (function () {
 
         },
 
-
         getParaStyleName: function (node) {
 
             var ParagraphStyleRange = xpath.select("..", node);
@@ -121,7 +119,6 @@ var store = (function () {
             return styleName;
 
         },
-
 
         getParaStyleName2: function (tempStr1) {
             var IDIndex = tempStr1.search('ParagraphStyle/');
@@ -150,7 +147,6 @@ var store = (function () {
 
             return styleName;
         },
-
 
         getXmlTag: function (node) {
             var XMLElement = xpath.select("..", node);

@@ -1,6 +1,8 @@
 //var oUtils = require('../../utils.js');
 var React = require('react');
 var Story=require('./Story.jsx');
+var utils = require('../store/utils');
+
 //var layoutStore = require('../store/layoutStore.js');
 //var storyStore=require('../store/storyStore.js');
 
@@ -11,17 +13,15 @@ var Frame = React.createClass({
     },
 
     getFramesView: function (obj2) {
-        //console.log("in getFramesView..."+JSON.stringify(obj2));
 
-        var storyData=JSON.stringify((this.props.storyStore).getStoreData());
+        var storyData=JSON.stringify((this.props.storyStoreData));
 
         var bindingLocation=this.getBindingLocation();
         var aFr = [];
-        var halfPageHeight = (this.props.layoutStore).getHalfPageHeight(obj2);
+        var halfPageHeight = utils.getHalfPageHeight(obj2);
         var obj = {};
-        var jSonObject=(this.props.layoutStore).getStoreData();
-        var pageDimObj=(this.props.layoutStore).getPageDimension(jSonObject[0],0);
-        var pageWidth=pageDimObj.width;
+
+        var pageWidth=this.props.pageDimObj.width;
 
         var topLeftR = [], leftBottomR = [], rightBottomR = [], topRightR = [];
         var topLeft = [], leftBottom = [], rightBottom = [], topRight = [];
@@ -34,15 +34,11 @@ var Frame = React.createClass({
                 var tempItemTransform = obj.$.ItemTransform;
                 var itemTransformR = tempItemTransform.split(" ");
 
-                //console.log("itemTransformR" + itemTransformR);
                 for (var r = 0; r < 4; r++) {
                     var pointR = [];
 
                     var anchorPointWithoutSplit = (obj.Properties[0].PathGeometry[0].GeometryPathType[0].PathPointArray[0].PathPointType[r].$.Anchor);
-                    //console.log(anchorPointWithoutSplit);
                     var anchorPointR = anchorPointWithoutSplit.split(" ");
-                    //console.log("anchorPointR is:" + anchorPointR[0] + "  and  " + anchorPointR[1]);
-                    //console.log("Addition is:" + (parseInt(anchorPointR[0]) + parseInt(anchorPointR[1])));
                     pointR[0] = ((parseInt(anchorPointR[0]) * parseInt(itemTransformR[0])) + (parseInt(anchorPointR[1]) * parseInt(itemTransformR[1])) + parseInt(itemTransformR[4]));
                     pointR[1] = ((parseInt(anchorPointR[0]) * parseInt(itemTransformR[2])) + (parseInt(anchorPointR[1]) * parseInt(itemTransformR[3])) + parseInt(itemTransformR[5]) + halfPageHeight);
 
@@ -54,14 +50,12 @@ var Frame = React.createClass({
                         rightBottomR = pointR;
                     } else {
                         topRightR = pointR;
-                        //break;
                     }
                 }
 
 
                 var height = Math.abs(topLeftR[1] - rightBottomR[1]);
                 var width = Math.abs(topLeftR[0] - rightBottomR[0]);
-                //console.log("topLeftR X" + topLeftR[0]+"topLeftR Y"+topLeftR[1]);
 
                 var tempLeft1;
                /* if(bindingLocation!=0)
@@ -131,17 +125,13 @@ var Frame = React.createClass({
                 };
 
 
-                var oStyleLocal2={
-                    zIndex:200
-                };
                 var keyVal=0;
-                var storyStoreData=(this.props.storyStore).getStoreData();
+                var toStoryStoreData=(this.props.storyStoreData);
                 var storyName=obj.$.ParentStory;
 
                 aFr.push(<div className="frame" style={oStyle2} key={keyVal++}>
-                            <Story data={storyStoreData[storyName]} storyStore={this.props.storyStore}/>
+                            <Story data={toStoryStoreData[storyName]} />
                         </div>);
-                        //<div dangerouslySetInnerHTML={{__html: storyData}} style={oStyleLocal2} contentEditable={true}/>
             }
         }
         return (aFr);

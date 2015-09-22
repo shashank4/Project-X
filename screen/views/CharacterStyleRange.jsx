@@ -1,6 +1,7 @@
 var React = require("react");
 //var CharacterStyleRange = require('./CharacterStyleRange.jsx');
-var storyStore=require("../store/storyStore.js");
+var utils= require("../store/utils");
+
 var Content = require("./Content.jsx");
 var BrTag = require("./Br.jsx");
 
@@ -59,7 +60,7 @@ var CharacterStyleRange = React.createClass({
         var aCharacter = this.getCharacter(obj);
 
         var AppliedCharacterStyle=obj[0].$.AppliedCharacterStyle;
-        var cssName=storyStore.getCharaStyleName2(AppliedCharacterStyle);
+        var cssName=utils.getCharaStyleName2(AppliedCharacterStyle);
         console.log(cssName);
         var className1="characterContainer "+cssName;
 

@@ -1,7 +1,10 @@
+
+var React = require('react');
+
 var Pages = require('./Pages.jsx');
 var Frame = require('./Frame.jsx');
-//var oUtils = require('../../utils.js');
-var React = require('react');
+var utils = require('../store/utils');
+
 //var layoutStore=require('../store/layoutStore.js');
 
 var Spread = React.createClass({
@@ -23,12 +26,12 @@ var Spread = React.createClass({
             else {
                 for (var j = 1; j < pageCount; j++) {
 
-                    var tempPageDim = (this.props.layoutStore).getPageDimension(obj[i], j);
+                    var tempPageDim = utils.getPageDimension(obj[i], j);
                     width = (width) + tempPageDim.width;
 
                 }
             }
-            var tempPageDim2 = (this.props.layoutStore).getPageDimension(obj[i], 0);
+            var tempPageDim2 = utils.getPageDimension(obj[i], 0);
             height=tempPageDim2.height+144;
 
             if(i!=0)
@@ -46,11 +49,13 @@ var Spread = React.createClass({
             };
 
             var dataToFrame=obj[i]['idPkg:Spread'].Spread[0];
+
+            var pageDimObj=utils.getPageDimension(obj[i],0);
             var bindingLocation = parseInt(obj[i]['idPkg:Spread'].Spread[0].$.BindingLocation);
             aSp.push(
                 <div className="spread" style={oStyle} key={i+1000}>
-                    <Pages data={obj[i]} layoutStore={this.props.layoutStore}/>
-                    <Frame data={dataToFrame} bindingLocation={bindingLocation} storyStore={this.props.storyStore} layoutStore={this.props.layoutStore}/>
+                    <Pages data={obj[i]} />
+                    <Frame data={dataToFrame} pageDimObj={pageDimObj} bindingLocation={bindingLocation} storyStoreData={this.props.storyStoreData} />
                 </div>
             );
 
@@ -60,7 +65,7 @@ var Spread = React.createClass({
     },
     render: function () {
         console.log("in Spread");
-        var aSpreads = this.getSpreadView((this.props.layoutStore).getStoreData());
+        var aSpreads = this.getSpreadView(this.props.layoutStoreData);
         return (
             <div className="spreadClass" >
                 {aSpreads}
