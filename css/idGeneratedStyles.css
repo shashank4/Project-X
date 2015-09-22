@@ -2,9 +2,11 @@ body, div, dl, dt, dd, h1, h2, h3, h4, h5, h6, p, pre, code, blockquote {
     margin:0;
     padding:0;
     border-width:0;
+    white-space:PRE;
 }
 body {
     -epub-hyphens:auto;
+    white-space:PRE;
 }
 .Basic-Text-Frame {
     border-style:solid;
@@ -29,6 +31,7 @@ body {
     text-indent:0;
     text-transform:none;
     widows:1;
+    white-space:PRE;
 }
 .Paragraph-Style-1 {
     color:#25408f;
@@ -50,6 +53,7 @@ body {
     text-indent:0;
     text-transform:none;
     widows:1;
+    white-space:PRE;
 }
 .Paragraph-Style-2 {
     color:#41ad49;
@@ -71,6 +75,7 @@ body {
     text-indent:0;
     text-transform:none;
     widows:1;
+    white-space:PRE;
 }
 .Character-Style-1 {
     color:#00aeef;
@@ -78,6 +83,7 @@ body {
     font-size:14px;
     font-style:normal;
     font-weight:normal;
+    white-space:PRE;
 }
 .Character-Style-2 {
     color:#ec008c;
@@ -85,7 +91,9 @@ body {
     font-size:14px;
     font-style:normal;
     font-weight:normal;
+    white-space:PRE;
 }
 .Character-Style-3 {
     color:#fff200;
+    white-space:PRE;
 }
