@@ -10,7 +10,7 @@ var spreadArray = require('./../data/layoutData');
 
 
 var fs = require("fs");
-var AppController = require('./../screen/controller/AppController.jsx');
+var AppController = require('./../screen/controller/app-controller.jsx');
 var layoutStore = require('./../screen/store/layoutStore.js');
 var storyStore = require('./../screen/store/storyStore.js');
 

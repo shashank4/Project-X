@@ -2,7 +2,7 @@
  * Created by DEV on 03-09-2015.
  */
 var React = require('react');
-var AppController = require('./../screen/controller/AppController.jsx');
+var AppController = require('./../screen/controller/app-controller.jsx');
 var StoryStore = require('./../screen/store/storyStore');
 var LayoutStore = require('./../screen/store/layoutStore');
 
