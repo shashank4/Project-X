@@ -2,7 +2,7 @@ var React = require("react");
 //var CharacterStyleRange = require('./CharacterStyleRange.jsx');
 var utils= require("../store/utils");
 
-var Content = require("./Content.jsx");
+var Content = require("./Content.jsx").view;
 var BrTag = require("./Br.jsx");
 
 

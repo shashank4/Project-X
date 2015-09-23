@@ -7,7 +7,7 @@ var React = require('react');
 var Handlebars = require('handlebars');
 var oStoryData = require('./../data/storyData');
 var spreadArray = require('./../data/layoutData');
-
+var storyAction= require('../screen/actions/story-action');
 
 var fs = require("fs");
 var AppController = require('./../screen/controller/app-controller.jsx');
@@ -27,7 +27,7 @@ var renderedComponent = React.renderToString(
     AppControllerFactory({
         layoutStore:layoutStore,
         storyStore: storyStore,
-        ref: "domReference"
+        action:storyAction
     })
 );
 

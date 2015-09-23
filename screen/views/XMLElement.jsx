@@ -1,7 +1,7 @@
 var React = require("react");
 var ParagraphStyleRange = require("./ParagraphStyleRange.jsx");
 var CharacterStyleRange = require("./CharacterStyleRange.jsx");
-var Content = require("./Content.jsx");
+var Content = require("./Content.jsx").view;
 var Br = require("./Br.jsx");
 
 

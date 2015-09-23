@@ -1,5 +1,7 @@
 var React = require('react');
 var Canvas = require('../views/Canvas.jsx');
+var storyAction=require('../actions/story-action');
+
 
 
 var AppController = React.createClass({
@@ -18,11 +20,13 @@ var AppController = React.createClass({
 
   componentWillMount: function () {
     this.storyStateChanged();
+    this.props.action.registerEvent();
   },
 
   //@UnBind: store with state
   componentWillUnmount: function () {
     this.props.storyStore.unbind('change', this.storyStateChanged);
+    this.props.action.deRegisterEvent();
   },
 
   //@Bind: Store with state
@@ -41,7 +45,10 @@ var AppController = React.createClass({
     console.log("In app controller....\n");
     return (
         <div className="appController">
-          <Canvas layoutStoreData={this.state.layoutData} storyStoreData={this.state.storyData}/>
+          <Canvas
+              layoutStoreData={this.state.layoutData}
+              storyStoreData={this.state.storyData}
+              action={storyAction}/>
         </div>
     );
   }
