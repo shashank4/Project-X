@@ -1,8 +1,8 @@
 var React = require("react");
-var ParagraphStyleRange = require("./ParagraphStyleRange.jsx");
-var CharacterStyleRange = require("./CharacterStyleRange.jsx");
-var Content = require("./Content.jsx").view;
-var Br = require("./Br.jsx");
+var ParagraphStyleRange = require("./paragraphStyleRange.jsx");
+var CharacterStyleRange = require("./characterStyleRange.jsx");
+var Content = require("./content.jsx").view;
+var Br = require("./br.jsx");
 
 
 var XMLElement = React.createClass({

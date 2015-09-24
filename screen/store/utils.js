@@ -1,6 +1,10 @@
 /**
  * Created by CS49 on 22-09-2015.
  */
+var xmldom = require('xmldom').DOMParser;
+var xpath = require('xpath');
+var xml2js=require('xml2js');
+var parseString = require('xml2js').parseString;
 
 var utils = (function () {
 
@@ -169,6 +173,50 @@ var utils = (function () {
         aReturn[1] = tagName;
       }
       return aReturn;
+    },
+
+
+    getAllStoryData: function(obj){
+      console.log("in the util----------------------------"+obj.uee);
+      var xmlString=this.removeCustomTag(obj.uee);
+      console.log("hello you are a pro man:"+xmlString);
+
+      /*var keyValues=Object.keys(obj);
+      console.log("in the util------before for loop----------------------"+keyValues.length);*/
+
+        /*for(var i=0;i<keyValues.length;i++){
+          //console.log("in the util------before for loop----------------------"+obj.keyValues[i]);
+          //var singleStory=obj.(keyValues[i]);
+          console.log("in the util------in the for loop----------------------"+keyValues[i]);
+          var storyName=keyValues[i];
+          console.log(obj.storyName);
+          //var xmlString=this.removeCustomTag(singleStory);
+          //console.log("in the util------before for loop----------------------");
+          //console.log("hello you are a pro man:"+xmlString);
+        }*/
+    },
+
+
+    removeCustomTag: function(jsonData){
+      console.log("in the remocve tag");
+
+      var builder = new xml2js.Builder();
+      var xml = builder.buildObject((jsonData));
+      var doc = new xmldom().parseFromString(xml.toString());
+
+
+      var customNodes2= doc.getElementsByTagName("Custom");
+      var len = customNodes2.length;
+      for (var i = 0; i < len; i++) {
+        var customNodes = doc.getElementsByTagName("Custom")[0];
+        var childNode = xpath.select("//Custom/*", customNodes);
+        customNodes.parentNode.replaceChild(childNode[0], customNodes);
+        //customNodes.parentNode.appendChild(childNode[0]);
+        //customNodes.parentNode.removeChild(customNodes);
+      }
+      //console.log(doc.toString());
+      return doc.toString();
+
     }
 
 

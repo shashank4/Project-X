@@ -1,6 +1,6 @@
 var React = require("react");
 var utils= require("../store/utils");
-var CharacterStyleRange = require('./CharacterStyleRange.jsx');
+var CharacterStyleRange = require('./characterStyleRange.jsx');
 var XMLElement = require('./XMLElement.jsx');
 
 var ParagraphStyleRange = React.createClass({

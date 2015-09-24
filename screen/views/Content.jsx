@@ -23,7 +23,6 @@ var Content = React.createClass({
       />
     </div>);
   }
-
 });
 
 module.exports = {

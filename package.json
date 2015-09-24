@@ -1,6 +1,6 @@
 {
   "name": "NodeReactRepo",
-  "description": "Edeka transformation using React and Node",
+  "description": "IDML to WEB using React and Node",
   "main": "application.js",
   "dependencies": {
     "jquery": "2.1.4",
@@ -12,7 +12,8 @@
     "react-tools": "0.13.3"
   },
   "devDependencies": {
-    "adm-zip": "*",
+    "adm-zip": "0.4.7",
+    "body-parser": "^1.14.0",
     "browserify": "^11.1.0",
     "css-loader": " 0.14.3",
     "express": "4.12.4",
@@ -22,16 +23,20 @@
     "gulp-webpack": "1.4.0",
     "handlebars": "3.0.3",
     "jsx-loader": "0.13.2",
+    "media-typer": "^0.3.0",
+    "mime-types": "^2.1.7",
+    "multer": "^1.0.5",
     "node-jsx": "0.13.3",
     "reactify": "^1.1.1",
     "sass-loader": "1.0.2",
     "style-loader": "0.12.3",
+    "unpipe": "^1.0.0",
     "url-loader": "0.5.6",
-    "util": "*",
-    "xml2js": "*",
-    "xml2json": "*",
-    "xmldom": "*",
-    "xpath": "*"
+    "util": "0.10.3",
+    "xml2js": "0.4.12",
+    "xml2json": "0.9.0",
+    "xmldom": "0.1.19",
+    "xpath": "0.0.9"
   },
   "browserify": {
     "transform": [

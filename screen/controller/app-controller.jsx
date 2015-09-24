@@ -1,14 +1,19 @@
 var React = require('react');
-var Canvas = require('../views/Canvas.jsx');
+var Canvas = require('../views/canvas.jsx');
 var storyAction=require('../actions/story-action');
+var EventDispatcher = require('./../../libraries/eventDispacher/EventDispatcher');
 
+var Events={
+  SAVE_BUTTON_CLICKED:"save_button_clicked"
+};
 
 
 var AppController = React.createClass({
 
   propTypes: {
     layoutStore: React.PropTypes.object,
-    storyStore: React.PropTypes.object
+    storyStore: React.PropTypes.object,
+    action:React.PropTypes.object
   },
 
   getInitialState: function () {
@@ -41,10 +46,16 @@ var AppController = React.createClass({
     });
   },
 
+  handleOnClick: function() {
+    EventDispatcher.dispatch(Events.SAVE_BUTTON_CLICKED);
+
+  },
+
   render: function () {
     console.log("In app controller....\n");
     return (
         <div className="appController">
+         <a className="demo" onClick={this.handleOnClick}> Save</a>
           <Canvas
               layoutStoreData={this.state.layoutData}
               storyStoreData={this.state.storyData}
@@ -54,4 +65,8 @@ var AppController = React.createClass({
   }
 });
 
-module.exports = AppController;
+//module.exports =AppController;
+module.exports = {
+  view: AppController,
+  events: Events
+};

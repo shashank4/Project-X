@@ -6,6 +6,12 @@ var Spread = require('./Spread.jsx');
 
 var Canvas = React.createClass({
 
+  propTypes: {
+    layoutStore: React.PropTypes.object,
+    storyStore: React.PropTypes.object,
+    action:React.PropTypes.object
+  },
+
   render: function () {
     var obj = this.props.layoutStoreData;
     var pageDimObj = utils.getPageDimension(obj[0], 0);

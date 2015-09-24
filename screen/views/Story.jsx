@@ -2,7 +2,7 @@ var React=require("react");
 //var storyStore=require("../store/storyStore.js");
 var utils=require("../store/utils");
 var XMLElement=require("./XMLElement.jsx");
-var ParagraphStyleRange=require("./ParagraphStyleRange.jsx");
+var ParagraphStyleRange=require("./paragraphStyleRange.jsx");
 
 var Story =React.createClass({
 
