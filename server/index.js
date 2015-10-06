@@ -25,8 +25,8 @@ var layoutStore = require('./../screen/store/layoutStore.js');
 var storyStore = require('./../screen/store/storyStore.js');
 
 
-console.log(oStoryData);
-console.log(spreadArray);
+//console.log(oStoryData);
+//console.log(spreadArray);
 
 storyStore.setStoreData(oStoryData);
 layoutStore.setStoreData(spreadArray);
@@ -58,9 +58,8 @@ app.get('/', function (req, res) {
 });
 
 app.post('/onClickSave', upload.array(), function(req, res, next) {
-      //console.log((JSON.stringify(req.body)));
   console.log("before util");
-      utils.getAllStoryData(req.body);
+  utils.getAllStoryData(req.body);
       //res.json(req.body);
 });
 

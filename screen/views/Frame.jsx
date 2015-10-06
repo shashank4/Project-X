@@ -1,5 +1,5 @@
 var React = require('react');
-var Story = require('./story.jsx');
+var Story = require('./story.jsx').view;
 var utils = require('../store/utils');
 
 var Frame = React.createClass({

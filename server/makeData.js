@@ -9,8 +9,11 @@ var xmldom = require('xmldom').DOMParser;
 var xpath = require('xpath');
 var parseString = require('xml2js').parseString;
 
-var dirPath = 'D:/DesktopData/IDML/newExamine_2/';
 
+var utils= require('../screen/store/utils');
+
+var dirPath = "C:/Users/CS49/Desktop/IDML/test1/";                    //'D:/DesktopData/IDML/newExamine_2/';
+var uid=0;
 var zip = new zip3('D:/DesktopData/IDML/testing1.zip');
 zip.extractAllTo(/*target path*/"D:/DesktopData/IDML/", /*overwrite*/true);
 
@@ -21,6 +24,11 @@ var createXmlDom = function (xmlNode, doc) {
   var tempNext = xmlNode;
   var tempPre = xmlNode;
   var zNext = 0, zPre = 0;
+
+  //set id attribute.
+  var uid=utils.generateUUID();
+  xmlNode.setAttribute("data-uid", uid);
+
   while (tempNext.nextSibling != null) {
     arrayOfNext[zNext] = tempNext.nextSibling;
     tempNext = tempNext.nextSibling;
@@ -221,8 +229,9 @@ fs.readFile(dirPath + 'designmap.xml', function (err, data) {
                      nodes[i].setAttribute("seqNo", seqNo++);
                      }
                      */
+                    //console.log("jdhfgjshdfgjshdgfjhgdfjshfg----------before----------" + doc.toString());
                     addCustomTag(doc);
-                    //console.log("jdhfgjshdfgjshdgfjhgdfjshfg--------------------" + doc.toString());
+                    //console.log("jdhfgjshdfgjshdgfjhgdfjshfg--------after------------" + doc.toString());
 
 
                     var jsonStory = "";
@@ -230,7 +239,9 @@ fs.readFile(dirPath + 'designmap.xml', function (err, data) {
                     parseString(doc, {async: false}, function (err, resultSpread) {
                       jsonStory = resultSpread;
                     });
+
                     oStoryData[storyName] = jsonStory;
+                    //console.log("jdhfgjshdfgjshdgfjhgdfjshfg--------jsonStory------------" + JSON.stringify(jsonStory));
                   }
                 }
               }

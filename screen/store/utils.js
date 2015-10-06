@@ -3,7 +3,7 @@
  */
 var xmldom = require('xmldom').DOMParser;
 var xpath = require('xpath');
-var xml2js=require('xml2js');
+var xml2js = require('xml2js');
 var parseString = require('xml2js').parseString;
 
 var utils = (function () {
@@ -176,28 +176,40 @@ var utils = (function () {
     },
 
 
-    getAllStoryData: function(obj){
-      console.log("in the util----------------------------"+obj.uee);
-      var xmlString=this.removeCustomTag(obj.uee);
-      console.log("hello you are a pro man:"+xmlString);
+    getAllStoryData: function (obj) {
+      console.log("in the util----------------------------" + obj.uec);
+      var xmlString = this.removeCustomTag(obj.uec);
+      console.log("hello you are a pro man:" + xmlString);
 
       /*var keyValues=Object.keys(obj);
-      console.log("in the util------before for loop----------------------"+keyValues.length);*/
+       console.log("in the util------before for loop----------------------"+keyValues.length);*/
 
-        /*for(var i=0;i<keyValues.length;i++){
-          //console.log("in the util------before for loop----------------------"+obj.keyValues[i]);
-          //var singleStory=obj.(keyValues[i]);
-          console.log("in the util------in the for loop----------------------"+keyValues[i]);
-          var storyName=keyValues[i];
-          console.log(obj.storyName);
-          //var xmlString=this.removeCustomTag(singleStory);
-          //console.log("in the util------before for loop----------------------");
-          //console.log("hello you are a pro man:"+xmlString);
-        }*/
+      /*for(var i=0;i<keyValues.length;i++){
+       //console.log("in the util------before for loop----------------------"+obj.keyValues[i]);
+       //var singleStory=obj.(keyValues[i]);
+       console.log("in the util------in the for loop----------------------"+keyValues[i]);
+       var storyName=keyValues[i];
+       console.log(obj.storyName);
+       //var xmlString=this.removeCustomTag(singleStory);
+       //console.log("in the util------before for loop----------------------");
+       //console.log("hello you are a pro man:"+xmlString);
+       }*/
+    },
+
+    removeAttribute:function(dom){
+      var allElements=dom.getElementsByTagName("*");
+      for(var i=0;i<allElements.length;i++){
+        if(allElements[i].getAttribute("data-uid") !== null){
+          allElements[i].removeAttribute("data-uid");
+        }
+      }
+
+
+
     },
 
 
-    removeCustomTag: function(jsonData){
+    removeCustomTag: function (jsonData) {
       console.log("in the remocve tag");
 
       var builder = new xml2js.Builder();
@@ -205,21 +217,60 @@ var utils = (function () {
       var doc = new xmldom().parseFromString(xml.toString());
 
 
-      var customNodes2= doc.getElementsByTagName("Custom");
+      var customNodes2 = doc.getElementsByTagName("Custom");
       var len = customNodes2.length;
       for (var i = 0; i < len; i++) {
         var customNodes = doc.getElementsByTagName("Custom")[0];
         var childNode = xpath.select("//Custom/*", customNodes);
         customNodes.parentNode.replaceChild(childNode[0], customNodes);
-        //customNodes.parentNode.appendChild(childNode[0]);
-        //customNodes.parentNode.removeChild(customNodes);
       }
-      //console.log(doc.toString());
+
+      /**
+       * remove data-uid attribute
+       */
+      var allElements=doc.getElementsByTagName("*");
+      for(var j=0;j<allElements.length;j++){
+        if(allElements[j].getAttribute("data-uid") !== null){
+          allElements[j].removeAttribute("data-uid");
+        }
+      }
+
       return doc.toString();
 
+    },
+
+    generateUUID: function () {
+      var iCurrentTimeStamp = new Date().getTime();
+
+      var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var iRandom = (iCurrentTimeStamp + Math.random() * 16) % 16 | 0;
+
+        iCurrentTimeStamp = Math.floor(iCurrentTimeStamp / 16);
+
+        return (c == 'x' ? iRandom : (iRandom & 0x3 | 0x8)).toString(16);
+      });
+
+      return uuid;
+    },
+
+    getObjects: function (obj, key, val) {
+
+      var objects = [];
+      for (var i in obj) {
+        if ( i == "Custom" && typeof obj[i] == 'object') {
+          for (var j = 0; j < obj[i].length; j++) {
+            if (obj[i][j].Content && obj[i][j].Content[0]["$"]["data-uid"] == val) {
+              return obj[i];
+            } else if(typeof obj[i][j] == 'object'){
+              objects = objects.concat(this.getObjects(obj[i][j], key, val));
+            }
+          }
+        } else if (typeof obj[i] == 'object') {
+          objects = objects.concat(this.getObjects(obj[i], key, val));
+        }
+      }
+      return objects;
     }
-
-
 
     /*  getCharaStyleName: function (node) {
      var CharacterStyleRange = xpath.select("..", node);
