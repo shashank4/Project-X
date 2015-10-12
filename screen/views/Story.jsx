@@ -108,7 +108,7 @@ var Story = React.createClass({
             var range = sel.getRangeAt(0);
             var currentDom = range.commonAncestorContainer.parentNode;
             var targetUID = currentDom.getAttribute("data-uid");
-            EventDispatcher.dispatch(Events.BACKSPACE_KEY_PRESSED, this, oEvent, sel, targetUID);
+            EventDispatcher.dispatch(Events.DELETE_KEY_PRESSED, this, oEvent, sel, targetUID);
         }
     },
 
