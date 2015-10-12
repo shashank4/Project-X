@@ -1,55 +1,49 @@
-var React=require("react");
-var EventBusClass=require("../../libraries/eventDispacher/EventDispatcher");
-//var appController= require('../controller/app-controller.jsx');
-var storyStore= require("../store/storyStore");
-var ContentEvent = require('./../views/content.jsx').events;
-var AppControllerEvent=require('../controller/app-controller.jsx').events;
-var StoryEvent=require('../views/Story.jsx').events;
+var React = require("react");
+var EventBusClass = require("../../libraries/eventDispacher/EventDispatcher");
+var storyStore = require("../store/storyStore");
+var StoryEvent = require('../views/Story.jsx').events;
 
 var storyAction = (function () {
 
-  var handleContentTextChanged = function (oContext, sel,targetUID) {
-    storyStore.handleContentTextChanged(sel,targetUID);
-  };
+    var handleSaveButonClick = function () {
+        storyStore.handleSaveClick();
+    };
 
-  var handleSaveButonClick=function(){
-    storyStore.handleSaveClick();
-  };
+    var handleContentTextChanged = function (oContext, sel, targetUID) {
+        storyStore.handleContentTextChanged(sel, targetUID);
+    };
 
-  var handleEnterKeyPressed=function(oContext,childNodes,aContentData, aParent){
-    console.log("in the action");
-    storyStore.handleEnterPressed(childNodes,aContentData,aParent);
-  };
+    var handleEnterKeyPressed = function (oContext, oEvent, sel, key, targetUID) {
+        storyStore.handleEnterKeyPress(sel, key, targetUID);
+    };
 
-  var handleEnterKeyPressed2=function(oContext,oEvent, sel,key,targetUID){
-    console.log("in the action");
-    storyStore.handleEnterKeyPress(sel,key,targetUID);
+    var handleBackspace = function (oContext, oEvent, sel, targetUID) {
+        storyStore.handleBackspacePressed(oEvent, sel, targetUID);
+    };
 
-  };
-
-  var handleBackspace=function(oContext,oEvent,aContentData,aParent){
-    console.log("in the backSpace");
-    storyStore.handleBackspacePressed(oEvent,aContentData,aParent);
-  };
+    var handleDelete = function (oContext, oEvent, sel, targetUID) {
+        storyStore.handleDeletePressed(oEvent, sel, targetUID);
+    };
 
 
-  return {
-    registerEvent: function () {
-      EventBusClass.addEventListener("save_button_clicked", handleSaveButonClick);
-      EventBusClass.addEventListener(StoryEvent.CONTENT_CHANGE_EVENT, handleContentTextChanged);
-      //EventBusClass.addEventListener(ContentEvent.ENTER_KEY_PRESSSED, handleEnterKeyPressed);
-      EventBusClass.addEventListener(ContentEvent.BACKSPACE_KEY_PRESSED,handleBackspace);
-      EventBusClass.addEventListener(StoryEvent.ENTER_KEY_PRESSSED, handleEnterKeyPressed2);
-    },
-    deRegisterEvent: function () {
-      EventBusClass.removeEventListener("save_button_clicked", handleSaveButonClick);
-      EventBusClass.removeEventListener(StoryEvent.CONTENT_CHANGE_EVENT, handleContentTextChanged);
-      //EventBusClass.removeEventListener(ContentEvent.ENTER_KEY_PRESSSED, handleEnterKeyPressed);
-      EventBusClass.removeEventListener(ContentEvent.BACKSPACE_KEY_PRESSED,handleBackspace);
-      EventBusClass.removeEventListener(StoryEvent.ENTER_KEY_PRESSSED, handleEnterKeyPressed2);
+    return {
+        registerEvent: function () {
+            EventBusClass.addEventListener("save_button_clicked", handleSaveButonClick);
+            EventBusClass.addEventListener(StoryEvent.CONTENT_CHANGE_EVENT, handleContentTextChanged);
+            EventBusClass.addEventListener(StoryEvent.ENTER_KEY_PRESSSED, handleEnterKeyPressed);
+            EventBusClass.addEventListener(StoryEvent.BACKSPACE_KEY_PRESSED, handleBackspace);
+            EventBusClass.addEventListener(StoryEvent.DELETE_KEY_PRESSED, handleDelete);
+
+        },
+        deRegisterEvent: function () {
+            EventBusClass.removeEventListener("save_button_clicked", handleSaveButonClick);
+            EventBusClass.removeEventListener(StoryEvent.CONTENT_CHANGE_EVENT, handleContentTextChanged);
+            EventBusClass.removeEventListener(StoryEvent.ENTER_KEY_PRESSSED, handleEnterKeyPressed);
+            EventBusClass.removeEventListener(StoryEvent.BACKSPACE_KEY_PRESSED, handleBackspace);
+            EventBusClass.removeEventListener(StoryEvent.DELETE_KEY_PRESSED, handleDelete);
+        }
     }
-  }
 
 })();
 
-module.exports=storyAction;
+module.exports = storyAction;

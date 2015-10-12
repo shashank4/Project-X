@@ -55,6 +55,12 @@ body * {
     border-right-color: rgba(153, 51, 255, 1);
 }
 
+.storyContainer{
+    font-size: 0;
+    outline: 0px solid transparent;
+}
+
+
 .characterContainer{
     /*display: inline-block;*/
 }
@@ -75,4 +81,8 @@ body * {
 p{
   text-color: rgba(0, 0, 0, 1);
   text-align: center;
+}
+
+.myButton{
+    margin-left: 1224px;
 }

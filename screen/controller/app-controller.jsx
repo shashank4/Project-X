@@ -55,7 +55,7 @@ var AppController = React.createClass({
     console.log("In app controller....\n");
     return (
         <div className="appController">
-         <a className="demo" onClick={this.handleOnClick}> Save</a>
+         <button className="myButton" onClick={this.handleOnClick}> Save</button>
           <Canvas
               layoutStoreData={this.state.layoutData}
               storyStoreData={this.state.storyData}

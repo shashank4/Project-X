@@ -3,9 +3,7 @@ var React = require("react");
 //var utils=require('../store/utils');
 
 var Events = {
-  CONTENT_CHANGE_EVENT: "content_change_event",
-  ENTER_KEY_PRESSSED:"enter_key_presssed",
-  BACKSPACE_KEY_PRESSED:"backspace_key_pressed"
+
 };
 
 var Content = React.createClass({
@@ -15,21 +13,6 @@ var Content = React.createClass({
     data: React.PropTypes.object ,
     parent:React.PropTypes.object
   },
-
-
-  /*handleKeyPress:function(oEvent){
-    if(oEvent.keyCode==13) {
-      //EventDispatcher.dispatch(Events.ENTER_KEY_PRESSSED, this, oEvent.currentTarget.childNodes, this.props.data, this.props.parent);
-    }
-  },
-
-  handleKeyDown:function(oEvent){
-    if(oEvent.keyCode==8) {
-      console.log("Control comes here...BACKSPACE");
-      EventDispatcher.dispatch(Events.BACKSPACE_KEY_PRESSED, this, oEvent, this.props.data, this.props.parent);
-    }
-  },*/
-
 
   render: function () {
     console.log("in Content"+this.props.data);
@@ -43,9 +26,6 @@ var Content = React.createClass({
       >
       {contentData}
       </span>);
-
-      /* onKeyUp={this.handleKeyPress}
-     onKeyDown={this.handleKeyDown}*///dangerouslySetInnerHTML={{__html: contentData}}
   }
 });
 

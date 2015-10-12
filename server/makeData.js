@@ -1,6 +1,6 @@
 var React = require('react');
 var Handlebars = require('handlebars');
-var miniData=require('../data/MiniData');
+//var miniData=require('../data/MiniData');
 
 var fs = require("fs");
 var zip3 = require('adm-zip');
@@ -229,19 +229,14 @@ fs.readFile(dirPath + 'designmap.xml', function (err, data) {
                      nodes[i].setAttribute("seqNo", seqNo++);
                      }
                      */
-                    //console.log("jdhfgjshdfgjshdgfjhgdfjshfg----------before----------" + doc.toString());
                     addCustomTag(doc);
-                    //console.log("jdhfgjshdfgjshdgfjhgdfjshfg--------after------------" + doc.toString());
-
 
                     var jsonStory = "";
-
                     parseString(doc, {async: false}, function (err, resultSpread) {
                       jsonStory = resultSpread;
                     });
 
                     oStoryData[storyName] = jsonStory;
-                    //console.log("jdhfgjshdfgjshdgfjhgdfjshfg--------jsonStory------------" + JSON.stringify(jsonStory));
                   }
                 }
               }
