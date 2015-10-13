@@ -23,7 +23,6 @@
     "gulp-webpack": "1.4.0",
     "handlebars": "3.0.3",
     "jsx-loader": "0.13.2",
-    "lodash": "^3.10.1",
     "media-typer": "^0.3.0",
     "mime-types": "^2.1.7",
     "multer": "^1.0.5",
