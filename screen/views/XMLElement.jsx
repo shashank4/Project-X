@@ -8,7 +8,7 @@ var Br = require("./Br.jsx");
 var XMLElement = React.createClass({
 
   propTypes: {
-    data: React.PropTypes.object,  // individual story data
+    data: React.PropTypes.array
 
   },
 
@@ -63,7 +63,6 @@ var XMLElement = React.createClass({
   },
 
   render: function () {
-    console.log("in XMLElement");
     var aXmlElements = this.getAXmlElements(this.props.data);
     var uid= this.props.data[0]["$"]["data-uid"];
     return (

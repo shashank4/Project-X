@@ -238,7 +238,6 @@ var storyStore = (function () {
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
       var parentUID = returnedObject.patentUID;
-
       if (sel.focusOffset == 0) {
         oEvent.preventDefault();
 
@@ -380,25 +379,59 @@ var storyStore = (function () {
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
       var parentUID = returnedObject.patentUID;
+      if (sel.focusOffset == aParent[iIndex].Content[0]["_"].length) {
+        if (iIndex <= aParent.length - 2) {
+          if (aParent[iIndex + 1].Br) {
+            oEvent.preventDefault();
+            if (aParent[iIndex + 2]) {
+              aParent[iIndex].Content[0]["_"] = aParent[iIndex].Content[0]["_"].concat(aParent[iIndex + 2].Content[0]["_"])
+            }
+            aParent.splice(iIndex + 1, 2);
+            _triggerChange();
 
-      if(iIndex<aParent.length-2){
-
-        if(aParent[iIndex+1].Br){
-          oEvent.preventDefault();
-          if (aParent[iIndex + 2]) {
-            aParent[iIndex].Content[0]["_"]=aParent[iIndex].Content[0]["_"].concat(aParent[iIndex+2].Content[0]["_"])
+          } else if (aParent[iIndex + 1].XMLElement) {
+            oEvent.preventDefault();
+            var str = aParent[iIndex + 1].XMLElement[0].Custom[0].Content[0]["_"];
+            if (str.length != 1) {
+              aParent[iIndex + 1].XMLElement[0].Custom[0].Content[0]["_"] = str.slice(0, 0) + str.slice(1, str.length);
+            } else {
+              aParent[iIndex + 1].XMLElement[0].Custom.splice(0, 1);
+            }
+            _triggerChange();
           }
-          aParent.splice(iIndex+1,2);
 
-          _triggerChange();
-         }
-
+        } else if (iIndex == aParent.length - 1) {
+          var oCharacterOfParent = this.searchClosestCustomOfChara(data, parentUID);
+          var aCustom = oCharacterOfParent.reqObj;
+          var charIndex = oCharacterOfParent.iIndex;
+          if (aCustom[charIndex + 1]) {
+            if (aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"].length != 1) {
+              oEvent.preventDefault();
+              var tempStr = aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+              aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"] = tempStr.slice(0, 0) + tempStr.slice(1, tempStr.length);
+              _triggerChange();
+            } else {
+              if (aCustom[charIndex + 1].CharacterStyleRange[0].Custom.length == 1) {
+                if (aCustom[charIndex + 2]) {
+                  oEvent.preventDefault();
+                  if (aCustom[charIndex].CharacterStyleRange[0]["$"].AppliedCharacterStyle == aCustom[charIndex + 2].CharacterStyleRange[0]["$"].AppliedCharacterStyle) {
+                    aCustom[charIndex].CharacterStyleRange[0].Custom[0].Content[0]["_"] = aCustom[charIndex].CharacterStyleRange[0].Custom[0].Content[0]["_"]
+                    + aCustom[charIndex + 2].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+                    aCustom.splice(charIndex + 1, 2);
+                    _triggerChange();
+                  } else {
+                    aCustom.splice(charIndex + 1, 1);
+                    _triggerChange();
+                  }
+                }
+              }
+            }
+          }
+        }
       }
-
-
     }
+  }
 
-  };
 })();
 
 

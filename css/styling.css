@@ -3,6 +3,10 @@ body * {
     white-space:PRE;
 }
 
+span{
+    white-space: pre-wrap;
+}
+
 #container{
     border: none;
 }
@@ -79,7 +83,7 @@ body * {
 
 
 p{
-  text-color: rgba(0, 0, 0, 1);
+
   text-align: center;
 }
 

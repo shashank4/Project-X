@@ -47,9 +47,9 @@ var ParagraphStyleRange = React.createClass({
     var className1 = "paragraphContainer " + cssName;
 
     return (
-        <span className={className1} data-uid={dataUID}>
+        <p className={className1} data-uid={dataUID}>
                 {aParagraph}
-        </span>
+        </p>
     );
   }
 

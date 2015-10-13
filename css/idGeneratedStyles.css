@@ -2,16 +2,14 @@ body, div, dl, dt, dd, h1, h2, h3, h4, h5, h6, p, pre, code, blockquote {
     margin:0;
     padding:0;
     border-width:0;
-    white-space:PRE;
 }
 body {
     -epub-hyphens:auto;
-    white-space:PRE;
 }
-.Basic-Text-Frame {
+div.Basic-Text-Frame {
     border-style:solid;
 }
-.Basic-Paragraph {
+p.Basic-Paragraph {
     color:#000000;
     font-family:"Minion Pro", serif;
     font-size:12px;
@@ -31,9 +29,8 @@ body {
     text-indent:0;
     text-transform:none;
     widows:1;
-    white-space:PRE;
 }
-.Paragraph-Style-1 {
+p.Paragraph-Style-1 {
     color:#25408f;
     font-family:"Minion Pro", serif;
     font-size:12px;
@@ -53,9 +50,8 @@ body {
     text-indent:0;
     text-transform:none;
     widows:1;
-    white-space:PRE;
 }
-.Paragraph-Style-2 {
+p.Paragraph-Style-2 {
     color:#41ad49;
     font-family:"Minion Pro", serif;
     font-size:12px;
@@ -75,25 +71,21 @@ body {
     text-indent:0;
     text-transform:none;
     widows:1;
-    white-space:PRE;
 }
-.Character-Style-1 {
+span.Character-Style-1 {
     color:#00aeef;
     font-family:"Birch Std", serif;
     font-size:14px;
     font-style:normal;
     font-weight:normal;
-    white-space:PRE;
 }
-.Character-Style-2 {
+span.Character-Style-2 {
     color:#ec008c;
     font-family:"Birch Std", serif;
     font-size:14px;
     font-style:normal;
     font-weight:normal;
-    white-space:PRE;
 }
-.Character-Style-3 {
+span.Character-Style-3 {
     color:#fff200;
-    white-space:PRE;
 }

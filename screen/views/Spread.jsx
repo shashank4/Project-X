@@ -12,10 +12,6 @@ var Spread = React.createClass({
     storyStore: React.PropTypes.object
   },
 
-  getStore: function () {
-    return this.props.store;
-  },
-
   getSpreadView: function (obj) {
     var aSp = [];
     var height;
@@ -70,7 +66,6 @@ var Spread = React.createClass({
     return (aSp);
   },
   render: function () {
-    console.log("in Spread");
     var aSpreads = this.getSpreadView(this.props.layoutStoreData);
     return (
         <div className="spreadClass" >

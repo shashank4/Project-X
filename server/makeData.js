@@ -214,21 +214,6 @@ fs.readFile(dirPath + 'designmap.xml', function (err, data) {
 
                     var doc = new xmldom().parseFromString(toString);
 
-                    /*var seqNo = 0;
-                     var nodes = xpath.select("//Content | //Br", doc);
-                     for (var i = 0; i < nodes.length; i++) {
-                     var charStyleName = storyStore.getCharaStyleName(nodes[i]);
-                     var paraStyleName = storyStore.getParaStyleName(nodes[i]);
-                     var xmlTagArray = storyStore.getXmlTag(nodes[i]);
-
-                     nodes[i].setAttribute("ParagraphStyleName", paraStyleName);
-                     nodes[i].setAttribute("CharacterStyleName", charStyleName);
-                     nodes[i].setAttribute("TagSelf", xmlTagArray[0]);
-                     nodes[i].setAttribute("TagName", xmlTagArray[1]);
-                     nodes[i].setAttribute("contenteditable", true);
-                     nodes[i].setAttribute("seqNo", seqNo++);
-                     }
-                     */
                     addCustomTag(doc);
 
                     var jsonStory = "";

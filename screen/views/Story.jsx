@@ -126,9 +126,7 @@ var Story = React.createClass({
         }
     },
 
-
     render: function () {
-        console.log("in story...");
         var wrapperArray = this.renderStoryData(this.props.data);
         return (
             <div className="storyContainer"
@@ -139,13 +137,6 @@ var Story = React.createClass({
             </div>
         );
     }
-
-
-    /*<Select
-     name="form-field-name"
-     value="one"
-     onKeyUp={this.handleKeyUp}
-     />*/
 
 });
 
