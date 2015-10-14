@@ -10,10 +10,10 @@ var xpath = require('xpath');
 var parseString = require('xml2js').parseString;
 
 
-var utils= require('../screen/store/utils');
+var utils = require('../screen/store/utils');
 
 var dirPath = "C:/Users/CS49/Desktop/IDML/test1/";                    //'D:/DesktopData/IDML/newExamine_2/';
-var uid=0;
+var uid = 0;
 var zip = new zip3('D:/DesktopData/IDML/testing1.zip');
 zip.extractAllTo(/*target path*/"D:/DesktopData/IDML/", /*overwrite*/true);
 
@@ -26,7 +26,7 @@ var createXmlDom = function (xmlNode, doc) {
   var zNext = 0, zPre = 0;
 
   //set id attribute.
-  var uid=utils.generateUUID();
+  var uid = utils.generateUUID();
   xmlNode.setAttribute("data-uid", uid);
 
   while (tempNext.nextSibling != null) {
@@ -123,117 +123,114 @@ function writeClientData (oStoryData, spreadArray) {
 
 /*function removeCustomTag () {
 
-  var builder = new xml2js.Builder();
-  var xml = builder.buildObject((miniData.uee));
-  var doc = new xmldom().parseFromString(xml.toString());
+ var builder = new xml2js.Builder();
+ var xml = builder.buildObject((miniData.uee));
+ var doc = new xmldom().parseFromString(xml.toString());
 
 
-   var customNodes2= doc.getElementsByTagName("Custom");
-   var len = customNodes2.length;
-  for (var i = 0; i < len; i++) {
-    var customNodes = doc.getElementsByTagName("Custom")[0];
-    var childNode = xpath.select("//Custom*//*", customNodes);
+ var customNodes2= doc.getElementsByTagName("Custom");
+ var len = customNodes2.length;
+ for (var i = 0; i < len; i++) {
+ var customNodes = doc.getElementsByTagName("Custom")[0];
+ var childNode = xpath.select("//Custom*//*", customNodes);
 
-    customNodes.parentNode.replaceChild(childNode[0], customNodes);
-    //customNodes.parentNode.appendChild(childNode[0]);
-    //customNodes.parentNode.removeChild(customNodes);
-  }
-   console.log(doc.toString());
-
-
-
-
-
-
-*//*  for(var i=0;i<customNodes.length;i++){
-    var currentNode= doc.getElementsByTagName("Custom")[i];
-    console.log("selected node is:  ");
-    console.log(currentNode);
-
-    console.log("parent node is:" );
-    var parent=currentNode.parentNode;
-    //var parentDom=new xmldom().parseFromString((currentNode.parentNode).toString());
-    console.log();
-
-    console.log("first child is:");
-    var firstChild=currentNode.firstChild;
-    var cloneOfFirstChild=firstChild.cloneNode(true);
-    console.log(firstChild);
-    //cloneOfFirstCh?ild=doc.createElement()
-    //parent.removeChild(currentNode);
-        var domOfClone=new xmldom().parseFromString(cloneOfFirstChild.toString());
-    (parent).insertBefore(domOfClone,currentNode);
-
-    //currentNode.parentNode
-    console.log("parent node is:" );
-    console.log("******************************************************\n"+parent);
+ customNodes.parentNode.replaceChild(childNode[0], customNodes);
+ //customNodes.parentNode.appendChild(childNode[0]);
+ //customNodes.parentNode.removeChild(customNodes);
+ }
+ console.log(doc.toString());
 
 
 
 
-  }*//*
 
 
-}*/
+ *//*  for(var i=0;i<customNodes.length;i++){
+ var currentNode= doc.getElementsByTagName("Custom")[i];
+ console.log("selected node is:  ");
+ console.log(currentNode);
+
+ console.log("parent node is:" );
+ var parent=currentNode.parentNode;
+ //var parentDom=new xmldom().parseFromString((currentNode.parentNode).toString());
+ console.log();
+
+ console.log("first child is:");
+ var firstChild=currentNode.firstChild;
+ var cloneOfFirstChild=firstChild.cloneNode(true);
+ console.log(firstChild);
+ //cloneOfFirstCh?ild=doc.createElement()
+ //parent.removeChild(currentNode);
+ var domOfClone=new xmldom().parseFromString(cloneOfFirstChild.toString());
+ (parent).insertBefore(domOfClone,currentNode);
+
+ //currentNode.parentNode
+ console.log("parent node is:" );
+ console.log("******************************************************\n"+parent);
 
 
-fs.readFile(dirPath + 'designmap.xml', function (err, data) {
-//var data= fs.
-  parser.parseString(data, function (err, result) {
-    result3 = result;
-
-    var spreadArray = [];
-    var spreadCount = result3.Document['idPkg:Spread'].length;
-    var remaining = spreadCount;
-    var sequenceMap = {};
-
-    for (var i = 0; i < spreadCount; i++) {
-      (function () {
-        var spreadXMLName = result3.Document['idPkg:Spread'][i].$.src;
 
 
-        fs.readFile(dirPath + spreadXMLName, function (err, data) {
+ }
 
-          parser.parseString(data, function (err, resultSpread) {
-            sequenceMap[spreadXMLName] = resultSpread;
-            remaining -= 1;
 
-            if (remaining == 0) {
-              var oStoryData = {};
-              for (var j = 0; j < spreadCount; j++) {
-                spreadXMLName = result3.Document['idPkg:Spread'][j].$.src;
-                spreadArray.push(sequenceMap[spreadXMLName]);
+ }*/
 
-                if ((spreadArray[j]["idPkg:Spread"].Spread[0]).hasOwnProperty("TextFrame")) {
-                  var textFrameCount = spreadArray[0]["idPkg:Spread"].Spread[0].TextFrame.length;
-                  for (var tfIterator = 0; tfIterator < textFrameCount; tfIterator++) {
 
-                    var storyName = spreadArray[0]["idPkg:Spread"].Spread[0].TextFrame[tfIterator].$.ParentStory;
-                    var copyDataXml = fs.readFileSync(dirPath + 'Stories/Story_' + storyName + '.xml');
-                    var toString = copyDataXml.toString();
+var data = fs.readFileSync(dirPath + 'designmap.xml');
 
-                    var doc = new xmldom().parseFromString(toString);
+parser.parseString(data, function (err, result) {
+  var result3 = result;
 
-                    addCustomTag(doc);
+  var spreadArray = [];
+  var spreadCount = result3.Document['idPkg:Spread'].length;
+  var remaining = spreadCount;
+  var sequenceMap = {};
 
-                    var jsonStory = "";
-                    parseString(doc, {async: false}, function (err, resultSpread) {
-                      jsonStory = resultSpread;
-                    });
+  for (var i = 0; i < spreadCount; i++) {
+    (function () {
+      var spreadXMLName = result3.Document['idPkg:Spread'][i].$.src;
 
-                    oStoryData[storyName] = jsonStory;
-                  }
-                }
+      var newData = fs.readFileSync(dirPath + spreadXMLName);
+
+      parser.parseString(newData, function (err, resultSpread) {
+        sequenceMap[spreadXMLName] = resultSpread;
+        remaining -= 1;
+
+        if (remaining == 0) {
+          var oStoryData = {};
+          for (var j = 0; j < spreadCount; j++) {
+            spreadXMLName = result3.Document['idPkg:Spread'][j].$.src;
+            spreadArray.push(sequenceMap[spreadXMLName]);
+
+            if ((spreadArray[j]["idPkg:Spread"].Spread[0]).hasOwnProperty("TextFrame")) {
+              var textFrameCount = spreadArray[0]["idPkg:Spread"].Spread[0].TextFrame.length;
+              for (var tfIterator = 0; tfIterator < textFrameCount; tfIterator++) {
+
+                var storyName = spreadArray[0]["idPkg:Spread"].Spread[0].TextFrame[tfIterator].$.ParentStory;
+                var copyDataXml = fs.readFileSync(dirPath + 'Stories/Story_' + storyName + '.xml');
+                var toString = copyDataXml.toString();
+
+                var doc = new xmldom().parseFromString(toString);
+
+                addCustomTag(doc);
+
+                var jsonStory = "";
+                parseString(doc, {async: false}, function (err, resultSpread) {
+                  jsonStory = resultSpread;
+                });
+
+                oStoryData[storyName] = jsonStory;
               }
-              writeClientData(oStoryData, spreadArray);
             }
-          });
+          }
+          writeClientData(oStoryData, spreadArray);
+        }
+      });
 
-        });
-      })();
-    }
+    })();
+  }
 
-  });
 });
 
 

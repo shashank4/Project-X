@@ -149,32 +149,47 @@ var storyStore = (function () {
       }
     },
 
-    handleContentTextChanged: function (sel, uuid) {
+    handleContentTextChanged: function (sel, uuid, spyFlag) {
 
-      if (sel.focusNode.nextSibling
-          && sel.focusNode.nextSibling.className.indexOf("br") > (-1)) {
+      if ((sel.focusNode.nextSibling
+            && sel.focusNode.nextSibling.className.indexOf("br") > (-1))
+          ||
+          ((sel.focusNode.previousSibling
+            && sel.focusNode.previousSibling.className.indexOf("br") > (-1)))) {
+
         var oParentCustom = this.searchClosestCustomOfContentNBr(data, "data-uid", uuid);
         var aCustom = oParentCustom.objectPos;
         var index = oParentCustom.indexPos;
         var newContentStringBefore = sel.focusNode.data;
+
         var newUid = utils.generateUUID();
         var newContentObj = {"Content": [{"_": newContentStringBefore, "$": {"data-uid": newUid}}]};
 
         if (sel.focusNode.previousSibling && sel.focusNode.previousSibling.className.indexOf("br") > (-1)) {
           aCustom.splice(index + 1, 0, newContentObj);
-          aCustom.splice(-1);
+
           _triggerChange();
-        } else {
+
+        } else if (sel.focusNode.nextSibling && sel.focusNode.nextSibling.className.indexOf("br") > (-1)) {
           if (index != 0)
             aCustom.splice(index - 1, 0, newContentObj);
           else
-            aCustom.unshift(newContentObj);
+            aCustom.splice(index, 0, newContentObj);
+
           aCustom.splice(-1);
           _triggerChange();
 
         }
 
 
+      }else if(!sel.focusNode.nextSibling && !sel.focusNode.previousSibling
+                && !sel.focusNode.parentNode.nextSibling && !sel.focusNode.parentNode.previousSibling){
+        var oChara = this.selfSearch(data, uuid);
+        var newUid2 = utils.generateUUID();
+        var newContentObj2 = {"Content": [{"_": sel.focusNode.data, "$": {"data-uid": newUid2}}]};
+        oChara.Custom.splice(0,0,newContentObj2);
+        _triggerChange();
+        console.log("hii");
       } else {
         var oContent = this.selfSearch(data, uuid);
         oContent["_"] = sel.focusNode.data;
@@ -199,35 +214,44 @@ var storyStore = (function () {
 
       } else {
 
-        var rest = aParent.splice(iIndex + 1);
-        aParent.splice(iIndex, 1);
+        if(offset==0 && iIndex==0){
+          var newUid6 = utils.generateUUID();
+          var newBrObj6 = {"Br": [{"$": {"data-uid": newUid6}}]};
+          aParent.splice(iIndex, 0, newBrObj6);
+          _triggerChange();
+        }else{
+          var rest = aParent.splice(iIndex + 1);
+          aParent.splice(iIndex, 1);
 
-        var newUid = utils.generateUUID();
-        var newContentStringBefore = aContentData.substring(0, offset);
-        var newContentObjBefore = {"Content": [{"_": newContentStringBefore, "$": {"data-uid": newUid}}]};
-        aParent.push(newContentObjBefore);
+          var newUid = utils.generateUUID();
+          var newContentStringBefore = aContentData.substring(0, offset);
+          var newContentObjBefore = {"Content": [{"_": newContentStringBefore, "$": {"data-uid": newUid}}]};
+          aParent.push(newContentObjBefore);
 
-        var newUid2 = utils.generateUUID();
-        var newBrObj = {"Br": [{"$": {"data-uid": newUid2}}]};
-        aParent.push(newBrObj);
+          var newUid2 = utils.generateUUID();
+          var newBrObj = {"Br": [{"$": {"data-uid": newUid2}}]};
+          aParent.push(newBrObj);
 
-        if (sel.focusNode.length == sel.focusOffset
-            && sel.focusNode.parentNode.nextSibling == null
-            && sel.focusNode.parentNode.parentNode.nextSibling == null
-            && sel.focusNode.parentNode.parentNode.parentNode.nextSibling == null) {
-          var newUid4 = utils.generateUUID();
-          var newBrObjExtreemLast = {"Br": [{"$": {"data-uid": newUid4}}]};
-          aParent.push(newBrObjExtreemLast);
+          if (sel.focusNode.length == sel.focusOffset
+              && sel.focusNode.parentNode.nextSibling == null
+              && sel.focusNode.parentNode.parentNode.nextSibling == null
+              && sel.focusNode.parentNode.parentNode.parentNode.nextSibling == null) {
+            var newUid4 = utils.generateUUID();
+            var newBrObjExtreemLast = {"Br": [{"$": {"data-uid": newUid4}}]};
+            aParent.push(newBrObjExtreemLast);
+          }
+
+          if (offset < aContentData.length) {
+            var newUid3 = utils.generateUUID();
+            var newContentStringAfter = aContentData.substring(offset, aContentData.length);
+            var newContentObjAfter = {"Content": [{"_": newContentStringAfter, "$": {"data-uid": newUid3}}]};
+            aParent.push(newContentObjAfter);
+          }
+          _.assign(aParent, aParent.concat(rest));
+          _triggerChange();
         }
 
-        if (offset < aContentData.length) {
-          var newUid3 = utils.generateUUID();
-          var newContentStringAfter = aContentData.substring(offset, aContentData.length);
-          var newContentObjAfter = {"Content": [{"_": newContentStringAfter, "$": {"data-uid": newUid3}}]};
-          aParent.push(newContentObjAfter);
-        }
-        _.assign(aParent, aParent.concat(rest));
-        _triggerChange();
+
       }
 
     },
@@ -365,7 +389,6 @@ var storyStore = (function () {
 
     },
 
-
     handleDeletePressed: function (oEvent, sel, targetUID) {
       /**
        * delete cases...
@@ -428,6 +451,27 @@ var storyStore = (function () {
             }
           }
         }
+      }
+    },
+
+    handleTabPressed:function(oEvent, sel, uuid){
+      oEvent.preventDefault();
+      var tenSpaces = "          ";
+
+      if(sel.focusNode.firstChild && sel.focusNode.firstChild.className.indexOf("br") > (-1)){
+        var oChara = this.selfSearch(data, uuid);
+        var newUid2 = utils.generateUUID();
+        var newContentObj2 = {"Content": [{"_": tenSpaces, "$": {"data-uid": newUid2}}]};
+        oChara.Custom.splice(0,0,newContentObj2);
+        _triggerChange();
+      } else {
+        var str=sel.focusNode.data;
+        var offset=sel.focusOffset;
+        var preText=str.substring(0,offset);
+        var postText=str.substring(offset,str.length);
+        var oContent = this.selfSearch(data, uuid);
+        oContent["_"] = preText+tenSpaces+postText;
+        _triggerChange();
       }
     }
   }
