@@ -43,7 +43,6 @@ var Spread = React.createClass({
         position: "absolute",
         top: gTop +116+ "px",
         left: "36px"
-        //zIndex: 0
       };
 
       var dataToFrame = obj[i]['idPkg:Spread'].Spread[0];
@@ -59,10 +58,7 @@ var Spread = React.createClass({
             storyStoreData={this.props.storyStoreData} />
           </div>
       );
-
-
     }
-
     return (aSp);
   },
   render: function () {

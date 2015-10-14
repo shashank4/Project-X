@@ -11,7 +11,6 @@ var Pages = React.createClass({
 
   getPagesView: function (obj) {
     var pageVisitCount = 0;
-    //console.log("In getPagesView:::///");
     var aPg = [];
     var left = 0;
     var pageCount = (parseInt(obj['idPkg:Spread'].Spread[0].$.PageCount));
@@ -28,14 +27,12 @@ var Pages = React.createClass({
       else
         left = left + width;
 
-
       var oStyle = {
         height: height + "px",
         width: width + "px",
         position: "absolute",
         left: left + "px",
         top: 72 + "px"
-        //zIndex: 1
       };
       var oMstyle = {
         height: (height - 72) + "px",
@@ -43,7 +40,6 @@ var Pages = React.createClass({
         position: "absolute",
         left: "36px",
         top: "36px"
-        //zIndex: 0
       };
 
       if (pageVisitCount == 0) {
@@ -51,7 +47,6 @@ var Pages = React.createClass({
         aPg.push(
             <div className="page" style={oStyle} key={pageVisitCount}>
               <div className="innerpage" style={oMstyle}/>
-
             </div>);
       }
       else {
@@ -65,14 +60,12 @@ var Pages = React.createClass({
     return (aPg);
   },
   render: function () {
-    console.log("In Pages:::///");
     var aPages = this.getPagesView(this.props.data);
     return (
         <div>
               {aPages}
         </div>
     );
-
   }
 });
 

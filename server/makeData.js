@@ -178,7 +178,7 @@ function writeClientData (oStoryData, spreadArray) {
 
 
 fs.readFile(dirPath + 'designmap.xml', function (err, data) {
-
+//var data= fs.
   parser.parseString(data, function (err, result) {
     result3 = result;
 

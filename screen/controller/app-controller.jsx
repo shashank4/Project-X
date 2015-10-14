@@ -52,7 +52,6 @@ var AppController = React.createClass({
   },
 
   render: function () {
-    console.log("In app controller....\n");
     return (
         <div className="appController">
          <button className="myButton" onClick={this.handleOnClick}> Save</button>
@@ -65,7 +64,7 @@ var AppController = React.createClass({
   }
 });
 
-//module.exports =AppController;
+
 module.exports = {
   view: AppController,
   events: Events

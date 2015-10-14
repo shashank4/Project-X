@@ -4,8 +4,6 @@ var layoutStore = (function () {
     return {
 
         setStoreData: function (json) {
-            console.log("-------------------------------------------------------------------");
-            console.log(json);
             aJson = json;
         },
 

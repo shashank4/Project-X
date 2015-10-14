@@ -8,45 +8,45 @@ var BrTag = require("./Br.jsx");
 var CharacterStyleRange = React.createClass({
 
   propTypes: {
-    data: React.PropTypes.object,
+    data: React.PropTypes.array,
     key: React.PropTypes.object
   },
 
-  getCharacter: function (obj) {
+  getCharacter: function (arr) {
     var aStory = [];
     var uniq = 0;
-    var objLen = obj.length;
-    for (var i = 0; i < objLen; i++) {
-      for (var j = 0; j < obj[i].Custom.length; j++) {
+    var arrLen = arr.length;
+    for (var i = 0; i < arrLen; i++) {
+      for (var j = 0; j < arr[i].Custom.length; j++) {
 
-        if ((obj[i].Custom[j]).hasOwnProperty("CharacterStyleRange")) {
+        if ((arr[i].Custom[j]).hasOwnProperty("CharacterStyleRange")) {
           console.log("hasOwnProperty(CharacterStyleRange)");
-          var aCharacterStyleRange = obj[i].Custom[j].CharacterStyleRange;
+          var aCharacterStyleRange = arr[i].Custom[j].CharacterStyleRange;
           aStory.push(
               <CharacterStyleRange data={aCharacterStyleRange} key={uniq++} />
           );
         }
 
 
-        if ((obj[i].Custom[j]).hasOwnProperty("XMLElement")) {
+        if ((arr[i].Custom[j]).hasOwnProperty("XMLElement")) {
           var XMLElement = require('./XMLElement.jsx');
-          var aToXMLElement = obj[i].Custom[j].XMLElement;
+          var aToXMLElement = arr[i].Custom[j].XMLElement;
           aStory.push(
               <XMLElement data={aToXMLElement} key={uniq++}  />
           );
         }
 
 
-        if ((obj[i].Custom[j].hasOwnProperty("Content"))) {
-          var aContent = obj[i].Custom[j].Content;
+        if ((arr[i].Custom[j].hasOwnProperty("Content"))) {
+          var aContent = arr[i].Custom[j].Content;
           aStory.push(
-              <Content data={aContent} key={uniq++} parent={obj[i].Custom} />
+              <Content data={aContent} key={uniq++} parent={arr[i].Custom} />
           );
         }
 
 
-        if ((obj[i].Custom[j].hasOwnProperty("Br"))) {
-          var aBr = obj[i].Custom[j].Br;
+        if ((arr[i].Custom[j].hasOwnProperty("Br"))) {
+          var aBr = arr[i].Custom[j].Br;
           aStory.push(
               <BrTag data={aBr} key={uniq++}/>
           );
@@ -58,12 +58,11 @@ var CharacterStyleRange = React.createClass({
   },
 
   render: function () {
-    console.log("in CharacterStyleRange");
     var obj = this.props.data;
     var aCharacter = this.getCharacter(obj);
 
     var AppliedCharacterStyle = obj[0].$.AppliedCharacterStyle;
-    var cssName = utils.getCharaStyleName2(AppliedCharacterStyle);
+    var cssName = utils.getCharaStyleName(AppliedCharacterStyle);
     var className1 = "characterContainer " + cssName;
     var dataUID=this.props.data[0]["$"]["data-uid"];
     return (

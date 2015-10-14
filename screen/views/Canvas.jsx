@@ -16,7 +16,6 @@ var Canvas = React.createClass({
     var obj = this.props.layoutStoreData;
     var pageDimObj = utils.getPageDimension(obj[0], 0);
     var pageHeight = pageDimObj.height;
-    console.log("obj length is:" + obj.length);
     var spreadCount = obj.length;
 
     var cHeight = (spreadCount * (pageHeight + 144)) + (72 * 2) + (36 * (spreadCount - 1));
@@ -25,13 +24,10 @@ var Canvas = React.createClass({
       padding: "72px",
       height: cHeight + "px",
       width: cWidth + "px",
-      //position: "absolute",
       left: "100px",
       top: "100px"
-      //zIndex: 0
     };
 
-    console.log("in canvas");
     var toSpread = this.props.layoutStoreData;
 
     return (

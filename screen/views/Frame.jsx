@@ -7,7 +7,7 @@ var Frame = React.createClass({
   propTypes: {
     data: React.PropTypes.object,
     pageDimObj: React.PropTypes.object,
-    bindingLocation: React.PropTypes.object,
+    bindingLocation: React.PropTypes.number,
     storyStoreData: React.PropTypes.object
   },
 
@@ -140,8 +140,6 @@ var Frame = React.createClass({
   },
 
   render: function () {
-    console.log("in frames...");
-
     var aFrames = this.getFramesView(this.props.data);
     return (
         <div className="frameContainer">

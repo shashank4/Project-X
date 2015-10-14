@@ -28,10 +28,8 @@ var utils = (function () {
     },
 
     getHalfPageHeight: function (obj) {
-      //console.log("getHalfPageHeight");
       var abc = (obj.Page[0].$.GeometricBounds).split(" ");
       var xyz = parseInt(abc[2]) / 2;
-      //console.log("halfPage Height:"+xyz);
       return xyz;
     },
 
@@ -90,9 +88,8 @@ var utils = (function () {
       });
     },
 
-    getCharaStyleName2: function (tempStr1) {
+    getCharaStyleName: function (tempStr1) {
 
-      console.log(tempStr1);
       var IDIndex = tempStr1.search('CharacterStyle/');
       var reqIndex = IDIndex + 15;
       var startIndex = reqIndex;
@@ -116,13 +113,12 @@ var utils = (function () {
           styleName = styleName.replace(" ", "-");
         } while (styleName.search(" ") != (-1));
       }
-      //console.log("character styleName is:"+styleName);
 
       return styleName;
 
     },
 
-    getParaStyleName2: function (tempStr1) {
+    getParaStyleName: function (tempStr1) {
       var IDIndex = tempStr1.search('ParagraphStyle/');
       var reqIndex = IDIndex + 15;
       var startIndex = reqIndex;
@@ -145,7 +141,6 @@ var utils = (function () {
           styleName = styleName.replace(" ", "-");
         } while (styleName.search(" ") != (-1));
       }
-      //console.log("styleName is:" + styleName);
 
       return styleName;
     },
@@ -181,19 +176,6 @@ var utils = (function () {
       var xmlString = this.removeCustomTag(obj.uec);
       console.log("hello you are a pro man:" + xmlString);
 
-      /*var keyValues=Object.keys(obj);
-       console.log("in the util------before for loop----------------------"+keyValues.length);*/
-
-      /*for(var i=0;i<keyValues.length;i++){
-       //console.log("in the util------before for loop----------------------"+obj.keyValues[i]);
-       //var singleStory=obj.(keyValues[i]);
-       console.log("in the util------in the for loop----------------------"+keyValues[i]);
-       var storyName=keyValues[i];
-       console.log(obj.storyName);
-       //var xmlString=this.removeCustomTag(singleStory);
-       //console.log("in the util------before for loop----------------------");
-       //console.log("hello you are a pro man:"+xmlString);
-       }*/
     },
 
     removeAttribute:function(dom){
@@ -210,7 +192,6 @@ var utils = (function () {
 
 
     removeCustomTag: function (jsonData) {
-      console.log("in the remocve tag");
 
       var builder = new xml2js.Builder();
       var xml = builder.buildObject((jsonData));
@@ -286,7 +267,7 @@ var utils = (function () {
      var tempStr1 = CharacterStyleRange.toString();
      var styleName;
      if (tempStr1.search('CharacterStyleRange') != (-1)) {
-     styleName = this.getCharaStyleName2(tempStr1);
+     styleName = this.getCharaStyleName(tempStr1);
      }
      return styleName;
 
@@ -305,7 +286,7 @@ var utils = (function () {
      var tempStr1 = ParagraphStyleRange.toString();
      var styleName;
      if (tempStr1.search('ParagraphStyleRange') != (-1)) {
-     styleName = this.getParaStyleName2(tempStr1);
+     styleName = this.getParaStyleName(tempStr1);
      }
      return styleName;
 
