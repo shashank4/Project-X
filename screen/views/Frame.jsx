@@ -127,11 +127,11 @@ var Frame = React.createClass({
         };
 
 
-        var keyVal = 0;
+        var keyVal = utils.generateUUID();
         var toStoryStoreData = (this.props.storyStoreData);
         var storyName = obj.$.ParentStory;
 
-        aFr.push(<div className="frame" style={oStyle2} key={keyVal++}>
+        aFr.push(<div className="frame" style={oStyle2} key={keyVal}>
           <Story data={toStoryStoreData[storyName]} />
         </div>);
       }

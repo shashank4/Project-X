@@ -172,9 +172,16 @@ var utils = (function () {
 
 
     getAllStoryData: function (obj) {
-      console.log("in the util----------------------------" + obj.uec);
-      var xmlString = this.removeCustomTag(obj.uec);
-      console.log("hello you are a pro man:" + xmlString);
+      var aStories = Object.keys(obj);
+      console.log(aStories);
+      for(var i=0;i<aStories.length;i++){
+        var storyName=aStories[i];
+        console.log(storyName);
+        var xmlString = this.removeCustomTag(obj[storyName]);
+        console.log("Story Name is:"+storyName+"%%%  and XML data is" + xmlString);
+      }
+
+
 
     },
 

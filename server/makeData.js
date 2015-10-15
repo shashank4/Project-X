@@ -8,14 +8,20 @@ var xml2js = require('xml2js');
 var xmldom = require('xmldom').DOMParser;
 var xpath = require('xpath');
 var parseString = require('xml2js').parseString;
-
+var rename = require('rename');
 
 var utils = require('../screen/store/utils');
 
-var dirPath = "C:/Users/CS49/Desktop/IDML/test1/";                    //'D:/DesktopData/IDML/newExamine_2/';
+
+
+
+var idmlFileName = "C:/Users/CS49/Desktop/IDML/Untitled-12.idml";
+
+var zip = new zip3(idmlFileName);
+zip.extractAllTo(/*target path*/"C:/Users/CS49/Desktop/IDML/Untitled-2/", /*overwrite*/true);
+
+var dirPath = "C:/Users/CS49/Desktop/IDML/Untitled-2/";                      //"C:/Users/CS49/Desktop/IDML/test1/";                    //'D:/DesktopData/IDML/newExamine_2/';
 var uid = 0;
-var zip = new zip3('D:/DesktopData/IDML/testing1.zip');
-zip.extractAllTo(/*target path*/"D:/DesktopData/IDML/", /*overwrite*/true);
 
 var parser = new xml2js.Parser();
 
@@ -80,7 +86,6 @@ var addCustomTag = function (doc) {
     createXmlDom(nodesBr[iter2], doc);
   }
 
-
   var nodesXMLElement = doc.getElementsByTagName("XMLElement");
   for (var iter3 = 0; iter3 < nodesXMLElement.length; iter3++) {
     createXmlDom(nodesXMLElement[iter3], doc);
@@ -118,7 +123,7 @@ function writeClientData (oStoryData, spreadArray) {
   });
 
   fs.writeFileSync(__dirname + '/../data/storyData.js', storyData, null);
-  fs.writeFileSync('D:/DesktopData/storyData.js', JSON.stringify(oStoryData), null);
+  //fs.writeFileSync('D:/DesktopData/storyData.js', JSON.stringify(oStoryData), null);
 }
 
 /*function removeCustomTag () {
@@ -204,10 +209,10 @@ parser.parseString(data, function (err, result) {
             spreadArray.push(sequenceMap[spreadXMLName]);
 
             if ((spreadArray[j]["idPkg:Spread"].Spread[0]).hasOwnProperty("TextFrame")) {
-              var textFrameCount = spreadArray[0]["idPkg:Spread"].Spread[0].TextFrame.length;
+              var textFrameCount = spreadArray[j]["idPkg:Spread"].Spread[0].TextFrame.length;
               for (var tfIterator = 0; tfIterator < textFrameCount; tfIterator++) {
 
-                var storyName = spreadArray[0]["idPkg:Spread"].Spread[0].TextFrame[tfIterator].$.ParentStory;
+                var storyName = spreadArray[j]["idPkg:Spread"].Spread[0].TextFrame[tfIterator].$.ParentStory;
                 var copyDataXml = fs.readFileSync(dirPath + 'Stories/Story_' + storyName + '.xml');
                 var toString = copyDataXml.toString();
 
