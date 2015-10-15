@@ -1,4 +1,5 @@
 var React = require('react');
+var _ = require('lodash');
 
 var Pages = require('./pages.jsx');
 var Frame = require('./frame.jsx');
@@ -8,61 +9,63 @@ var utils = require('../store/utils');
 var Spread = React.createClass({
 
   propTypes: {
-    layoutStore: React.PropTypes.object,
-    storyStore: React.PropTypes.object
+    layoutStoreData: React.PropTypes.array,
+    storyStoreData: React.PropTypes.array
   },
 
-  getSpreadView: function (obj) {
+  getSpreadView: function () {
     var aSp = [];
-    var height;
-    var gTop = 0;
-    for (var i = 0; i < obj.length; i++) {
+    var iHeight;
+    var iTop = 0;
+    var aSpreads = this.props.layoutStoreData;
 
-      var pageCount = parseInt(obj[i]['idPkg:Spread'].Spread[0].$.PageCount);
-      var width = 1224 + 612;
-      if (pageCount <= 2)
-        width = 2448;
+    _.forEach(aSpreads, function (oSpread, iIndex) {
+      var iPageCount = parseInt(oSpread['idPkg:Spread'].Spread[0].$.PageCount);
+      var iWidth = 1224 + 612;
+      if (iPageCount <= 2) {
+        iWidth = 2448;
+      }
       else {
-        for (var j = 1; j < pageCount; j++) {
-
-          var tempPageDim = utils.getPageDimension(obj[i], j);
-          width = (width) + tempPageDim.width;
-
+        for (var j = 1; j < iPageCount; j++) {
+          var oTempPageDimension = utils.getPageDimension(oSpread, j);
+          iWidth = (iWidth) + oTempPageDimension.width;
         }
       }
-      var tempPageDim2 = utils.getPageDimension(obj[i], 0);
-      height = tempPageDim2.height + 144;
 
-      if (i != 0) {
-        gTop = gTop + height + 36;
+      var tempPageDim2 = utils.getPageDimension(oSpread, 0);
+      iHeight = tempPageDim2.height + 144;
+
+      if (iIndex != 0) {
+        iTop = iTop + iHeight + 36;
       }
 
       var oStyle = {
-        height: height + "px",
-        width: width + "px",
+        height: iHeight + "px",
+        width: iWidth + "px",
         position: "absolute",
-        top: gTop +116+ "px",
+        top: iTop +116+ "px",
         left: "36px"
       };
 
-      var dataToFrame = obj[i]['idPkg:Spread'].Spread[0];
-      var pageDimObj = utils.getPageDimension(obj[i], 0);
-      var bindingLocation = parseInt(obj[i]['idPkg:Spread'].Spread[0].$.BindingLocation);
+      var oDataToFrame = oSpread['idPkg:Spread'].Spread[0];
+      var oPageDimObj = utils.getPageDimension(oSpread, 0);
+      var oBindingLocation = parseInt(oSpread['idPkg:Spread'].Spread[0].$.BindingLocation);
 
       aSp.push(
-          <div className="spread" style={oStyle} key={i + 1000}>
-            <Pages data={obj[i]} />
-            <Frame  data={dataToFrame}
-            pageDimObj={pageDimObj}
-            bindingLocation={bindingLocation}
-            storyStoreData={this.props.storyStoreData} />
+          <div className="spread" style={oStyle} key={iIndex + 1000}>
+            <Pages data={oSpread} />
+            <Frame  data={oDataToFrame}
+                    pageDimObj={oPageDimObj}
+                    bindingLocation={oBindingLocation}
+                    storyStoreData={this.props.storyStoreData} />
           </div>
       );
-    }
+    }.bind(this));
+
     return (aSp);
   },
   render: function () {
-    var aSpreads = this.getSpreadView(this.props.layoutStoreData);
+    var aSpreads = this.getSpreadView();
     return (
         <div className="spreadClass" >
                 {aSpreads}
