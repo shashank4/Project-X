@@ -4,7 +4,7 @@ var utils = require("../store/utils");
 var XMLElement = require("./XMLElement.jsx");
 var ParagraphStyleRange = require("./paragraphStyleRange.jsx");
 var EventDispatcher = require("../../libraries/eventDispacher/EventDispatcher");
-var storyAction= require("../actions/story-action");
+var storyAction = require("../actions/story-action");
 var Events = {
   CONTENT_CHANGE_EVENT: "content_change_event",
   ENTER_KEY_PRESSSED: "enter_key_presssed",
@@ -50,21 +50,21 @@ var Story = React.createClass({
 
   handleContentBlur: function (oEvent) {
     if (window.getSelection()) {
-      var spyFlag=0;
+      var spyFlag = 0;
       var targetUID;
       var currentDom;
       var sel = window.getSelection();
       var range = sel.getRangeAt(0);
       if (spyFlag == 0) {
 
-        if (range.commonAncestorContainer.previousSibling && sel.focusNode.previousSibling.className.indexOf("br") > (-1)){
+        if (range.commonAncestorContainer.previousSibling && sel.focusNode.previousSibling.className.indexOf("br") > (-1)) {
           currentDom = range.commonAncestorContainer.previousSibling;
         }
-        else if (sel.focusNode.nextSibling && sel.focusNode.nextSibling.className.indexOf("br") > (-1)){
+        else if (sel.focusNode.nextSibling && sel.focusNode.nextSibling.className.indexOf("br") > (-1)) {
           currentDom = range.commonAncestorContainer.nextSibling;
         }
 
-        if(currentDom){
+        if (currentDom) {
           targetUID = currentDom.getAttribute("data-uid");
           spyFlag = 1;
         }
@@ -75,7 +75,7 @@ var Story = React.createClass({
 
       }
 
-      EventDispatcher.dispatch(Events.CONTENT_CHANGE_EVENT, this, sel, targetUID,spyFlag);
+      EventDispatcher.dispatch(Events.CONTENT_CHANGE_EVENT, this, sel, targetUID, spyFlag);
     }
   },
 
@@ -103,8 +103,11 @@ var Story = React.createClass({
     if (window.getSelection()) {
       var sel = window.getSelection();
       var range = sel.getRangeAt(0);
-      var currentDom = range.commonAncestorContainer.parentNode;
-      var targetUID = currentDom.getAttribute("data-uid");
+      var currentDom;
+      var targetUID;
+      currentDom = range.commonAncestorContainer.parentNode;
+      targetUID = currentDom.getAttribute("data-uid");
+
       EventDispatcher.dispatch(Events.BACKSPACE_KEY_PRESSED, this, oEvent, sel, targetUID);
     }
   },
@@ -119,7 +122,7 @@ var Story = React.createClass({
     }
   },
 
-  handleTabPress: function(oEvent){
+  handleTabPress: function (oEvent) {
     if (window.getSelection()) {
       var sel = window.getSelection();
       var range = sel.getRangeAt(0);

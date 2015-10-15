@@ -167,29 +167,20 @@ var storyStore = (function () {
 
         if (sel.focusNode.previousSibling && sel.focusNode.previousSibling.className.indexOf("br") > (-1)) {
           aCustom.splice(index + 1, 0, newContentObj);
-
           _triggerChange();
 
         } else if (sel.focusNode.nextSibling && sel.focusNode.nextSibling.className.indexOf("br") > (-1)) {
-          if (index != 0)
+          if (index != 0){
             aCustom.splice(index - 1, 0, newContentObj);
-          else
+            aCustom.splice(-1);
+          }
+          else{
             aCustom.splice(index, 0, newContentObj);
-
-          aCustom.splice(-1);
+          }
           _triggerChange();
-
         }
 
 
-      }else if(!sel.focusNode.nextSibling && !sel.focusNode.previousSibling
-                && !sel.focusNode.parentNode.nextSibling && !sel.focusNode.parentNode.previousSibling){
-        var oChara = this.selfSearch(data, uuid);
-        var newUid2 = utils.generateUUID();
-        var newContentObj2 = {"Content": [{"_": sel.focusNode.data, "$": {"data-uid": newUid2}}]};
-        oChara.Custom.splice(0,0,newContentObj2);
-        _triggerChange();
-        console.log("hii");
       } else {
         var oContent = this.selfSearch(data, uuid);
         oContent["_"] = sel.focusNode.data;
@@ -205,6 +196,15 @@ var storyStore = (function () {
       var iIndex = returnedObject.indexPos;
       var flag = returnedObject.flag;
       var offset = sel.focusOffset;
+
+      if(sel.focusNode.firstChild && sel.focusNode.firstChild.className.indexOf('br')>(-1)){
+
+        var newUid7 = utils.generateUUID();
+        var newBrObj7 = {"Br": [{"$": {"data-uid": newUid7}}]};
+        aParent.splice(0,0,newBrObj7);
+        _triggerChange();
+        return;
+      }
 
       if (flag == 1) {
         var newUid5 = utils.generateUUID();
@@ -258,10 +258,25 @@ var storyStore = (function () {
 
     handleBackspacePressed: function (oEvent, sel, targetUID) {
 
+      if(sel.focusNode.nodeName != "#text" && sel.focusNode.firstChild
+          && sel.focusNode.firstChild.className.indexOf('br') > (-1)){
+        oEvent.preventDefault();
+        if(sel.focusNode.parentNode.previousSibling.lastChild.lastChild.className.indexOf('br')>(-1)){
+          var currentDom=sel.focusNode.parentNode.previousSibling.lastChild.lastChild;
+          var targetUIDLocal = currentDom.getAttribute("data-uid");
+          var returnedObjectLocal = this.searchClosestCustomOfContentNBr(data,"data-uid",targetUIDLocal);
+          var aParentLocal = returnedObjectLocal.objectPos;
+          aParentLocal.splice(aParentLocal.length-1,1);
+          _triggerChange();
+          return;
+        }
+      }
+
       var returnedObject = this.searchClosestCustomOfContentNBr(data, "data-uid", targetUID);
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
       var parentUID = returnedObject.patentUID;
+
       if (sel.focusOffset == 0) {
         oEvent.preventDefault();
 
