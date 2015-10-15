@@ -3,7 +3,7 @@ var Handlebars = require('handlebars');
 //var miniData=require('../data/MiniData');
 
 var fs = require("fs");
-var zip3 = require('adm-zip');
+var admZip = require('adm-zip');
 var xml2js = require('xml2js');
 var xmldom = require('xmldom').DOMParser;
 var xpath = require('xpath');
@@ -17,10 +17,13 @@ var utils = require('../screen/store/utils');
 
 var idmlFileName = "C:/Users/CS49/Desktop/IDML/Untitled-12.idml";
 
-var zip = new zip3(idmlFileName);
-zip.extractAllTo(/*target path*/"C:/Users/CS49/Desktop/IDML/Untitled-2/", /*overwrite*/true);
 
-var dirPath = "C:/Users/CS49/Desktop/IDML/Untitled-2/";                      //"C:/Users/CS49/Desktop/IDML/test1/";                    //'D:/DesktopData/IDML/newExamine_2/';
+
+var targetPath="C:/Users/CS49/Desktop/IDML/try/"
+var unZip = new admZip(idmlFileName);
+unZip.extractAllTo(targetPath, /*overwrite*/true);
+
+var dirPath = "C:/Users/CS49/Desktop/IDML/try/";                      //"C:/Users/CS49/Desktop/IDML/test1/";                    //'D:/DesktopData/IDML/newExamine_2/';
 var uid = 0;
 
 var parser = new xml2js.Parser();
@@ -123,7 +126,6 @@ function writeClientData (oStoryData, spreadArray) {
   });
 
   fs.writeFileSync(__dirname + '/../data/storyData.js', storyData, null);
-  //fs.writeFileSync('D:/DesktopData/storyData.js', JSON.stringify(oStoryData), null);
 }
 
 /*function removeCustomTag () {
@@ -238,6 +240,21 @@ parser.parseString(data, function (err, result) {
 
 });
 
+
+/**
+ * zip logic not working
+ */
+/*var tempPath="C:/Users/CS49/Desktop/IDML/Untitled-7/";
+var zip= new admZip();
+//zip.addLocalFolder(tempPath+"MasterSpreads");
+//zip.addLocalFolder(tempPath+"META-INF");
+//zip.addLocalFolder(tempPath+"Resources");
+//zip.addLocalFolder(tempPath+"Spreads");
+//zip.addLocalFolder(tempPath+"Stories");
+zip.addLocalFolder(tempPath+"XML");
+zip.addLocalFile(tempPath+"designmap.xml" );
+//zip.addLocalFile(tempPath+"mimetype" );
+zip.writeZip("C:/Users/CS49/Desktop/try.idml");*/
 
 /*
  * Assumptions:
