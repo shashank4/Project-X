@@ -1,6 +1,5 @@
 var React = require('react');
 var Canvas = require('../views/canvas.jsx');
-var storyAction=require('../actions/story-action');
 var EventDispatcher = require('./../../libraries/eventDispacher/EventDispatcher');
 
 var Events={
@@ -13,7 +12,7 @@ var AppController = React.createClass({
   propTypes: {
     layoutStore: React.PropTypes.object,
     storyStore: React.PropTypes.object,
-    action:React.PropTypes.object
+    action: React.PropTypes.object
   },
 
   getInitialState: function () {
@@ -57,8 +56,7 @@ var AppController = React.createClass({
          <button className="myButton" onClick={this.handleOnClick}> Save</button>
           <Canvas
               layoutStoreData={this.state.layoutData}
-              storyStoreData={this.state.storyData}
-              action={storyAction}/>
+              storyStoreData={this.state.storyData}/>
         </div>
     );
   }
