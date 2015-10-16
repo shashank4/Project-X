@@ -10,6 +10,7 @@ var utils = require('../store/utils');
 var storyStore = (function () {
 
   var data = {};
+  var sPathToUpdate = "";
 
   var _triggerChange = function () {
     storyStore.trigger('change');
@@ -22,6 +23,14 @@ var storyStore = (function () {
 
     getStoreData: function () {
       return data;
+    },
+
+    getPathToUpdate: function () {
+      return sPathToUpdate;
+    },
+
+    setPathToUpdate: function (sPath) {
+      sPathToUpdate = sPath;
     },
 
     handleSaveClick: function () {

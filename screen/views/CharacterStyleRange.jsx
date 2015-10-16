@@ -10,7 +10,8 @@ var CharacterStyleRange = React.createClass({
   propTypes: {
     data: React.PropTypes.array,
     key: React.PropTypes.object,
-    path: React.PropTypes.string
+    path: React.PropTypes.string,
+    pathToUpdate: React.PropTypes.string
   },
 
   getCharacter: function (arr) {
@@ -26,7 +27,11 @@ var CharacterStyleRange = React.createClass({
           console.log("hasOwnProperty(CharacterStyleRange)");
           var aCharacterStyleRange = arr[i].Custom[j].CharacterStyleRange;
           aStory.push(
-              <CharacterStyleRange path={sPath} data={aCharacterStyleRange} key={uniq++} />
+              <CharacterStyleRange
+                  key={uniq++}
+                  path={sPath}
+                  data={aCharacterStyleRange}
+                  pathToUpdate={this.props.pathToUpdate}/>
           );
         }
 
@@ -35,7 +40,11 @@ var CharacterStyleRange = React.createClass({
           var XMLElement = require('./XMLElement.jsx');
           var aToXMLElement = arr[i].Custom[j].XMLElement;
           aStory.push(
-              <XMLElement path={sPath} data={aToXMLElement} key={uniq++}  />
+              <XMLElement
+                  key={uniq++}
+                  path={sPath}
+                  data={aToXMLElement}
+                  pathToUpdate={this.props.pathToUpdate}/>
           );
         }
 
@@ -43,7 +52,11 @@ var CharacterStyleRange = React.createClass({
         if ((arr[i].Custom[j].hasOwnProperty("Content"))) {
           var aContent = arr[i].Custom[j].Content;
           aStory.push(
-              <Content path={sPath} data={aContent} key={uniq++} parent={arr[i].Custom} />
+              <Content
+                  key={uniq++}
+                  path={sPath}
+                  data={aContent}
+                  parent={arr[i].Custom}/>
           );
         }
 
@@ -51,7 +64,10 @@ var CharacterStyleRange = React.createClass({
         if ((arr[i].Custom[j].hasOwnProperty("Br"))) {
           var aBr = arr[i].Custom[j].Br;
           aStory.push(
-              <BrTag path={sPath} data={aBr} key={uniq++}/>
+              <BrTag
+                  key={uniq++}
+                  path={sPath}
+                  data={aBr}/>
           );
         }
       }

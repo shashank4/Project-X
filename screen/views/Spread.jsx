@@ -10,7 +10,8 @@ var Spread = React.createClass({
 
   propTypes: {
     layoutStoreData: React.PropTypes.array,
-    storyStoreData: React.PropTypes.object
+    storyStoreData: React.PropTypes.object,
+    pathToUpdate: React.PropTypes.string
   },
 
   getSpreadView: function () {
@@ -55,6 +56,7 @@ var Spread = React.createClass({
           <div className="spread" style={oStyle} key={iIndex + 1000}>
             <Pages data={oSpread} />
             <Frame  data={oDataToFrame}
+                    pathToUpdate={this.props.pathToUpdate}
                     pageDimObj={oPageDimObj}
                     bindingLocation={oBindingLocation}
                     storyStoreData={this.props.storyStoreData} />

@@ -17,20 +17,26 @@ var Events = {
 var Story = React.createClass({
 
   propTypes: {
-    data: React.PropTypes.object  // individual story data
+    data: React.PropTypes.object,  // individual story data
+    path: React.PropTypes.string,
+    pathToUpdate: React.PropTypes.string
   },
 
   renderStoryData: function (obj) {
     var aStory = [];
     var storyLen = (obj['idPkg:Story'].Story.length);
     for (var i = 0; i < storyLen; i++) {
-      var sPath = obj['idPkg:Story'].Story[i].$.Self;
+      var sPath = obj['idPkg:Story'].Story[i]['$']['Self'];
       for (var j = 0; j < (obj['idPkg:Story'].Story[i].Custom).length; j++) {
         var uniq = utils.generateUUID();
         if ((obj['idPkg:Story'].Story[i].Custom[j]).hasOwnProperty("XMLElement")) {
           var aToXMLElement = obj['idPkg:Story'].Story[i].Custom[j].XMLElement;
           aStory.push(
-              <XMLElement data={aToXMLElement} path={sPath} key={uniq} />
+              <XMLElement
+                  key={uniq}
+                  pathToUpdate={this.props.pathToUpdate}
+                  data={aToXMLElement}
+                  path={sPath} />
           );
         }
 
@@ -40,7 +46,12 @@ var Story = React.createClass({
           var AppliedParagraphStyle = aToParagraphStyleRange[0].$.AppliedParagraphStyle;
           var cssName = utils.getParaStyleName(AppliedParagraphStyle);
           aStory.push(
-              <ParagraphStyleRange key={uniq} data={aToParagraphStyleRange} path={sPath} styleName={cssName} />
+              <ParagraphStyleRange
+                  key={uniq}
+                  data={aToParagraphStyleRange}
+                  path={sPath}
+                  styleName={cssName}
+                  pathToUpdate={this.props.pathToUpdate}/>
           );
         }
       }
@@ -145,6 +156,12 @@ var Story = React.createClass({
     if (oEvent.keyCode == 9) {
       this.handleTabPress(oEvent);
     }
+  },
+
+  shouldComponentUpdate: function(nextProps, nextState) {
+    //var sPath = this.props.data['idPkg:Story'].Story[0]['$']['Self'];
+    //return nextProps.pathToUpdate !== sPath;
+    return true;
   },
 
   render: function () {

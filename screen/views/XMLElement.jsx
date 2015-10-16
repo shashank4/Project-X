@@ -9,7 +9,8 @@ var XMLElement = React.createClass({
 
   propTypes: {
     data: React.PropTypes.array,
-    path: React.PropTypes.string
+    path: React.PropTypes.string,
+    pathToUpdate: React.PropTypes.string
 
   },
 
@@ -26,7 +27,11 @@ var XMLElement = React.createClass({
         if ((obj[i].Custom[j]).hasOwnProperty("XMLElement")) {
           var aToXMLElement = obj[i].Custom[j].XMLElement;
           aStory.push(
-              <XMLElement  path={sPath} key={uniq++} data={aToXMLElement} />
+              <XMLElement
+                  key={uniq++}
+                  path={sPath}
+                  data={aToXMLElement}
+                  pathToUpdate={this.props.pathToUpdate}/>
           );
         }
 
@@ -34,7 +39,11 @@ var XMLElement = React.createClass({
         if ((obj[i].Custom[j]).hasOwnProperty("ParagraphStyleRange")) {
           var aToParagraphStyleRange = obj[i].Custom[j].ParagraphStyleRange;
           aStory.push(
-              <ParagraphStyleRange path={sPath} data={aToParagraphStyleRange} key={uniq++} />
+              <ParagraphStyleRange
+                  key={uniq++}
+                  path={sPath}
+                  data={aToParagraphStyleRange}
+                  pathToUpdate={this.props.pathToUpdate}/>
           );
         }
 
@@ -42,7 +51,11 @@ var XMLElement = React.createClass({
         if ((obj[i].Custom[j]).hasOwnProperty("CharacterStyleRange")) {
           var aCharacterStyleRange = obj[i].Custom[j].CharacterStyleRange;
           aStory.push(
-              <CharacterStyleRange path={sPath} data={aCharacterStyleRange} key={uniq++} />
+              <CharacterStyleRange
+                  key={uniq++}
+                  path={sPath}
+                  data={aCharacterStyleRange}
+                  pathToUpdate={this.props.pathToUpdate}/>
           );
         }
 
@@ -50,7 +63,11 @@ var XMLElement = React.createClass({
         if ((obj[i].Custom[j]).hasOwnProperty("Content")) {
           var aContent = obj[i].Custom[j].Content;
           aStory.push(
-              <Content path={sPath} data={aContent} key={uniq++} parent={obj[i].Custom}   />
+              <Content
+                  key={uniq++}
+                  path={sPath}
+                  data={aContent}
+                  parent={obj[i].Custom}/>
           );
         }
 
@@ -58,7 +75,10 @@ var XMLElement = React.createClass({
         if ((obj[i].Custom[j]).hasOwnProperty("Br")) {
           var aBr = obj[i].Custom[j].Br;
           aStory.push(
-              <Br path={sPath} data={aBr} key={uniq++}/>
+              <Br
+                  key={uniq++}
+                  path={sPath}
+                  data={aBr}/>
           );
         }
       }

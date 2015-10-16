@@ -8,7 +8,8 @@ var Frame = React.createClass({
     data: React.PropTypes.object,
     pageDimObj: React.PropTypes.object,
     bindingLocation: React.PropTypes.number,
-    storyStoreData: React.PropTypes.object
+    storyStoreData: React.PropTypes.object,
+    pathToUpdate: React.PropTypes.string
   },
 
   getBindingLocation: function () {
@@ -132,7 +133,9 @@ var Frame = React.createClass({
         var storyName = obj.$.ParentStory;
 
         aFr.push(<div className="frame" style={oStyle2} key={keyVal}>
-          <Story data={toStoryStoreData[storyName]} />
+          <Story
+              data={toStoryStoreData[storyName]}
+              pathToUpdate={this.props.pathToUpdate}/>
         </div>);
       }
     }

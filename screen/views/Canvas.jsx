@@ -9,6 +9,7 @@ var Canvas = React.createClass({
   propTypes: {
     layoutStore: React.PropTypes.object,
     storyStore: React.PropTypes.object,
+    pathToUpdate: React.PropTypes.string
   },
 
   render: function () {
@@ -32,7 +33,10 @@ var Canvas = React.createClass({
     return (
 
         <div className="canva" style={oCstyle}>
-          <Spread layoutStoreData={toSpread} storyStoreData={this.props.storyStoreData}/>
+          <Spread
+              layoutStoreData={toSpread}
+              storyStoreData={this.props.storyStoreData}
+              pathToUpdate={this.props.pathToUpdate}/>
         </div>
     );
   }
