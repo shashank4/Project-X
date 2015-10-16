@@ -532,7 +532,7 @@ var storyStore = (function () {
 
     handleOnKeyDown: function (oEvent) {
       if (window.getSelection()) {
-        var oSel = window.getSelection();
+        var oSel = window.getSelection();               //o-object, a-array, i-index, s-string.
         var iRange = oSel.getRangeAt(0);
         var oCurrentDom = iRange.commonAncestorContainer.parentNode;
         var sTargetUID = oCurrentDom.getAttribute("data-uid");
