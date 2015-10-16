@@ -7,20 +7,22 @@ var ParagraphStyleRange = React.createClass({
 
   propTypes: {
     data: React.PropTypes.array,  // individual story data
-    key: React.PropTypes.object
+    key: React.PropTypes.object,
+    path: React.PropTypes.string
   },
 
   getParagraph: function (arr) {
     var aStory = [];
     var uniq = 0;
     var arrLen = arr.length;
+    var sPath = this.props.path;
     for (var i = 0; i < arrLen; i++) {
+      sPath += "/" + arr[i]['$']['data-uid'];
       for (var j = 0; j < arr[i].Custom.length; j++) {
-
         if ((arr[i].Custom[j]).hasOwnProperty("CharacterStyleRange")) {
           var aCharacterStyleRange = arr[i].Custom[j].CharacterStyleRange;
           aStory.push(
-              <CharacterStyleRange data={aCharacterStyleRange} key={uniq++} />
+              <CharacterStyleRange path={sPath} data={aCharacterStyleRange} key={uniq++} />
           );
         }
 
@@ -29,7 +31,7 @@ var ParagraphStyleRange = React.createClass({
           var XMLElement = require('./XMLElement.jsx');
           var aToXMLElement = arr[i].Custom[j].XMLElement;
           aStory.push(
-              <XMLElement data={aToXMLElement} key={uniq++} />
+              <XMLElement path={sPath} data={aToXMLElement} key={uniq++} />
           );
         }
       }

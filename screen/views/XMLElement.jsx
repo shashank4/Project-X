@@ -8,7 +8,8 @@ var Br = require("./Br.jsx");
 var XMLElement = React.createClass({
 
   propTypes: {
-    data: React.PropTypes.array
+    data: React.PropTypes.array,
+    path: React.PropTypes.string
 
   },
 
@@ -16,13 +17,16 @@ var XMLElement = React.createClass({
     var aStory = [];
     var uniq = 0;
     var objLen = obj.length;
+    var sPath = this.props.path;
     for (var i = 0; i < objLen; i++) {
+      sPath += "/" + obj[i]['$']['data-uid'];
+
       for (var j = 0; j < obj[i].Custom.length; j++) {
 
         if ((obj[i].Custom[j]).hasOwnProperty("XMLElement")) {
           var aToXMLElement = obj[i].Custom[j].XMLElement;
           aStory.push(
-              <XMLElement  key={uniq++} data={aToXMLElement} />
+              <XMLElement  path={sPath} key={uniq++} data={aToXMLElement} />
           );
         }
 
@@ -30,7 +34,7 @@ var XMLElement = React.createClass({
         if ((obj[i].Custom[j]).hasOwnProperty("ParagraphStyleRange")) {
           var aToParagraphStyleRange = obj[i].Custom[j].ParagraphStyleRange;
           aStory.push(
-              <ParagraphStyleRange data={aToParagraphStyleRange} key={uniq++} />
+              <ParagraphStyleRange path={sPath} data={aToParagraphStyleRange} key={uniq++} />
           );
         }
 
@@ -38,7 +42,7 @@ var XMLElement = React.createClass({
         if ((obj[i].Custom[j]).hasOwnProperty("CharacterStyleRange")) {
           var aCharacterStyleRange = obj[i].Custom[j].CharacterStyleRange;
           aStory.push(
-              <CharacterStyleRange data={aCharacterStyleRange} key={uniq++} />
+              <CharacterStyleRange path={sPath} data={aCharacterStyleRange} key={uniq++} />
           );
         }
 
@@ -46,7 +50,7 @@ var XMLElement = React.createClass({
         if ((obj[i].Custom[j]).hasOwnProperty("Content")) {
           var aContent = obj[i].Custom[j].Content;
           aStory.push(
-              <Content data={aContent} key={uniq++} parent={obj[i].Custom}   />
+              <Content path={sPath} data={aContent} key={uniq++} parent={obj[i].Custom}   />
           );
         }
 
@@ -54,7 +58,7 @@ var XMLElement = React.createClass({
         if ((obj[i].Custom[j]).hasOwnProperty("Br")) {
           var aBr = obj[i].Custom[j].Br;
           aStory.push(
-              <Br data={aBr} key={uniq++}/>
+              <Br path={sPath} data={aBr} key={uniq++}/>
           );
         }
       }

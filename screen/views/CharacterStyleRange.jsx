@@ -9,21 +9,24 @@ var CharacterStyleRange = React.createClass({
 
   propTypes: {
     data: React.PropTypes.array,
-    key: React.PropTypes.object
+    key: React.PropTypes.object,
+    path: React.PropTypes.string
   },
 
   getCharacter: function (arr) {
     var aStory = [];
     var uniq = 0;
     var arrLen = arr.length;
+    var sPath = this.props.path;
     for (var i = 0; i < arrLen; i++) {
+      sPath += "/" + arr[i]['$']['data-uid'];
       for (var j = 0; j < arr[i].Custom.length; j++) {
 
         if ((arr[i].Custom[j]).hasOwnProperty("CharacterStyleRange")) {
           console.log("hasOwnProperty(CharacterStyleRange)");
           var aCharacterStyleRange = arr[i].Custom[j].CharacterStyleRange;
           aStory.push(
-              <CharacterStyleRange data={aCharacterStyleRange} key={uniq++} />
+              <CharacterStyleRange path={sPath} data={aCharacterStyleRange} key={uniq++} />
           );
         }
 
@@ -32,7 +35,7 @@ var CharacterStyleRange = React.createClass({
           var XMLElement = require('./XMLElement.jsx');
           var aToXMLElement = arr[i].Custom[j].XMLElement;
           aStory.push(
-              <XMLElement data={aToXMLElement} key={uniq++}  />
+              <XMLElement path={sPath} data={aToXMLElement} key={uniq++}  />
           );
         }
 
@@ -40,7 +43,7 @@ var CharacterStyleRange = React.createClass({
         if ((arr[i].Custom[j].hasOwnProperty("Content"))) {
           var aContent = arr[i].Custom[j].Content;
           aStory.push(
-              <Content data={aContent} key={uniq++} parent={arr[i].Custom} />
+              <Content path={sPath} data={aContent} key={uniq++} parent={arr[i].Custom} />
           );
         }
 
@@ -48,7 +51,7 @@ var CharacterStyleRange = React.createClass({
         if ((arr[i].Custom[j].hasOwnProperty("Br"))) {
           var aBr = arr[i].Custom[j].Br;
           aStory.push(
-              <BrTag data={aBr} key={uniq++}/>
+              <BrTag path={sPath} data={aBr} key={uniq++}/>
           );
         }
       }

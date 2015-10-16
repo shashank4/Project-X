@@ -21,16 +21,16 @@ var Story = React.createClass({
   },
 
   renderStoryData: function (obj) {
-
     var aStory = [];
     var storyLen = (obj['idPkg:Story'].Story.length);
     for (var i = 0; i < storyLen; i++) {
+      var sPath = obj['idPkg:Story'].Story[i].$.Self;
       for (var j = 0; j < (obj['idPkg:Story'].Story[i].Custom).length; j++) {
         var uniq = utils.generateUUID();
         if ((obj['idPkg:Story'].Story[i].Custom[j]).hasOwnProperty("XMLElement")) {
           var aToXMLElement = obj['idPkg:Story'].Story[i].Custom[j].XMLElement;
           aStory.push(
-              <XMLElement data={aToXMLElement} key={uniq} />
+              <XMLElement data={aToXMLElement} path={sPath} key={uniq} />
           );
         }
 
@@ -40,7 +40,7 @@ var Story = React.createClass({
           var AppliedParagraphStyle = aToParagraphStyleRange[0].$.AppliedParagraphStyle;
           var cssName = utils.getParaStyleName(AppliedParagraphStyle);
           aStory.push(
-              <ParagraphStyleRange key={uniq} data={aToParagraphStyleRange} styleName={cssName} />
+              <ParagraphStyleRange key={uniq} data={aToParagraphStyleRange} path={sPath} styleName={cssName} />
           );
         }
       }
