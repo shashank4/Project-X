@@ -16,7 +16,6 @@ var XMLElement = React.createClass({
 
   getAXmlElements: function (obj) {
     var aStory = [];
-    var uniq = 0;
     var objLen = obj.length;
     var sPath = this.props.path;
     for (var i = 0; i < objLen; i++) {
@@ -28,7 +27,7 @@ var XMLElement = React.createClass({
           var aToXMLElement = obj[i].Custom[j].XMLElement;
           aStory.push(
               <XMLElement
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aToXMLElement}
                   pathToUpdate={this.props.pathToUpdate}/>
@@ -40,7 +39,7 @@ var XMLElement = React.createClass({
           var aToParagraphStyleRange = obj[i].Custom[j].ParagraphStyleRange;
           aStory.push(
               <ParagraphStyleRange
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aToParagraphStyleRange}
                   pathToUpdate={this.props.pathToUpdate}/>
@@ -52,7 +51,7 @@ var XMLElement = React.createClass({
           var aCharacterStyleRange = obj[i].Custom[j].CharacterStyleRange;
           aStory.push(
               <CharacterStyleRange
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aCharacterStyleRange}
                   pathToUpdate={this.props.pathToUpdate}/>
@@ -64,7 +63,7 @@ var XMLElement = React.createClass({
           var aContent = obj[i].Custom[j].Content;
           aStory.push(
               <Content
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aContent}
                   parent={obj[i].Custom}/>
@@ -76,7 +75,7 @@ var XMLElement = React.createClass({
           var aBr = obj[i].Custom[j].Br;
           aStory.push(
               <Br
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aBr}/>
           );
@@ -86,13 +85,16 @@ var XMLElement = React.createClass({
     return aStory;
   },
 
+  shouldComponentUpdate: function(nextProps, nextState) {
+    var sXMLElementId = this.props.data[0]['$']['data-uid'];
+    return _.contains(nextProps.pathToUpdate, sXMLElementId);
+  },
+
   render: function () {
     var aXmlElements = this.getAXmlElements(this.props.data);
     var uid= this.props.data[0]["$"]["data-uid"];
     return (
-        <span className="xmlElementContainer" data-uid={uid}>
-                {aXmlElements}
-        </span>
+        <span className="xmlElementContainer" data-uid={uid}>{aXmlElements}</span>
     );
   }
 });

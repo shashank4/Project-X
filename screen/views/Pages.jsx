@@ -62,9 +62,7 @@ var Pages = React.createClass({
   render: function () {
     var aPages = this.getPagesView();
     return (
-        <div>
-              {aPages}
-        </div>
+        <div>{aPages}</div>
     );
   }
 });

@@ -22,10 +22,7 @@ var Content = React.createClass({
       <span  className="content contentContainer"
         ref="contentContainer"
         data-uid={myUID}
-        data-path={sPath}
-      >
-      {contentData}
-      </span>);
+        data-path={sPath}>{contentData}</span>);
   }
 });
 
