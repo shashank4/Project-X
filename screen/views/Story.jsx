@@ -5,12 +5,14 @@ var XMLElement = require("./XMLElement.jsx");
 var ParagraphStyleRange = require("./paragraphStyleRange.jsx");
 var EventDispatcher = require("../../libraries/eventDispacher/EventDispatcher");
 var storyAction= require("../actions/story-action");
+
 var Events = {
   CONTENT_CHANGE_EVENT: "content_change_event",
   ENTER_KEY_PRESSSED: "enter_key_presssed",
   BACKSPACE_KEY_PRESSED: "backspace_key_pressed",
   DELETE_KEY_PRESSED: "delete_key_pressed",
-  TAB_KEY_PRESSED: "tab_key_pressed"
+  TAB_KEY_PRESSED: "tab_key_pressed",
+  ON_KEY_DOWN: "on_key_down"
 };
 
 
@@ -141,7 +143,7 @@ var Story = React.createClass({
   },
 
   handleKeyDown: function (oEvent) {
-    if (oEvent.keyCode == 13) {
+   /* if (oEvent.keyCode == 13) {
       this.handleEnterKeyPress(oEvent);
     }
 
@@ -155,7 +157,10 @@ var Story = React.createClass({
 
     if (oEvent.keyCode == 9) {
       this.handleTabPress(oEvent);
-    }
+    }*/
+
+    EventDispatcher.dispatch(Events.ON_KEY_DOWN, this, oEvent);
+
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
@@ -169,8 +174,7 @@ var Story = React.createClass({
     return (
         <div className="storyContainer"
         contentEditable={true}
-        onKeyDown={this.handleKeyDown}
-        onBlur={this.handleContentBlur}>
+        onKeyDown={this.handleKeyDown} >
         {wrapperArray}
         </div>
     );

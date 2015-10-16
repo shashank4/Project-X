@@ -29,6 +29,10 @@ var storyAction = (function () {
     storyStore.handleTabPressed(oEvent, sel, targetUID);
   };
 
+  var handleOnKeyDown = function (oContext, oEvent) {
+    storyStore.handleOnKeyDown(oEvent);
+  };
+
   return {
     registerEvent: function () {
       EventBusClass.addEventListener("save_button_clicked", handleSaveButonClick);
@@ -37,8 +41,9 @@ var storyAction = (function () {
       EventBusClass.addEventListener(StoryEvent.BACKSPACE_KEY_PRESSED, handleBackspace);
       EventBusClass.addEventListener(StoryEvent.DELETE_KEY_PRESSED, handleDelete);
       EventBusClass.addEventListener(StoryEvent.TAB_KEY_PRESSED, handleTab);
-
+      EventBusClass.addEventListener(StoryEvent.ON_KEY_DOWN, handleOnKeyDown);
     },
+
     deRegisterEvent: function () {
       EventBusClass.removeEventListener("save_button_clicked", handleSaveButonClick);
       EventBusClass.removeEventListener(StoryEvent.CONTENT_CHANGE_EVENT, handleContentTextChanged);
@@ -46,6 +51,7 @@ var storyAction = (function () {
       EventBusClass.removeEventListener(StoryEvent.BACKSPACE_KEY_PRESSED, handleBackspace);
       EventBusClass.removeEventListener(StoryEvent.DELETE_KEY_PRESSED, handleDelete);
       EventBusClass.removeEventListener(StoryEvent.TAB_KEY_PRESSED, handleTab);
+      EventBusClass.removeEventListener(StoryEvent.ON_KEY_DOWN, handleOnKeyDown);
     }
   }
 

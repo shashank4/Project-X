@@ -16,6 +16,10 @@ var storyStore = (function () {
     storyStore.trigger('change');
   };
 
+  var _setPathTOUpdate = function (sPath) {
+    sPathToUpdate = sPath;
+  };
+
   return {
     setStoreData: function (data1) {
       data = data1;
@@ -30,7 +34,7 @@ var storyStore = (function () {
     },
 
     setPathToUpdate: function (sPath) {
-      sPathToUpdate = sPath;
+      _setPathTOUpdate(sPath);
     },
 
     handleSaveClick: function () {
@@ -482,6 +486,20 @@ var storyStore = (function () {
         oContent["_"] = preText+tenSpaces+postText;
         _triggerChange();
       }
+    },
+
+    handleOnKeyDown: function (oEvent) {
+      if (window.getSelection()) {
+        var oSel = window.getSelection();
+        var iRange = oSel.getRangeAt(0);
+        var oCurrentDom = iRange.commonAncestorContainer.parentNode;
+        var sTargetUID = oCurrentDom.getAttribute("data-uid");
+        var sPath = oCurrentDom.getAttribute("data-path");
+        _setPathTOUpdate(sPath);
+
+        _triggerChange();
+      }
+
     }
   }
 
