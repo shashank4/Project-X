@@ -101,13 +101,15 @@ var Story = React.createClass({
       var currentDom;
       if (sel.focusNode.nodeName == "#text") {
         currentDom = range.commonAncestorContainer.parentNode;
-        targetUID = currentDom.getAttribute("data-uid");
+        //targetUID = currentDom.getAttribute("data-uid");
+        var targetPath = currentDom.getAttribute("data-path") + "/" + currentDom.getAttribute("data-uid");
       }
       else {
         currentDom = range.commonAncestorContainer.lastChild;
-        targetUID = currentDom.getAttribute("data-uid");
+        //targetUID = currentDom.getAttribute("data-uid");
+        var targetPath = currentDom.getAttribute("data-path") + "/" + currentDom.getAttribute("data-uid");
       }
-      EventDispatcher.dispatch(Events.ENTER_KEY_PRESSSED, this, oEvent, sel, key, targetUID);
+      EventDispatcher.dispatch(Events.ENTER_KEY_PRESSSED, this, oEvent, sel, key, targetPath);
     }
   },
 
@@ -116,8 +118,8 @@ var Story = React.createClass({
       var sel = window.getSelection();
       var range = sel.getRangeAt(0);
       var currentDom = range.commonAncestorContainer.parentNode;
-      var targetUID = currentDom.getAttribute("data-uid");
-      EventDispatcher.dispatch(Events.BACKSPACE_KEY_PRESSED, this, oEvent, sel, targetUID);
+      var targetPath = currentDom.getAttribute("data-path") + "/" + currentDom.getAttribute("data-uid");
+      EventDispatcher.dispatch(Events.BACKSPACE_KEY_PRESSED, this, oEvent, sel, targetPath);
     }
   },
 
@@ -126,8 +128,9 @@ var Story = React.createClass({
       var sel = window.getSelection();
       var range = sel.getRangeAt(0);
       var currentDom = range.commonAncestorContainer.parentNode;
-      var targetUID = currentDom.getAttribute("data-uid");
-      EventDispatcher.dispatch(Events.DELETE_KEY_PRESSED, this, oEvent, sel, targetUID);
+      //var targetUID = currentDom.getAttribute("data-uid");
+      var targetPath = currentDom.getAttribute("data-path") + "/" + currentDom.getAttribute("data-uid");
+      EventDispatcher.dispatch(Events.DELETE_KEY_PRESSED, this, oEvent, sel, targetPath);
     }
   },
 
@@ -136,8 +139,9 @@ var Story = React.createClass({
       var sel = window.getSelection();
       var range = sel.getRangeAt(0);
       var currentDom = range.commonAncestorContainer.parentNode;
-      var targetUID = currentDom.getAttribute("data-uid");
-      EventDispatcher.dispatch(Events.TAB_KEY_PRESSED, this, oEvent, sel, targetUID);
+      //var targetUID = currentDom.getAttribute("data-uid");
+      var targetPath = currentDom.getAttribute("data-path") + "/" + currentDom.getAttribute("data-uid");
+      EventDispatcher.dispatch(Events.TAB_KEY_PRESSED, this, oEvent, sel, targetPath);
     }
   },
 
