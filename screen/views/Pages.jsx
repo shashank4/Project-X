@@ -1,4 +1,5 @@
 var React = require('react');
+var _ = require('lodash');
 var Frame = require('./frame.jsx');
 var utils = require('../store/utils');
 
@@ -9,58 +10,57 @@ var Pages = React.createClass({
     data: React.PropTypes.object
   },
 
-  getPagesView: function (obj) {
-    var pageVisitCount = 0;
-    var aPg = [];
-    var left = 0;
-    var pageCount = (parseInt(obj['idPkg:Spread'].Spread[0].$.PageCount));
-    for (var i = 0; i < pageCount; i++) {
+  getPagesView: function () {
+    var oPages = this.props.data;
+    var aPagesView = [];
+    var iLeft = 0;
+    var iPageCount = (parseInt(oPages['idPkg:Spread'].Spread[0].$.PageCount));
 
-      var oPageDim = utils.getPageDimension(obj, i);
+    _.times(iPageCount, function (iIndex) {
+      var oPageDim = utils.getPageDimension(oPages, iIndex);
 
-      var height = oPageDim.height;
-      var width = oPageDim.width;
-      var bindingLocation = parseInt(obj['idPkg:Spread'].Spread[0].$.BindingLocation);
+      var iHeight = oPageDim.height;
+      var iWidth = oPageDim.width;
+      var iBindingLocation = parseInt(oPages['idPkg:Spread'].Spread[0].$.BindingLocation);
 
-      if (bindingLocation == 0 && pageCount == 1)
-        left = (width * 2);
+      if (iBindingLocation == 0 && iPageCount == 1)
+        iLeft = (iWidth * 2);
       else
-        left = left + width;
+        iLeft = iLeft + iWidth;
 
       var oStyle = {
-        height: height + "px",
-        width: width + "px",
+        height: iHeight + "px",
+        width: iWidth + "px",
         position: "absolute",
-        left: left + "px",
+        left: iLeft + "px",
         top: 72 + "px"
       };
       var oMstyle = {
-        height: (height - 72) + "px",
-        width: (width - 72) + "px",
+        height: (iHeight - 72) + "px",
+        width: (iWidth - 72) + "px",
         position: "absolute",
         left: "36px",
         top: "36px"
       };
 
-      if (pageVisitCount == 0) {
-        pageVisitCount++;
-        aPg.push(
-            <div className="page" style={oStyle} key={pageVisitCount}>
+      if (iIndex == 0) {
+        aPagesView.push(
+            <div className="page" style={oStyle} key={iIndex}>
               <div className="innerpage" style={oMstyle}/>
             </div>);
       }
       else {
-        pageVisitCount++;
-        aPg.push(
-            <div className="page" style={oStyle} key={pageVisitCount}>
-              <div className="innerpage" style={oMstyle} key={pageVisitCount + 1000} />
+        aPagesView.push(
+            <div className="page" style={oStyle} key={iIndex}>
+              <div className="innerpage" style={oMstyle} key={iIndex + 1000} />
             </div>);
       }
-    }
-    return (aPg);
+    });
+
+    return (aPagesView);
   },
   render: function () {
-    var aPages = this.getPagesView(this.props.data);
+    var aPages = this.getPagesView();
     return (
         <div>
               {aPages}

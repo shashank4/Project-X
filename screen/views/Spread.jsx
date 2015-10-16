@@ -10,7 +10,7 @@ var Spread = React.createClass({
 
   propTypes: {
     layoutStoreData: React.PropTypes.array,
-    storyStoreData: React.PropTypes.array
+    storyStoreData: React.PropTypes.object
   },
 
   getSpreadView: function () {
