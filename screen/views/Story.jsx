@@ -1,4 +1,5 @@
 var React = require("react");
+var _ = require('lodash');
 
 var utils = require("../store/utils");
 var XMLElement = require("./XMLElement.jsx");
@@ -20,7 +21,6 @@ var Story = React.createClass({
 
   propTypes: {
     data: React.PropTypes.object,  // individual story data
-    path: React.PropTypes.string,
     pathToUpdate: React.PropTypes.string
   },
 
@@ -30,15 +30,14 @@ var Story = React.createClass({
     for (var i = 0; i < storyLen; i++) {
       var sPath = obj['idPkg:Story'].Story[i]['$']['Self'];
       for (var j = 0; j < (obj['idPkg:Story'].Story[i].Custom).length; j++) {
-        var uniq = utils.generateUUID();
         if ((obj['idPkg:Story'].Story[i].Custom[j]).hasOwnProperty("XMLElement")) {
           var aToXMLElement = obj['idPkg:Story'].Story[i].Custom[j].XMLElement;
           aStory.push(
               <XMLElement
-                  key={uniq}
+                  key={j}
                   pathToUpdate={this.props.pathToUpdate}
                   data={aToXMLElement}
-                  path={sPath} />
+                  path={sPath}/>
           );
         }
 
@@ -49,7 +48,7 @@ var Story = React.createClass({
           var cssName = utils.getParaStyleName(AppliedParagraphStyle);
           aStory.push(
               <ParagraphStyleRange
-                  key={uniq}
+                  key={j}
                   data={aToParagraphStyleRange}
                   path={sPath}
                   styleName={cssName}
@@ -147,7 +146,7 @@ var Story = React.createClass({
   },
 
   handleKeyDown: function (oEvent) {
-   /* if (oEvent.keyCode == 13) {
+    /*if (oEvent.keyCode == 13) {
       this.handleEnterKeyPress(oEvent);
     }
 
@@ -168,18 +167,17 @@ var Story = React.createClass({
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
-    //var sPath = this.props.data['idPkg:Story'].Story[0]['$']['Self'];
-    //return nextProps.pathToUpdate !== sPath;
-    return true;
+    var sPath = this.props.data['idPkg:Story'].Story[0]['$']['Self'];
+    return _.contains(nextProps.pathToUpdate, sPath);
   },
 
   render: function () {
     var wrapperArray = this.renderStoryData(this.props.data);
     return (
         <div className="storyContainer"
-        contentEditable={true}
-        onKeyDown={this.handleKeyDown} >
-        {wrapperArray}
+             contentEditable={true}
+             onKeyDown={this.handleKeyDown}>
+          {wrapperArray}
         </div>
     );
   }

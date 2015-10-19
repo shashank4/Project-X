@@ -11,10 +11,8 @@ var Br = React.createClass({
     var sPath = this.props.path;
     return (
         <br className="br brContainer"
-                 key={uniq++}
                  data-uid={myUID}
-                 data-path={sPath}
-            />
+                 data-path={sPath}/>
     );
   }
 

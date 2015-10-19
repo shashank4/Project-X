@@ -16,7 +16,6 @@ var CharacterStyleRange = React.createClass({
 
   getCharacter: function (arr) {
     var aStory = [];
-    var uniq = 0;
     var arrLen = arr.length;
     var sPath = this.props.path;
     for (var i = 0; i < arrLen; i++) {
@@ -28,7 +27,7 @@ var CharacterStyleRange = React.createClass({
           var aCharacterStyleRange = arr[i].Custom[j].CharacterStyleRange;
           aStory.push(
               <CharacterStyleRange
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aCharacterStyleRange}
                   pathToUpdate={this.props.pathToUpdate}/>
@@ -41,7 +40,7 @@ var CharacterStyleRange = React.createClass({
           var aToXMLElement = arr[i].Custom[j].XMLElement;
           aStory.push(
               <XMLElement
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aToXMLElement}
                   pathToUpdate={this.props.pathToUpdate}/>
@@ -53,7 +52,7 @@ var CharacterStyleRange = React.createClass({
           var aContent = arr[i].Custom[j].Content;
           aStory.push(
               <Content
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aContent}
                   parent={arr[i].Custom}/>
@@ -65,7 +64,7 @@ var CharacterStyleRange = React.createClass({
           var aBr = arr[i].Custom[j].Br;
           aStory.push(
               <BrTag
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aBr}/>
           );
@@ -74,6 +73,11 @@ var CharacterStyleRange = React.createClass({
     }
     return aStory;
 
+  },
+
+  shouldComponentUpdate: function(nextProps, nextState) {
+    var sCharacterStyleId = this.props.data[0]['$']['data-uid'];
+    return _.contains(nextProps.pathToUpdate, sCharacterStyleId);
   },
 
   render: function () {
@@ -85,9 +89,7 @@ var CharacterStyleRange = React.createClass({
     var className1 = "characterContainer " + cssName;
     var dataUID=this.props.data[0]["$"]["data-uid"];
     return (
-        <span className={className1} data-uid={dataUID}>
-            {aCharacter}
-        </span>
+        <span className={className1} data-uid={dataUID}>{aCharacter}</span>
     );
   }
 

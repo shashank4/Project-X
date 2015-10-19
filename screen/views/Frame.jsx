@@ -76,9 +76,7 @@ var Frame = React.createClass({
           top: topLeftR[1] + 72 + "px",
           zIndex: 100
         };
-
         aFr.push(<div className="frame" style={oStyle}></div>);
-
       }
     }
 
@@ -128,15 +126,15 @@ var Frame = React.createClass({
         };
 
 
-        var keyVal = utils.generateUUID();
         var toStoryStoreData = (this.props.storyStoreData);
         var storyName = obj.$.ParentStory;
 
-        aFr.push(<div className="frame" style={oStyle2} key={keyVal}>
-          <Story
-              data={toStoryStoreData[storyName]}
-              pathToUpdate={this.props.pathToUpdate}/>
-        </div>);
+        aFr.push(
+            <div className="frame" style={oStyle2} key={z}>
+              <Story
+                  data={toStoryStoreData[storyName]}
+                  pathToUpdate={this.props.pathToUpdate}/>
+            </div>);
       }
     }
     return (aFr);
@@ -145,9 +143,7 @@ var Frame = React.createClass({
   render: function () {
     var aFrames = this.getFramesView(this.props.data);
     return (
-        <div className="frameContainer">
-          {aFrames}
-        </div>
+        <div className="frameContainer">{aFrames}</div>
     );
   }
 });

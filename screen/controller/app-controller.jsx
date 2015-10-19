@@ -54,7 +54,7 @@ var AppController = React.createClass({
     var sPathToUpdate = this.props.storyStore.getPathToUpdate();
     return (
         <div className="appController">
-         <button className="myButton" onClick={this.handleOnClick}> Save</button>
+         <button className="myButton" onClick={this.handleOnClick}>Save</button>
           <Canvas
               layoutStoreData={this.state.layoutData}
               storyStoreData={this.state.storyData}

@@ -7,14 +7,14 @@ var ParagraphStyleRange = React.createClass({
 
   propTypes: {
     data: React.PropTypes.array,  // individual story data
-    key: React.PropTypes.object,
     path: React.PropTypes.string,
     pathToUpdate: React.PropTypes.string
   },
 
-  getParagraph: function (arr) {
+  getParagraph: function () {
     var aStory = [];
     var uniq = 0;
+    var arr = this.props.data;
     var arrLen = arr.length;
     var sPath = this.props.path;
     for (var i = 0; i < arrLen; i++) {
@@ -24,7 +24,7 @@ var ParagraphStyleRange = React.createClass({
           var aCharacterStyleRange = arr[i].Custom[j].CharacterStyleRange;
           aStory.push(
               <CharacterStyleRange
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aCharacterStyleRange}
                   pathToUpdate={this.props.pathToUpdate}/>
@@ -37,7 +37,7 @@ var ParagraphStyleRange = React.createClass({
           var aToXMLElement = arr[i].Custom[j].XMLElement;
           aStory.push(
               <XMLElement
-                  key={uniq++}
+                  key={j}
                   path={sPath}
                   data={aToXMLElement}
                   pathToUpdate={this.props.pathToUpdate}/>
@@ -49,17 +49,20 @@ var ParagraphStyleRange = React.createClass({
 
   },
 
+  shouldComponentUpdate: function(nextProps, nextState) {
+    var sParagraphId = this.props.data[0]['$']['data-uid'];
+    return _.contains(nextProps.pathToUpdate, sParagraphId);
+  },
+
   render: function () {
     var obj = this.props.data;
-    var aParagraph = this.getParagraph(obj);
+    var aParagraph = this.getParagraph();
     var dataUID=this.props.data[0]["$"]["data-uid"];
     var cssName = utils.getParaStyleName(obj[0].$.AppliedParagraphStyle);
     var className1 = "paragraphContainer " + cssName;
 
     return (
-        <p className={className1} data-uid={dataUID}>
-                {aParagraph}
-        </p>
+        <p className={className1} data-uid={dataUID}>{aParagraph}</p>
     );
   }
 
