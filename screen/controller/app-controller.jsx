@@ -52,13 +52,15 @@ var AppController = React.createClass({
 
   render: function () {
     var sPathToUpdate = this.props.storyStore.getPathToUpdate();
+    var oCaretPosition = this.props.storyStore.getCaretPosition();
     return (
         <div className="appController">
          <button className="myButton" onClick={this.handleOnClick}>Save</button>
           <Canvas
               layoutStoreData={this.state.layoutData}
               storyStoreData={this.state.storyData}
-              pathToUpdate={sPathToUpdate}/>
+              pathToUpdate={sPathToUpdate}
+              caretPosition={oCaretPosition}/>
         </div>
     );
   }

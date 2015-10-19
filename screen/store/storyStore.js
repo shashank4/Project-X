@@ -13,6 +13,10 @@ var storyStore = (function () {
 
   var data = {};
   var sPathToUpdate = "";
+  var oCaretPosition = {
+    oSelection: {},
+    oSelectedDOM: {}
+  };
 
   var _triggerChange = function () {
     storyStore.trigger('change');
@@ -67,6 +71,10 @@ var storyStore = (function () {
 
     setPathToUpdate: function (sPath) {
       _setPathTOUpdate(sPath);
+    },
+
+    getCaretPosition: function () {
+      return oCaretPosition;
     },
 
     handleSaveClick: function () {
@@ -204,7 +212,7 @@ var storyStore = (function () {
 
 
     handleContentTextChanged: function (oEvent, sel, targetPath,oCurrentDom) {
-      oEvent.preventDefault();
+      //oEvent.preventDefault();
       var bIsCapsLock = isCapLockOn(oEvent);
       var pressedChar = String.fromCharCode(oEvent.keyCode);
 
@@ -618,6 +626,10 @@ var storyStore = (function () {
       if (window.getSelection()) {
         var oSel = window.getSelection();               //o-object, a-array, i-index, s-string.
         var iRange = oSel.getRangeAt(0);
+
+        oCaretPosition.oSelection = oSel;
+        oCaretPosition.oRange = iRange.cloneRange();
+        oCaretPosition.endOffset = iRange.endOffset;
 
         var oCurrentDom = iRange.commonAncestorContainer.parentNode;
         if(oCurrentDom.className.indexOf('paragraphContainer')>(-1)){

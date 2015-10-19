@@ -9,7 +9,8 @@ var Frame = React.createClass({
     pageDimObj: React.PropTypes.object,
     bindingLocation: React.PropTypes.number,
     storyStoreData: React.PropTypes.object,
-    pathToUpdate: React.PropTypes.string
+    pathToUpdate: React.PropTypes.string,
+    caretPosition: React.PropTypes.object
   },
 
   getBindingLocation: function () {
@@ -133,6 +134,7 @@ var Frame = React.createClass({
             <div className="frame" style={oStyle2} key={z}>
               <Story
                   data={toStoryStoreData[storyName]}
+                  caretPosition={this.props.caretPosition}
                   pathToUpdate={this.props.pathToUpdate}/>
             </div>);
       }

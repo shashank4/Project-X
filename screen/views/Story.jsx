@@ -5,7 +5,7 @@ var utils = require("../store/utils");
 var XMLElement = require("./XMLElement.jsx");
 var ParagraphStyleRange = require("./paragraphStyleRange.jsx");
 var EventDispatcher = require("../../libraries/eventDispacher/EventDispatcher");
-var storyAction= require("../actions/story-action");
+var storyAction = require("../actions/story-action");
 
 var Events = {
   CONTENT_CHANGE_EVENT: "content_change_event",
@@ -21,7 +21,8 @@ var Story = React.createClass({
 
   propTypes: {
     data: React.PropTypes.object,  // individual story data
-    pathToUpdate: React.PropTypes.string
+    pathToUpdate: React.PropTypes.string,
+    caretPosition: React.PropTypes.object
   },
 
   renderStoryData: function (obj) {
@@ -134,7 +135,7 @@ var Story = React.createClass({
     }
   },
 
-  handleTabPress: function(oEvent){
+  handleTabPress: function (oEvent) {
     if (window.getSelection()) {
       var sel = window.getSelection();
       var range = sel.getRangeAt(0);
@@ -147,26 +148,46 @@ var Story = React.createClass({
 
   handleKeyDown: function (oEvent) {
     /*if (oEvent.keyCode == 13) {
-      this.handleEnterKeyPress(oEvent);
-    }
+     this.handleEnterKeyPress(oEvent);
+     }
 
-    if (oEvent.keyCode == 8) {
-      this.handleBackspacePress(oEvent);
-    }
+     if (oEvent.keyCode == 8) {
+     this.handleBackspacePress(oEvent);
+     }
 
-    if (oEvent.keyCode == 46) {
-      this.handleDeletePress(oEvent);
-    }
+     if (oEvent.keyCode == 46) {
+     this.handleDeletePress(oEvent);
+     }
 
-    if (oEvent.keyCode == 9) {
-      this.handleTabPress(oEvent);
-    }*/
+     if (oEvent.keyCode == 9) {
+     this.handleTabPress(oEvent);
+     }*/
 
     EventDispatcher.dispatch(Events.ON_KEY_DOWN, this, oEvent);
 
   },
 
-  shouldComponentUpdate: function(nextProps, nextState) {
+  componentDidUpdate: function () {
+
+    var oOldSelection = this.props.caretPosition.oSelection;
+    if (oOldSelection.rangeCount) {
+      var oRange = this.props.caretPosition.oRange;
+      var iOffset = this.props.caretPosition.endOffset;
+
+      oRange.setStart(oRange.startContainer.firstChild, iOffset);
+      oRange.setEnd(oRange.endContainer, iOffset);
+
+      var DOM = this.refs.storyContainer.getDOMNode();
+      var oSelection = window.getSelection();
+      oSelection.removeAllRanges();
+      oSelection.addRange(oRange);
+
+      DOM.focus();
+    }
+
+  },
+
+  shouldComponentUpdate: function (nextProps, nextState) {
     var sPath = this.props.data['idPkg:Story'].Story[0]['$']['Self'];
     return _.contains(nextProps.pathToUpdate, sPath);
   },
@@ -175,8 +196,9 @@ var Story = React.createClass({
     var wrapperArray = this.renderStoryData(this.props.data);
     return (
         <div className="storyContainer"
+             ref="storyContainer"
              contentEditable={true}
-             onKeyDown={this.handleKeyDown}>
+             onInput={this.handleKeyDown}>
           {wrapperArray}
         </div>
     );

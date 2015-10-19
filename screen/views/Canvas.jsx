@@ -9,7 +9,8 @@ var Canvas = React.createClass({
   propTypes: {
     layoutStore: React.PropTypes.object,
     storyStore: React.PropTypes.object,
-    pathToUpdate: React.PropTypes.string
+    pathToUpdate: React.PropTypes.string,
+    caretPosition: React.PropTypes.object
   },
 
   render: function () {
@@ -36,7 +37,8 @@ var Canvas = React.createClass({
           <Spread
               layoutStoreData={toSpread}
               storyStoreData={this.props.storyStoreData}
-              pathToUpdate={this.props.pathToUpdate}/>
+              pathToUpdate={this.props.pathToUpdate}
+              caretPosition={this.props.caretPosition}/>
         </div>
     );
   }
