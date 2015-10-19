@@ -174,15 +174,15 @@ var utils = (function () {
     getAllStoryData: function (obj) {
       var aStories = Object.keys(obj);
       console.log(aStories);
+        var oStoryXmls = {};
       for(var i=0;i<aStories.length;i++){
         var storyName=aStories[i];
         console.log(storyName);
         var xmlString = this.removeCustomTag(obj[storyName]);
         console.log("Story Name is:"+storyName+"%%%  and XML data is" + xmlString);
+          oStoryXmls[storyName] = xmlString;
       }
-
-
-
+        return oStoryXmls;
     },
 
     removeAttribute:function(dom){

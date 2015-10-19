@@ -3,6 +3,7 @@
  */
 require("node-jsx").install({extension: ".js"});
 
+var _ = require('lodash');
 var React = require('react');
 var Handlebars = require('handlebars');
 var fs = require("fs");
@@ -23,6 +24,9 @@ var utils= require('../screen/store/utils');
 var AppController = require('./../screen/controller/app-controller.jsx').view;
 var layoutStore = require('./../screen/store/layoutStore.js');
 var storyStore = require('./../screen/store/storyStore.js');
+
+var Config = require('./config');
+var AdmZip = require('adm-zip');
 
 
 //console.log(oStoryData);
@@ -59,8 +63,20 @@ app.get('/', function (req, res) {
 
 app.post('/onClickSave', upload.array(), function(req, res, next) {
   console.log("before util");
-  utils.getAllStoryData(req.body);
+  var oStoryData = utils.getAllStoryData(req.body);
       //res.json(req.body);
+    _.forEach(oStoryData,function(sStoryXml,sStoryName){
+        var storiesDirectory = Config.extractedDirPath + "/Stories/";
+        fs.writeFile(storiesDirectory + "Story_" + sStoryName + ".xml", sStoryXml);
+    });
+    var zip = AdmZip();
+    zip.addLocalFolder(Config.extractedDirPath);
+    var idmlPath = Config.idmlPath;
+    var idmlFilePath = idmlPath.substring(0, idmlPath.lastIndexOf("/") + 1);
+    var idmlFileName = idmlPath.substring(idmlPath.lastIndexOf("/") + 1, idmlPath.length);
+    idmlFileName = idmlFileName.split('.')[0] + "_new" + ".idml";
+
+    zip.writeZip(idmlFilePath + "/" + idmlFileName);
 });
 
 app.use(express.static('./'));
