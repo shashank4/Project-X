@@ -211,7 +211,7 @@ var storyStore = (function () {
 
 
     handleContentTextChanged: function (oEvent, sel, targetPath,oCurrentDom) {
-      oEvent.preventDefault();
+
       var bIsCapsLock = isCapLockOn(oEvent);
       var pressedChar = String.fromCharCode(oEvent.keyCode);
 
@@ -229,21 +229,23 @@ var storyStore = (function () {
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
 
+      var oParentCustom = this.searchClosestCustomOfContentNBr(currentStory, path);
+      var aCustom = oParentCustom.objectPos;
+      var index = oParentCustom.indexPos;
+
+
       var uuid = path[path.length - 1];
 
       /**
        * if key is pressed on any BR node.
        */
       if(oCurrentDom.className.indexOf('br')>(-1)){
-
-        var oCustom = this.searchClosestCustomOfContentNBr(currentStory, path);
         var newUid21 = utils.generateUUID();
         var newContentObj21 = {"Content": [{"_": pressedChar, "$": {"data-uid": newUid21}}]};
-        oCustom.objectPos.splice(oCustom.indexPos, 0, newContentObj21);
+        aCustom.splice(index, 0, newContentObj21);
         _triggerChange();
         return;
       }
-
 
       /**
        * if a key is pressed either BEFORE or AFTER the BR node...
@@ -254,13 +256,8 @@ var storyStore = (function () {
           ((sel.focusNode.previousSibling
           && sel.focusNode.previousSibling.className.indexOf("br") > (-1)))) {
 
-
-        var oParentCustom = this.searchClosestCustomOfContentNBr(currentStory, path);
-        var aCustom = oParentCustom.objectPos;
-        var index = oParentCustom.indexPos;
         var newContentStringBefore = sel.focusNode.data.substring(0, sel.focusOffset) + pressedChar
                                       + sel.focusNode.data.substring(sel.focusOffset, sel.length);
-
         var newUid = utils.generateUUID();
         var newContentObj = {"Content": [{"_": newContentStringBefore, "$": {"data-uid": newUid}}]};
 
@@ -269,9 +266,8 @@ var storyStore = (function () {
          */
         if (sel.focusNode.previousSibling && sel.focusNode.previousSibling.className.indexOf("br") > (-1)) {
           aCustom.splice(index + 1, 0, newContentObj);
-
           _triggerChange();
-
+          return null;
         }
         /**
          * * if a key is pressed BEFORE the BR node...
@@ -284,26 +280,9 @@ var storyStore = (function () {
 
           aCustom.splice(-1);
           _triggerChange();
-
+          return null;
         }
-
-
       }
-      /**
-       * if a key is pressed ON the extreme last BR node...
-       *//*
-      else if (!sel.focusNode.nextSibling && !sel.focusNode.previousSibling
-          && !sel.focusNode.parentNode.nextSibling && !sel.focusNode.parentNode.previousSibling) {
-
-        var oChara = this.searchClosestCustomOfContentNBr(currentStory, path);
-        var newUid2 = utils.generateUUID();
-        var newContentObj2 = {"Content": [{"_": pressedChar, "$": {"data-uid": newUid2}}]};
-        oChara.objectPos.splice(0, 0, newContentObj2);
-        _triggerChange();
-        console.log("hii");
-
-
-      }*/
       /**
        * if key is pressed in the middle of the node.(Normal processing)
        */
@@ -313,6 +292,7 @@ var storyStore = (function () {
                         + sel.focusNode.data.substring(sel.focusOffset, sel.length);
 
         _triggerChange();
+        return null;
       }
     },
 
@@ -410,8 +390,8 @@ var storyStore = (function () {
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
       var parentUID = returnedObject.parentUID;
+
       if (sel.focusOffset == 0) {
-        oEvent.preventDefault();
 
         /**
          * if iIndex th node is not the start node.....then do normal processing
@@ -419,11 +399,17 @@ var storyStore = (function () {
          * to previous content data.
          */
         if (iIndex != 0) {
-          if (aParent[iIndex - 1].Br) {                 /*if previous node is br*/
+          /**
+           * if previous node is br (prev node will always be BR)
+           */
+          if (aParent[iIndex - 1].Br) {
             var rest = aParent.splice(iIndex + 1);
             var currentNode = aParent.splice(iIndex, 1);
             aParent.splice(iIndex - 1, 1);
 
+            /**
+             * if aParent length is  still not 0 after removing current and previous node.
+             */
             if (aParent.length != 0) {
               var previousContent = aParent.splice(iIndex - 2, 1);
               var preData = previousContent[0].Content[0]["_"];
@@ -438,6 +424,7 @@ var storyStore = (function () {
         }
         else {
           /**
+           * if iIndex == 0.
            * Paragraph Handling
            */
           if (sel.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
@@ -461,17 +448,27 @@ var storyStore = (function () {
         }
 
       }
-      else if (sel.focusNode.data.length == 1) {
-        oEvent.preventDefault();
+      /**
+       * if there is only one character in the selected node and focusOffset is also 1
+       * then remove current node and check, if next and previous node is same or not. If same charaStyle then combine.
+       * Check for chara and XML tag.
+       */
+      else if (sel.focusOffset==1 && sel.focusNode.data.length == 1 ) {
         if (aParent.length == 1) {
 
+          var path2=targetPath.split('/');
+          path2.splice(0,1);
+          path2.splice(-1,1);
+          var oUltimateParent = this.searchClosestCustomOfContentNBr(currentStory, path2);
+          var aUltimateCustom = oUltimateParent.objectPos;
+          var jIndex = oUltimateParent.indexPos;
           /**
-           * xml tag :either you can totally remove or normal processing
+           * xml tag :either you can totally remove or normal processing. We can't combine xml tags.
            */
           if (sel.focusNode.parentNode.parentNode.className == "xmlElementContainer") {
-            var oUltimateParent = this.searchClosestCustomOfXmltag(data, targetPath);
-            var aUltimateCustom = oUltimateParent.reqObj;
-            var jIndex = oUltimateParent.iIndex;
+            //var oUltimateParent = this.searchClosestCustomOfXmltag(data, targetPath);
+            //var aUltimateCustom = oUltimateParent.reqObj;
+            //var jIndex = oUltimateParent.iIndex;
 
             var restUltimate = aUltimateCustom.splice(jIndex + 1);
             aUltimateCustom.splice(jIndex, 1);
@@ -483,21 +480,45 @@ var storyStore = (function () {
            * characterStyleRange handling
            */
           if (sel.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
-            var oCharacterOfParent = this.searchClosestCustomOfChara(data, parentUID);
-            var aCustom = oCharacterOfParent.reqObj;
-            var charIndex = oCharacterOfParent.iIndex;
+            //var oCharacterOfParent = this.searchClosestCustomOfChara(data, parentUID);
+            var aCustom = aUltimateCustom;
+            var charIndex =  jIndex;
+            /**
+             * if aCustom is having more than 1 child elements i.e. more than one characterStyleRanges.
+             */
             if (aCustom.length > 1) {
-              if (aCustom[charIndex + 1] && aCustom[charIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle == aCustom[charIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle) {
-                if (aCustom[charIndex + 2])
+              /**
+               * if next charaStyle and previous charaStyle are same, then remove current node and combine
+               */
+              if (aCustom[charIndex + 1] && aCustom[charIndex - 1] &&
+                  (aCustom[charIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle == aCustom[charIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle)) {
+                /**
+                 * if next nodes are present ,then store it to rest to append.
+                 */
+                if (aCustom[charIndex + 2]){
                   var restArray = aCustom.splice(charIndex + 2);
+                }
+
                 var last = aCustom[charIndex - 1].CharacterStyleRange[0].Custom.length - 1;
-                if (aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content && aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content) {
-                  aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] = aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] + aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+                /**
+                 * if pre charaStyle has last node as CONTENT and next charaStyle has its first element as CONTENT, then merge these two CONTENTS
+                 */
+                if (aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content
+                    && aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content)
+                {
+                  aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] =
+                        aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"]
+                      + aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+
                   aCustom[charIndex + 1].CharacterStyleRange[0].Custom.splice(0, 1);
                 }
 
+                /**
+                 * if next charaStyle has more nodes then append remaining nodes to pre charaStyle.
+                 */
                 if (aCustom[charIndex + 1].CharacterStyleRange[0].Custom.length > 0) {
-                  aCustom[charIndex - 1].CharacterStyleRange[0].Custom = aCustom[charIndex - 1].CharacterStyleRange[0].Custom.concat(aCustom[charIndex + 1].CharacterStyleRange[0].Custom);
+                  aCustom[charIndex - 1].CharacterStyleRange[0].Custom =
+                      aCustom[charIndex - 1].CharacterStyleRange[0].Custom.concat(aCustom[charIndex + 1].CharacterStyleRange[0].Custom);
                 }
 
                 aCustom.splice(charIndex + 1);
@@ -528,6 +549,15 @@ var storyStore = (function () {
           }
           _triggerChange();
         }
+      }
+      /**
+       * for normal backSpace.
+       */
+      else if(sel.focusOffset >= 1){
+        var str = sel.focusNode.data;
+        aParent[iIndex].Content[0]["_"] = str.slice(0,sel.focusOffset-1) + str.slice(sel.focusOffset);
+        _triggerChange();
+        return null;
       }
 
     },
@@ -651,7 +681,7 @@ var storyStore = (function () {
 
         else if (oEvent.keyCode == 8) { //backSpace
           oEvent.preventDefault();
-          this.handleBackspacePressed(oEvent,oSel, sPath);
+          this.handleBackspacePressed(oEvent, oSel, sPath);
         }
 
         else if (oEvent.keyCode == 46) { // Delete
@@ -662,6 +692,7 @@ var storyStore = (function () {
           this.handleTabPressed(oEvent, oSel, sPath);
         }
         else{
+          oEvent.preventDefault();
           this.handleContentTextChanged(oEvent,oSel,sPath,oCurrentDom);
         }
         _triggerChange();
