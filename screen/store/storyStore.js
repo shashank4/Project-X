@@ -22,7 +22,6 @@ var storyStore = (function () {
     sPathToUpdate = sPath;
   };
 
-
   var isCapLockOn = function(e){
     //var charKeyCode = e.keyCode ? e.keyCode : e.which; // To work with both MSIE & Netscape
 
@@ -232,7 +231,7 @@ var storyStore = (function () {
         var oCustom = this.searchClosestCustomOfContentNBr(currentStory, path);
         var newUid21 = utils.generateUUID();
         var newContentObj21 = {"Content": [{"_": pressedChar, "$": {"data-uid": newUid21}}]};
-        oCustom.objectPos.splice(0, 0, newContentObj21);
+        oCustom.objectPos.splice(oCustom.indexPos, 0, newContentObj21);
         _triggerChange();
         return;
       }
@@ -321,14 +320,15 @@ var storyStore = (function () {
       var iOffset = oSel.focusOffset;
 
       /**
-       * true = 'BR' nod....if key is down on Br node
+       * true = 'BR' node....if key is down on Br node
        * append directly
        */
       if (bFlag == true) {
         var newUid5 = utils.generateUUID();
         var newBrObj5 = {"Br": [{"$": {"data-uid": newUid5}}]};
-        _.assign(aParent, aParent.push(newBrObj5));
+        aParent.splice(iIndex,0,newBrObj5);
         _triggerChange();
+        return null;
       }
       /**
        * if key is down on content node
@@ -342,6 +342,7 @@ var storyStore = (function () {
           var newBrObj6 = {"Br": [{"$": {"data-uid": newUid6}}]};
           aParent.splice(iIndex, 0, newBrObj6);
           _triggerChange();
+          return null;
         }
         /**
          * if  it is NOT first node of character style or xmlElement
@@ -373,19 +374,17 @@ var storyStore = (function () {
 
 
           /**
-           * if enter is pressed on extreem last position i.e. after last content or br of last Paragraph Node
+           * if enter is pressed on extreme last position i.e. after last content or br of last Paragraph Node
            * then push one extra br to get cursor on new line.
            */
           if (oSel.focusNode.length == oSel.focusOffset
               && oSel.focusNode.parentNode.nextSibling == null
               && oSel.focusNode.parentNode.parentNode.nextSibling == null
-              && oSel.focusNode.parentNode.parentNode.parentNode.nextSibling == null) {
+              && oSel.focusNode.parentNode.parentNode.parentNode.nextSibling == null ) {
             var newUid4 = utils.generateUUID();
-            var newBrObjExtreemLast = {"Br": [{"$": {"data-uid": newUid4}}]};
-            aParent.push(newBrObjExtreemLast);
+            var newBrObjExtremeLast = {"Br": [{"$": {"data-uid": newUid4}}]};
+            aParent.push(newBrObjExtremeLast);
           }
-
-
 
           _.assign(aParent, aParent.concat(rest));
           _triggerChange();
@@ -619,36 +618,41 @@ var storyStore = (function () {
         var oSel = window.getSelection();               //o-object, a-array, i-index, s-string.
         var iRange = oSel.getRangeAt(0);
 
-        var oCurrentDom = iRange.commonAncestorContainer.parentNode;
-        if(oCurrentDom.className.indexOf('paragraphContainer')>(-1)){
-          oCurrentDom = oCurrentDom.firstChild.firstChild;
+        var oCurrentDom;
+        if(iRange.commonAncestorContainer.nodeName != "#text"){
+          oCurrentDom = iRange.commonAncestorContainer.childNodes[iRange.startOffset];
         }
+        else{
+          oCurrentDom = iRange.commonAncestorContainer.parentNode;
+        }
+
         var sTargetUID = oCurrentDom.getAttribute("data-uid");
         var sPath = oCurrentDom.getAttribute("data-path");
         sPath = sPath + "/" + sTargetUID;
         _setPathTOUpdate(sPath);
 
 
-        if (oEvent.keyCode == 13) {
+        if (oEvent.keyCode == 13) { //ENTER
           oEvent.preventDefault();
           this.handleEnterKeyPress(oSel, sPath);
         }
 
-        else if (oEvent.keyCode == 8) {
+        else if (oEvent.keyCode == 8) { //backSpace
+          oEvent.preventDefault();
           this.handleBackspacePressed(oEvent,oSel, sPath);
         }
 
-        else if (oEvent.keyCode == 46) {
+        else if (oEvent.keyCode == 46) { // Delete
           this.handleDeletePressed(oEvent, oSel, sPath);
         }
 
-        else if (oEvent.keyCode == 9) {
+        else if (oEvent.keyCode == 9) {  //Tab
           this.handleTabPressed(oEvent, oSel, sPath);
         }
         else{
           this.handleContentTextChanged(oEvent,oSel,sPath,oCurrentDom);
         }
-          _triggerChange();
+        _triggerChange();
       }
 
     }
