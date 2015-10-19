@@ -1,4 +1,5 @@
 var React = require("react");
+var _ = require('lodash');
 var utils = require("../store/utils");
 var CharacterStyleRange = require('./characterStyleRange.jsx');
 var XMLElement = require('./XMLElement.jsx');

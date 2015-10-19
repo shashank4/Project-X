@@ -1,4 +1,5 @@
 var React = require("react");
+var _ = require('lodash');
 var ParagraphStyleRange = require("./paragraphStyleRange.jsx");
 var CharacterStyleRange = require("./characterStyleRange.jsx");
 var Content = require("./content.jsx").view;
