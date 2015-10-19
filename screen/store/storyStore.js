@@ -70,64 +70,67 @@ var storyStore = (function () {
     },
 
     searchClosestCustomOfContentNBr: function (obj, remainingPath, sParentId) {
-        if(obj["Custom"]){
-            var aCustom = obj["Custom"];
-            var oClosestCustom;
-            _.forEach(aCustom,function(oCustom, iCustomIndex){
-                _.forEach(oCustom,function(oTag, sTagKey){
-                    if(oTag[0]['$']){
-                        oTag = oTag[0];
-                        var sCustomTagUID = oTag['$'][UID_KEY];
-                        if(sCustomTagUID == remainingPath[0]){
-                            if(remainingPath.length == 1){
-                                //oClosestCustom = oCustom;
-                                oClosestCustom = {
-                                    objectPos: aCustom,
-                                    indexPos: iCustomIndex,
-                                    parentUID: sParentId,
-                                    flag: (sTagKey == 'Br')
-                                };
-                            } else {
-                                remainingPath.splice(0,1);
-                                oClosestCustom = this.searchClosestCustomOfContentNBr(oTag, remainingPath, oTag['$'][UID_KEY]);
-                            }
-                            return false;
-                        }
-                    }
-                }.bind(this));
-                if(oClosestCustom){
-                    return false;
+      if (obj["Custom"]) {
+        var aCustom = obj["Custom"];
+        var oClosestCustom;
+        _.forEach(aCustom, function (oCustom, iCustomIndex) {
+          _.forEach(oCustom, function (oTag, sTagKey) {
+            if (oTag[0]['$']) {
+              oTag = oTag[0];
+              var sCustomTagUID = oTag['$'][UID_KEY];
+              if (sCustomTagUID == remainingPath[0]) {
+                if (remainingPath.length == 1) {
+                  //oClosestCustom = oCustom;
+                  oClosestCustom = {
+                    objectPos: aCustom,
+                    indexPos: iCustomIndex,
+                    parentUID: sParentId,
+                    flag: (sTagKey == 'Br')
+                  };
+                } else {
+                  remainingPath.splice(0, 1);
+                  oClosestCustom = this.searchClosestCustomOfContentNBr(oTag, remainingPath, oTag['$'][UID_KEY]);
                 }
-            }.bind(this));
-            return oClosestCustom;
-        }
-        var objects = [];
-        /*for (var i in obj) {
-          if (i == "Custom" && typeof obj[i] == 'object') {
-            for (var j = 0; j < obj[i].length; j++) {
-              if (obj[i][j].Content && obj[i][j].Content[0]["$"]["data-uid"] == val) {
-                var parentUUID = obj["$"]["data-uid"];
-                return {objectPos: obj[i], indexPos: j, patentUID: parentUUID, flag: 0};
-              } else if (obj[i][j].Br) {
-                if (obj[i][j].Br[0]["$"]["data-uid"] == val) {
-                  var parentUUID2 = obj["$"]["data-uid"];
-                  return {objectPos: obj[i], indexPos: j, patentUID: parentUUID2, flag: 1};
-                }
-              } else if (typeof obj[i][j] == 'object') {
-                objects = this.searchClosestCustomOfContentNBr(obj[i][j], key, val);
-                if (objects) {
-                  return objects;
-                }
+                return false;
               }
             }
-          } else if (typeof obj[i] == 'object') {
-            objects = this.searchClosestCustomOfContentNBr(obj[i], key, val);
-            if (objects) {
-              return objects;
-            }
+          }.bind(this));
+          if (oClosestCustom) {
+            return false;
           }
-        }*/
+        }.bind(this));
+        return oClosestCustom;
+      }
+      var objects = [];
+      /*for (var i in obj) {
+       if (i == "Custom" && typeof obj[i] == 'object') {
+       for (var j = 0; j < obj[i].length; j++) {
+       if (obj[i][j].Content && obj[i][j].Content[0]["$"]["data-uid"] == val) {
+       var parentUUID = obj["$"]["data-uid"];
+       return {objectPos: obj[i], indexPos: j, patentUID: parentUUID, flag: 0};
+       } else if (obj[i][j].Br) {
+       if (obj[i][j].Br[0]["$"]["data-uid"] == val) {
+       var parentUUID2 = obj["$"]["data-uid"];
+       return {objectPos: obj[i], indexPos: j, patentUID: parentUUID2, flag: 1};
+       }
+       } else if (typeof obj[i][j] == 'object') {
+       objects = this.searchClosestCustomOfContentNBr(obj[i][j], key, val);
+       if (objects) {
+       return objects;
+       }
+       }
+       }
+       } else if (typeof obj[i] == 'object') {
+       objects = this.searchClosestCustomOfContentNBr(obj[i], key, val);
+       if (objects) {
+       return objects;
+       }
+       }
+       }*/
     },
+
+
+
 
     searchClosestCustomOfPara: function (obj, uuid) {
       var objects = [];
@@ -195,17 +198,19 @@ var storyStore = (function () {
       }
     },
 
+
+
     handleContentTextChanged: function (sel, targetPath, spyFlag) {
 
       if ((sel.focusNode.nextSibling
-            && sel.focusNode.nextSibling.className.indexOf("br") > (-1))
+          && sel.focusNode.nextSibling.className.indexOf("br") > (-1))
           ||
           ((sel.focusNode.previousSibling
-            && sel.focusNode.previousSibling.className.indexOf("br") > (-1)))) {
+          && sel.focusNode.previousSibling.className.indexOf("br") > (-1)))) {
 
-          var path = targetPath.split("/");
-          var currentStoryId = path.splice(0,1);
-          var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+        var path = targetPath.split("/");
+        var currentStoryId = path.splice(0, 1);
+        var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
         var oParentCustom = this.searchClosestCustomOfContentNBr(currentStory, path);
         var aCustom = oParentCustom.objectPos;
         var index = oParentCustom.indexPos;
@@ -231,12 +236,12 @@ var storyStore = (function () {
         }
 
 
-      }else if(!sel.focusNode.nextSibling && !sel.focusNode.previousSibling
-                && !sel.focusNode.parentNode.nextSibling && !sel.focusNode.parentNode.previousSibling){
+      } else if (!sel.focusNode.nextSibling && !sel.focusNode.previousSibling
+          && !sel.focusNode.parentNode.nextSibling && !sel.focusNode.parentNode.previousSibling) {
         var oChara = this.selfSearch(data, uuid);
         var newUid2 = utils.generateUUID();
         var newContentObj2 = {"Content": [{"_": sel.focusNode.data, "$": {"data-uid": newUid2}}]};
-        oChara.Custom.splice(0,0,newContentObj2);
+        oChara.Custom.splice(0, 0, newContentObj2);
         _triggerChange();
         console.log("hii");
       } else {
@@ -246,36 +251,49 @@ var storyStore = (function () {
       }
     },
 
-    handleEnterKeyPress: function (sel, key, targetPath) {
-        var path = targetPath.split("/");
-        var currentStoryId = path.splice(0,1);
-        var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+    handleEnterKeyPress: function (oSel, targetPath) {
+      var path = targetPath.split("/");
+      var currentStoryId = path.splice(0, 1);
+      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
       var returnedObject = this.searchClosestCustomOfContentNBr(currentStory, path);
-      var aContentData = sel.focusNode.data;
+      var aContentData = oSel.focusNode.data;
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
-      var flag = returnedObject.flag;
-      var offset = sel.focusOffset;
+      var bFlag = returnedObject.flag;
+      var iOffset = oSel.focusOffset;
 
-      if (flag == 1) {
+      /**
+       * true = 'BR' nod....if key is down on Br node
+       * append directly
+       */
+      if (bFlag == true) {
         var newUid5 = utils.generateUUID();
         var newBrObj5 = {"Br": [{"$": {"data-uid": newUid5}}]};
         _.assign(aParent, aParent.push(newBrObj5));
         _triggerChange();
-
-      } else {
-
-        if(offset==0 && iIndex==0){
+      }
+      /**
+       * if key is down on content node
+       */
+      else {
+        /**
+         * if offset is 0 and first node of character style or xmlElement
+         */
+        if (iIndex == 0 && iOffset == 0 ) {
           var newUid6 = utils.generateUUID();
           var newBrObj6 = {"Br": [{"$": {"data-uid": newUid6}}]};
           aParent.splice(iIndex, 0, newBrObj6);
           _triggerChange();
-        }else{
+        }
+        /**
+         * if  it is NOT first node of character style or xmlElement
+         */
+        else {
           var rest = aParent.splice(iIndex + 1);
           aParent.splice(iIndex, 1);
 
           var newUid = utils.generateUUID();
-          var newContentStringBefore = aContentData.substring(0, offset);
+          var newContentStringBefore = aContentData.substring(0, iOffset);
           var newContentObjBefore = {"Content": [{"_": newContentStringBefore, "$": {"data-uid": newUid}}]};
           aParent.push(newContentObjBefore);
 
@@ -283,34 +301,46 @@ var storyStore = (function () {
           var newBrObj = {"Br": [{"$": {"data-uid": newUid2}}]};
           aParent.push(newBrObj);
 
-          if (sel.focusNode.length == sel.focusOffset
-              && sel.focusNode.parentNode.nextSibling == null
-              && sel.focusNode.parentNode.parentNode.nextSibling == null
-              && sel.focusNode.parentNode.parentNode.parentNode.nextSibling == null) {
+
+          /**
+           * if cursor is not at the last position of the current content node.
+           * then break the string insert one br and append next string
+           */
+          if (iOffset < aContentData.length) {
+            var newUid3 = utils.generateUUID();
+            var newContentStringAfter = aContentData.substring(iOffset, aContentData.length);
+            var newContentObjAfter = {"Content": [{"_": newContentStringAfter, "$": {"data-uid": newUid3}}]};
+            aParent.push(newContentObjAfter);
+          }
+
+
+          /**
+           * if enter is pressed on extreem last position i.e. after last content or br of last Paragraph Node
+           * then push one extra br to get cursor on new line.
+           */
+          if (oSel.focusNode.length == oSel.focusOffset
+              && oSel.focusNode.parentNode.nextSibling == null
+              && oSel.focusNode.parentNode.parentNode.nextSibling == null
+              && oSel.focusNode.parentNode.parentNode.parentNode.nextSibling == null) {
             var newUid4 = utils.generateUUID();
             var newBrObjExtreemLast = {"Br": [{"$": {"data-uid": newUid4}}]};
             aParent.push(newBrObjExtreemLast);
           }
 
-          if (offset < aContentData.length) {
-            var newUid3 = utils.generateUUID();
-            var newContentStringAfter = aContentData.substring(offset, aContentData.length);
-            var newContentObjAfter = {"Content": [{"_": newContentStringAfter, "$": {"data-uid": newUid3}}]};
-            aParent.push(newContentObjAfter);
-          }
+
+
           _.assign(aParent, aParent.concat(rest));
           _triggerChange();
         }
 
 
       }
-
     },
 
     handleBackspacePressed: function (oEvent, sel, targetPath) {
-        var path = targetPath.split("/");
-        var currentStoryId = path.splice(0,1);
-        var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+      var path = targetPath.split("/");
+      var currentStoryId = path.splice(0, 1);
+      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
       var returnedObject = this.searchClosestCustomOfContentNBr(currentStory, path);
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
@@ -450,9 +480,9 @@ var storyStore = (function () {
        * 3)if
        *
        */
-        var path = targetPath.split("/");
-        var currentStoryId = path.splice(0,1);
-        var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+      var path = targetPath.split("/");
+      var currentStoryId = path.splice(0, 1);
+      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
       var returnedObject = this.searchClosestCustomOfContentNBr(currentStory, path);
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
@@ -509,35 +539,43 @@ var storyStore = (function () {
       }
     },
 
-    handleTabPressed:function(oEvent, sel, uuid){
+    handleTabPressed: function (oEvent, sel, uuid) {
       oEvent.preventDefault();
       var tenSpaces = "          ";
 
-      if(sel.focusNode.firstChild && sel.focusNode.firstChild.className.indexOf("br") > (-1)){
+      if (sel.focusNode.firstChild && sel.focusNode.firstChild.className.indexOf("br") > (-1)) {
         var oChara = this.selfSearch(data, uuid);
         var newUid2 = utils.generateUUID();
         var newContentObj2 = {"Content": [{"_": tenSpaces, "$": {"data-uid": newUid2}}]};
-        oChara.Custom.splice(0,0,newContentObj2);
+        oChara.Custom.splice(0, 0, newContentObj2);
         _triggerChange();
       } else {
-        var str=sel.focusNode.data;
-        var offset=sel.focusOffset;
-        var preText=str.substring(0,offset);
-        var postText=str.substring(offset,str.length);
+        var str = sel.focusNode.data;
+        var offset = sel.focusOffset;
+        var preText = str.substring(0, offset);
+        var postText = str.substring(offset, str.length);
         var oContent = this.selfSearch(data, uuid);
-        oContent["_"] = preText+tenSpaces+postText;
+        oContent["_"] = preText + tenSpaces + postText;
         _triggerChange();
       }
     },
 
     handleOnKeyDown: function (oEvent) {
+
       if (window.getSelection()) {
         var oSel = window.getSelection();               //o-object, a-array, i-index, s-string.
         var iRange = oSel.getRangeAt(0);
         var oCurrentDom = iRange.commonAncestorContainer.parentNode;
         var sTargetUID = oCurrentDom.getAttribute("data-uid");
         var sPath = oCurrentDom.getAttribute("data-path");
+        sPath = sPath + "/" + sTargetUID;
         _setPathTOUpdate(sPath);
+
+
+        if (oEvent.keyCode == 13) {
+          oEvent.preventDefault();
+          this.handleEnterKeyPress(oSel, sPath);
+        }
 
         _triggerChange();
       }
