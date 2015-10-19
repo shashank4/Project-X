@@ -131,32 +131,6 @@ var storyStore = (function () {
         }.bind(this));
         return oClosestCustom;
       }
-      var objects = [];
-      /*for (var i in obj) {
-       if (i == "Custom" && typeof obj[i] == 'object') {
-       for (var j = 0; j < obj[i].length; j++) {
-       if (obj[i][j].Content && obj[i][j].Content[0]["$"]["data-uid"] == val) {
-       var parentUUID = obj["$"]["data-uid"];
-       return {objectPos: obj[i], indexPos: j, patentUID: parentUUID, flag: 0};
-       } else if (obj[i][j].Br) {
-       if (obj[i][j].Br[0]["$"]["data-uid"] == val) {
-       var parentUUID2 = obj["$"]["data-uid"];
-       return {objectPos: obj[i], indexPos: j, patentUID: parentUUID2, flag: 1};
-       }
-       } else if (typeof obj[i][j] == 'object') {
-       objects = this.searchClosestCustomOfContentNBr(obj[i][j], key, val);
-       if (objects) {
-       return objects;
-       }
-       }
-       }
-       } else if (typeof obj[i] == 'object') {
-       objects = this.searchClosestCustomOfContentNBr(obj[i], key, val);
-       if (objects) {
-       return objects;
-       }
-       }
-       }*/
     },
 
 

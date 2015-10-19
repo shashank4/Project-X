@@ -11,16 +11,16 @@ var parseString = require('xml2js').parseString;
 var rename = require('rename');
 
 var utils = require('../screen/store/utils');
+var Config = require('./config');
 
 
 
-
-var idmlFileName = "C:/Users/CS49/Desktop/IDML/Untitled-12.idml";
+var idmlFileName = Config.idmlPath;
 
 var zip = new zip3(idmlFileName);
-zip.extractAllTo(/*target path*/"C:/Users/CS49/Desktop/IDML/Untitled-2/", /*overwrite*/true);
+var dirPath = Config.extractedDirPath;                      //"C:/Users/CS49/Desktop/IDML/test1/";                    //'D:/DesktopData/IDML/newExamine_2/';
 
-var dirPath = "C:/Users/CS49/Desktop/IDML/Untitled-2/";                      //"C:/Users/CS49/Desktop/IDML/test1/";                    //'D:/DesktopData/IDML/newExamine_2/';
+zip.extractAllTo(/*target path*/dirPath, /*overwrite*/true);
 var uid = 0;
 
 var parser = new xml2js.Parser();
