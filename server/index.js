@@ -26,9 +26,8 @@ var layoutStore = require('./../screen/store/layoutStore.js');
 var storyStore = require('./../screen/store/storyStore.js');
 
 var Config = require('./config');
-var AdmZip = require('adm-zip');
 
-
+var archiver = require('archiver');
 //console.log(oStoryData);
 //console.log(spreadArray);
 
@@ -69,14 +68,17 @@ app.post('/onClickSave', upload.array(), function(req, res, next) {
         var storiesDirectory = Config.extractedDirPath + "/Stories/";
         fs.writeFile(storiesDirectory + "Story_" + sStoryName + ".xml", sStoryXml);
     });
-    var zip = AdmZip();
-    zip.addLocalFolder(Config.extractedDirPath);
+
     var idmlPath = Config.idmlPath;
     var idmlFilePath = idmlPath.substring(0, idmlPath.lastIndexOf("/") + 1);
     var idmlFileName = idmlPath.substring(idmlPath.lastIndexOf("/") + 1, idmlPath.length);
     idmlFileName = idmlFileName.split('.')[0] + "_new" + ".idml";
 
-    zip.writeZip(idmlFilePath + "/" + idmlFileName);
+    var archive = archiver.create('zip', {});
+    var output = fs.createWriteStream(idmlFilePath + "/" + idmlFileName);
+    archive.directory(Config.extractedDirPath,false);
+    archive.pipe(output);
+    archive.finalize();
 });
 
 app.use(express.static('./'));
