@@ -22,6 +22,36 @@ var storyStore = (function () {
     sPathToUpdate = sPath;
   };
 
+
+  var isCapLockOn = function(e){
+    //var charKeyCode = e.keyCode ? e.keyCode : e.which; // To work with both MSIE & Netscape
+
+    var charKeyCode = false;
+    if (e.which) {
+      charKeyCode = e.which;
+    } else if (e.keyCode) {
+      charKeyCode = e.keyCode;
+    }
+
+    var shiftKey = false;
+    if (e.shiftKey) {
+      shiftKey = e.shiftKey;
+    } else if (e.modifiers) {
+      shiftKey = !!(e.modifiers & 4);
+    }
+
+
+// Check both the condition as described above
+    if((charKeyCode >= 65 && charKeyCode <= 90 && !shiftKey)
+        || (charKeyCode >= 97 && charKeyCode <= 122 && shiftKey))
+    {
+      return true;  // Caps lock is on
+    }
+    else{
+      return false;  // Caps lock is off.
+    }
+  };
+
   return {
     setStoreData: function (data1) {
       data = data1;
@@ -199,32 +229,73 @@ var storyStore = (function () {
     },
 
 
+    handleContentTextChanged: function (oEvent, sel, targetPath,oCurrentDom) {
+      oEvent.preventDefault();
+      var bIsCapsLock = isCapLockOn(oEvent);
+      var pressedChar = String.fromCharCode(oEvent.keyCode);
 
-    handleContentTextChanged: function (sel, targetPath, spyFlag) {
+      if(oEvent.keyCode!=16){ // If the pressed key is anything other than SHIFT
+        if(oEvent.keyCode >= 65 && oEvent.keyCode <= 90){ // If the key is a letter
+          if(oEvent.shiftKey /*|| bIsCapsLock*/ ){ // If the SHIFT/CAPS key is down, return the ASCII code for the capital letter
+            pressedChar = String.fromCharCode(oEvent.keyCode);
+          }else{ // If the SHIFT key is not down, convert to the ASCII code for the lowecase letter
+            pressedChar = String.fromCharCode(oEvent.keyCode + 32);
+          }
+        }
+      }
 
+      var path = targetPath.split("/");
+      var currentStoryId = path.splice(0, 1);
+      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+
+      var uuid = path[path.length - 1];
+
+      /**
+       * if key is pressed on any BR node.
+       */
+      if(oCurrentDom.className.indexOf('br')>(-1)){
+
+        var oCustom = this.searchClosestCustomOfContentNBr(currentStory, path);
+        var newUid21 = utils.generateUUID();
+        var newContentObj21 = {"Content": [{"_": pressedChar, "$": {"data-uid": newUid21}}]};
+        oCustom.objectPos.splice(0, 0, newContentObj21);
+        _triggerChange();
+        return;
+      }
+
+
+      /**
+       * if a key is pressed either BEFORE or AFTER the BR node...
+       */
       if ((sel.focusNode.nextSibling
           && sel.focusNode.nextSibling.className.indexOf("br") > (-1))
           ||
           ((sel.focusNode.previousSibling
           && sel.focusNode.previousSibling.className.indexOf("br") > (-1)))) {
 
-        var path = targetPath.split("/");
-        var currentStoryId = path.splice(0, 1);
-        var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+
         var oParentCustom = this.searchClosestCustomOfContentNBr(currentStory, path);
         var aCustom = oParentCustom.objectPos;
         var index = oParentCustom.indexPos;
-        var newContentStringBefore = sel.focusNode.data;
+        var newContentStringBefore = sel.focusNode.data.substring(0, sel.focusOffset) + pressedChar
+                                      + sel.focusNode.data.substring(sel.focusOffset, sel.length);
 
         var newUid = utils.generateUUID();
         var newContentObj = {"Content": [{"_": newContentStringBefore, "$": {"data-uid": newUid}}]};
 
+        /**
+         * if a key is pressed AFTER the BR node...
+         */
         if (sel.focusNode.previousSibling && sel.focusNode.previousSibling.className.indexOf("br") > (-1)) {
           aCustom.splice(index + 1, 0, newContentObj);
 
           _triggerChange();
 
-        } else if (sel.focusNode.nextSibling && sel.focusNode.nextSibling.className.indexOf("br") > (-1)) {
+        }
+        /**
+         * * if a key is pressed BEFORE the BR node...
+         */
+        else if (sel.focusNode.nextSibling && sel.focusNode.nextSibling.className.indexOf("br") > (-1)) {
           if (index != 0)
             aCustom.splice(index - 1, 0, newContentObj);
           else
@@ -236,17 +307,30 @@ var storyStore = (function () {
         }
 
 
-      } else if (!sel.focusNode.nextSibling && !sel.focusNode.previousSibling
+      }
+      /**
+       * if a key is pressed ON the extreme last BR node...
+       *//*
+      else if (!sel.focusNode.nextSibling && !sel.focusNode.previousSibling
           && !sel.focusNode.parentNode.nextSibling && !sel.focusNode.parentNode.previousSibling) {
-        var oChara = this.selfSearch(data, uuid);
+
+        var oChara = this.searchClosestCustomOfContentNBr(currentStory, path);
         var newUid2 = utils.generateUUID();
-        var newContentObj2 = {"Content": [{"_": sel.focusNode.data, "$": {"data-uid": newUid2}}]};
-        oChara.Custom.splice(0, 0, newContentObj2);
+        var newContentObj2 = {"Content": [{"_": pressedChar, "$": {"data-uid": newUid2}}]};
+        oChara.objectPos.splice(0, 0, newContentObj2);
         _triggerChange();
         console.log("hii");
-      } else {
-        var oContent = this.selfSearch(data, uuid);
-        oContent["_"] = sel.focusNode.data;
+
+
+      }*/
+      /**
+       * if key is pressed in the middle of the node.(Normal processing)
+       */
+      else {
+        var oContent = this.selfSearch(currentStory, uuid);
+        oContent["_"] = sel.focusNode.data.substring(0, sel.focusOffset) + pressedChar
+                        + sel.focusNode.data.substring(sel.focusOffset, sel.length);
+
         _triggerChange();
       }
     },
@@ -446,12 +530,7 @@ var storyStore = (function () {
                 aCustom.splice(charIndex, 1);
                 _triggerChange();
               }
-
-
-            } else if (aCustom.length == 1) {
-              console.log("you are going right bro....");
             }
-
           }
 
         }
@@ -565,7 +644,11 @@ var storyStore = (function () {
       if (window.getSelection()) {
         var oSel = window.getSelection();               //o-object, a-array, i-index, s-string.
         var iRange = oSel.getRangeAt(0);
+
         var oCurrentDom = iRange.commonAncestorContainer.parentNode;
+        if(oCurrentDom.className.indexOf('paragraphContainer')>(-1)){
+          oCurrentDom = oCurrentDom.firstChild.firstChild;
+        }
         var sTargetUID = oCurrentDom.getAttribute("data-uid");
         var sPath = oCurrentDom.getAttribute("data-path");
         sPath = sPath + "/" + sTargetUID;
@@ -577,7 +660,21 @@ var storyStore = (function () {
           this.handleEnterKeyPress(oSel, sPath);
         }
 
-        _triggerChange();
+        else if (oEvent.keyCode == 8) {
+          this.handleBackspacePressed(oEvent,oSel, sPath);
+        }
+
+        else if (oEvent.keyCode == 46) {
+          this.handleDeletePressed(oEvent, oSel, sPath);
+        }
+
+        else if (oEvent.keyCode == 9) {
+          this.handleTabPressed(oEvent, oSel, sPath);
+        }
+        else{
+          this.handleContentTextChanged(oEvent,oSel,sPath,oCurrentDom);
+        }
+          _triggerChange();
       }
 
     }
