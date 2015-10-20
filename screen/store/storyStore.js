@@ -52,6 +52,68 @@ var storyStore = (function () {
     }
   };
 
+  var handleCharaOfDelete = function(aParent, iIndex){
+    /**
+     * if next node is BR... then remove that node
+     */
+    if (aParent[iIndex + 1].Br)
+    {
+      /**
+       * if there are more next siblings to current node, then append next content to current content.
+       */
+      if (aParent[iIndex] && aParent[iIndex + 1 + 1] && aParent[iIndex + 1 + 1].Content){
+        aParent[iIndex].Content[0]["_"] = aParent[iIndex].Content[0]["_"].concat(aParent[iIndex + 2].Content[0]["_"])
+        aParent.splice(iIndex + 1 +1, 1);
+      }
+      aParent.splice(iIndex + 1, 1);
+      _triggerChange();
+      return null;
+
+    }
+    /**
+     * if next node is CONTENT, then remove its first character.
+     */
+    else if(aParent[iIndex + 1].Content){
+      var strContent = aParent[iIndex + 1].Content[0]["_"];
+      if (strContent.length != 1) {
+        aParent[iIndex + 1].Content[0]["_"] = /*str.slice(0, 0) +*/ strContent.slice(1, strContent.length);    //on error fisrt check here.
+      } else {
+        aParent[iIndex + 1].splice(0, 1);
+      }
+
+    }
+    /**
+     * if next node is XMLElement.
+     */
+    else if (aParent[iIndex + 1].XMLElement)
+    {
+      /**
+       * if first node of XMLElement is CONTENT.
+       */
+      if(aParent[iIndex + 1].XMLElement[0].Custom[0].Content)
+      {
+        var str = aParent[iIndex + 1].XMLElement[0].Custom[0].Content[0]["_"];
+        if (str.length != 1) {
+          aParent[iIndex + 1].XMLElement[0].Custom[0].Content[0]["_"] = /*str.slice(0, 0) +*/ str.slice(1, str.length);    //on error fisrt check here.
+        } else {
+          aParent[iIndex + 1].XMLElement[0].Custom.splice(0, 1);
+        }
+      }
+      /**
+       * if first node of XMLElement is BR.
+       */
+      else if (aParent[iIndex + 1].XMLElement[0].Custom[0].Br){
+        aParent[iIndex + 1].XMLElement[0].Custom.splice(0, 1);
+      }
+
+      _triggerChange();
+      return null;
+    }
+
+  };
+
+
+
   return {
     setStoreData: function (data1) {
       data = data1;
@@ -103,7 +165,7 @@ var storyStore = (function () {
       }
     },
 
-    searchClosestCustomOfContentNBr: function (obj, remainingPath, sParentId) {
+    searchClosestCustomOfLastInPath: function (obj, remainingPath, sParentId) {
       if (obj["Custom"]) {
         var aCustom = obj["Custom"];
         var oClosestCustom;
@@ -122,7 +184,7 @@ var storyStore = (function () {
                   };
                 } else {
                   remainingPath.splice(0, 1);
-                  oClosestCustom = this.searchClosestCustomOfContentNBr(oTag, remainingPath, oTag['$'][UID_KEY]);
+                  oClosestCustom = this.searchClosestCustomOfLastInPath(oTag, remainingPath, oTag['$'][UID_KEY]);
                 }
                 return false;
               }
@@ -135,35 +197,6 @@ var storyStore = (function () {
         return oClosestCustom;
       }
     },
-
-
-    searchClosestCustomOfChara: function (obj, uuid) {
-      var objects = [];
-      for (var i in obj) {
-        if (i == "Custom") {
-          for (var j = 0; j < obj[i].length; j++) {
-            if (obj[i][j].CharacterStyleRange
-                && obj[i][j].CharacterStyleRange[0]["$"]["data-uid"] == uuid) {
-              return {reqObj: obj[i], iIndex: j};
-            }
-            else if (typeof obj[i][j] == 'object') {
-              objects = this.searchClosestCustomOfChara(obj[i][j], uuid);
-              if (objects) {
-                return objects;
-              }
-            }
-          }
-        } else if (typeof obj[i] == 'object') {
-          objects = this.searchClosestCustomOfChara(obj[i], uuid);
-          if (objects) {
-            return objects;
-          }
-        }
-      }
-    },
-
-
-
 
     handleContentTextChanged: function (oEvent, sel, targetPath,oCurrentDom) {
 
@@ -184,7 +217,7 @@ var storyStore = (function () {
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
 
-      var oParentCustom = this.searchClosestCustomOfContentNBr(currentStory, path);
+      var oParentCustom = this.searchClosestCustomOfLastInPath(currentStory, path);
       var aCustom = oParentCustom.objectPos;
       var index = oParentCustom.indexPos;
 
@@ -243,6 +276,7 @@ var storyStore = (function () {
        */
       else {
         var oContent = this.selfSearch(currentStory, uuid);
+        var x = aCustom[index];
         oContent["_"] = sel.focusNode.data.substring(0, sel.focusOffset) + pressedChar
                         + sel.focusNode.data.substring(sel.focusOffset, sel.length);
 
@@ -255,7 +289,7 @@ var storyStore = (function () {
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-      var returnedObject = this.searchClosestCustomOfContentNBr(currentStory, path);
+      var returnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
       var aContentData = oSel.focusNode.data;
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
@@ -343,7 +377,7 @@ var storyStore = (function () {
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-      var returnedObject = this.searchClosestCustomOfContentNBr(currentStory, path);
+      var returnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
       var parentUID = returnedObject.parentUID;
@@ -367,7 +401,7 @@ var storyStore = (function () {
             /**
              * if aParent length is  still not 0 after removing current and previous node.
              */
-            if (aParent.length != 0) {
+            if (aParent.length != 0 && !aParent[iIndex - 1].Br) {
               var previousContent = aParent.splice(iIndex - 2, 1);
               var preData = previousContent[0].Content[0]["_"];
               var currentData = currentNode[0].Content[0]["_"];
@@ -390,7 +424,7 @@ var storyStore = (function () {
             pathForPara.splice(-1,1);
             pathForPara.splice(-1,1);
 
-            var oReturned = this.searchClosestCustomOfContentNBr(currentStory, pathForPara);
+            var oReturned = this.searchClosestCustomOfLastInPath(currentStory, pathForPara);
             var aCustomPara = oReturned.objectPos;
             var iIndexPara = oReturned.indexPos;
 
@@ -420,7 +454,7 @@ var storyStore = (function () {
           var pathForChara=targetPath.split('/');
           pathForChara.splice(0,1);
           pathForChara.splice(-1,1);
-          var oUltimateParent = this.searchClosestCustomOfContentNBr(currentStory, pathForChara);
+          var oUltimateParent = this.searchClosestCustomOfLastInPath(currentStory, pathForChara);
           var aUltimateCustom = oUltimateParent.objectPos;
           var jIndex = oUltimateParent.indexPos;
           /**
@@ -524,69 +558,58 @@ var storyStore = (function () {
     },
 
     handleDeletePressed: function (oEvent, sel, targetPath) {
-      /**
-       * delete cases...
-       * 1)if entire charastyle or xmltagv is ddeleted.----combine twwo contents...after and before waala.
-       * 2)if next sibling is br then remove br and check fro before and after charastylesa if same then combine.
-       * 3)if
-       *
-       */
+      oEvent.preventDefault();
+
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-      var returnedObject = this.searchClosestCustomOfContentNBr(currentStory, path);
+      var returnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
-      var parentUID = returnedObject.parentUID;
-      if (sel.focusOffset == aParent[iIndex].Content[0]["_"].length) {
-        if (iIndex <= aParent.length - 2) {
-          if (aParent[iIndex + 1].Br) {
-            oEvent.preventDefault();
-            if (aParent[iIndex + 2]) {
-              aParent[iIndex].Content[0]["_"] = aParent[iIndex].Content[0]["_"].concat(aParent[iIndex + 2].Content[0]["_"])
-            }
-            aParent.splice(iIndex + 1, 2);
-            _triggerChange();
 
-          } else if (aParent[iIndex + 1].XMLElement) {
-            oEvent.preventDefault();
-            var str = aParent[iIndex + 1].XMLElement[0].Custom[0].Content[0]["_"];
-            if (str.length != 1) {
-              aParent[iIndex + 1].XMLElement[0].Custom[0].Content[0]["_"] = str.slice(0, 0) + str.slice(1, str.length);
-            } else {
-              aParent[iIndex + 1].XMLElement[0].Custom.splice(0, 1);
-            }
-            _triggerChange();
-          }
+      /**
+       * if key is pressed on the last position of the current node
+       */
+      if (sel.focusOffset == aParent[iIndex].Content[0]["_"].length)
+      {
+        /**
+         * if current node has next node. (Current node will always be CONTENT)
+         */
+        if (aParent[iIndex + 1])
+        {
+          handleCharaOfDelete(aParent, iIndex);
+        }
+        /**
+         * if current node is the last node of its parent , i.e. it is the last node of current characterStyle.
+         */
+        else if (iIndex == aParent.length - 1) {
 
-        } else if (iIndex == aParent.length - 1) {
-          var oCharacterOfParent = this.searchClosestCustomOfChara(data, parentUID);
-          var aCustom = oCharacterOfParent.reqObj;
-          var charIndex = oCharacterOfParent.iIndex;
+          var pathForChara = targetPath.split("/");
+          pathForChara.splice(0,1);
+          pathForChara.splice(-1,1);
+          var oParentOfCharacter = this.searchClosestCustomOfLastInPath(currentStory,pathForChara);
+          var aCustom = oParentOfCharacter.objectPos;
+          var charIndex = oParentOfCharacter.indexPos;
+
+          /**
+           * if current node has next characterStyle
+           */
           if (aCustom[charIndex + 1]) {
-            if (aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"].length != 1) {
-              oEvent.preventDefault();
-              var tempStr = aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
-              aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"] = tempStr.slice(0, 0) + tempStr.slice(1, tempStr.length);
-              _triggerChange();
-            } else {
-              if (aCustom[charIndex + 1].CharacterStyleRange[0].Custom.length == 1) {
-                if (aCustom[charIndex + 2]) {
-                  oEvent.preventDefault();
-                  if (aCustom[charIndex].CharacterStyleRange[0]["$"].AppliedCharacterStyle == aCustom[charIndex + 2].CharacterStyleRange[0]["$"].AppliedCharacterStyle) {
-                    aCustom[charIndex].CharacterStyleRange[0].Custom[0].Content[0]["_"] = aCustom[charIndex].CharacterStyleRange[0].Custom[0].Content[0]["_"]
-                    + aCustom[charIndex + 2].CharacterStyleRange[0].Custom[0].Content[0]["_"];
-                    aCustom.splice(charIndex + 1, 2);
-                    _triggerChange();
-                  } else {
-                    aCustom.splice(charIndex + 1, 1);
-                    _triggerChange();
-                  }
-                }
-              }
-            }
+            handleCharaOfDelete(aCustom[charIndex + 1].CharacterStyleRange[0].Custom, -1);
+
+          }else if(!aCustom[iIndex+1]){
+            //handleParaOfDelete()
           }
         }
+      }
+      else if (sel.focusOffset < aParent[iIndex].Content[0]["_"].length){
+        var strContent = aParent[iIndex].Content[0]["_"];
+        if (strContent.length != 1) {
+          aParent[iIndex].Content[0]["_"] = strContent.slice(0, sel.focusOffset) + strContent.slice(sel.focusOffset+1, strContent.length);    //on error fisrt check here.
+        } else {
+          aParent[iIndex].splice(0, 1);
+        }
+        _triggerChange();
       }
     },
 

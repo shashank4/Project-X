@@ -241,7 +241,7 @@ var utils = (function () {
       return uuid;
     },
 
-    searchClosestCustomOfContentNBr: function (obj, key, val) {
+    searchClosestCustomOfLastInPath: function (obj, key, val) {
 
       var objects = [];
       for (var i in obj) {
@@ -250,11 +250,11 @@ var utils = (function () {
             if (obj[i][j].Content && obj[i][j].Content[0]["$"]["data-uid"] == val) {
               return obj[i];
             } else if(typeof obj[i][j] == 'object'){
-              objects = objects.concat(this.searchClosestCustomOfContentNBr(obj[i][j], key, val));
+              objects = objects.concat(this.searchClosestCustomOfLastInPath(obj[i][j], key, val));
             }
           }
         } else if (typeof obj[i] == 'object') {
-          objects = objects.concat(this.searchClosestCustomOfContentNBr(obj[i], key, val));
+          objects = objects.concat(this.searchClosestCustomOfLastInPath(obj[i], key, val));
         }
       }
       return objects;
