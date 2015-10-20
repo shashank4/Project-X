@@ -26,7 +26,7 @@ var storyStore = (function () {
     sPathToUpdate = sPath;
   };
 
-  var isCapLockOn = function(e){
+  var _isCapLockOn = function(e){
     //var charKeyCode = e.keyCode ? e.keyCode : e.which; // To work with both MSIE & Netscape
 
     var charKeyCode = false;
@@ -49,6 +49,25 @@ var storyStore = (function () {
       return true;  // Caps lock is on
     }else{
       return false;  // Caps lock is off.
+    }
+  };
+
+  var _getLastChild = function (oDOMNode) {
+    if(oDOMNode.lastChild && oDOMNode.lastChild.nodeName != "#text") {
+      return _getLastChild(oDOMNode.lastChild);
+    }
+    return oDOMNode;
+  };
+
+  var _getPreviousDOMLastChild = function (oDOMNode) {
+    if(oDOMNode.previousSibling) {
+      return _getLastChild(oDOMNode.previousSibling);
+    } else {
+      if(_.contains(oDOMNode.parentNode.className, "storyContainer")) {
+        return false;
+      } else {
+        return _getPreviousDOMLastChild(oDOMNode.parentNode);
+      }
     }
   };
 
@@ -167,7 +186,7 @@ var storyStore = (function () {
 
     handleContentTextChanged: function (oEvent, sel, targetPath,oCurrentDom) {
 
-      var bIsCapsLock = isCapLockOn(oEvent);
+      var bIsCapsLock = _isCapLockOn(oEvent);
       var pressedChar = String.fromCharCode(oEvent.keyCode);
 
       if(oEvent.keyCode!=16){ // If the pressed key is anything other than SHIFT
@@ -658,7 +677,31 @@ var storyStore = (function () {
         }
 
         else if (oEvent.keyCode == 8) { //backSpace
-          oCaretPosition.endOffset = iRange.endOffset - 1;
+
+          if(bFromText && iRange.endOffset > 0) {
+            iRangeForMultipleEnters = iRange.endOffset - 1;
+          } else {
+            var oPreviousBrNode = _getPreviousDOMLastChild(oCurrentDom);
+            if(oPreviousBrNode) {
+              oCaretPosition.oNodeToSet =_getPreviousDOMLastChild(oPreviousBrNode);
+              if(oCaretPosition.oNodeToSet) {
+                if(oCaretPosition.oNodeToSet.firstChild) {
+                  iRangeForMultipleEnters = oCaretPosition.oNodeToSet.firstChild.length;
+                } else {
+                  iRangeForMultipleEnters = _.indexOf(oCaretPosition.oNodeToSet.parentNode.childNodes, oCaretPosition.oNodeToSet);
+                  oCaretPosition.oNodeToSet = oCaretPosition.oNodeToSet.parentNode;
+                }
+              } else {
+                iRangeForMultipleEnters = _.indexOf(oPreviousBrNode.parentNode, oPreviousBrNode);
+                oCaretPosition.oNodeToSet = oPreviousBrNode.parentNode;
+              }
+            } else {
+              iRangeForMultipleEnters = _.indexOf(oCurrentDom.parentNode, oCurrentDom);
+              oCaretPosition.oNodeToSet = oCurrentDom.parentNode;
+            }
+          }
+
+          oCaretPosition.endOffset = iRangeForMultipleEnters;
           this.handleBackspacePressed(oEvent,oSel, sPath);
         }
 
