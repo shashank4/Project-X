@@ -174,18 +174,23 @@ var Story = React.createClass({
     if (oOldSelection.rangeCount) {
       var oRange = this.props.caretPosition.oRange;
       var iOffset = this.props.caretPosition.endOffset;
+      var oNodeToSet = this.props.caretPosition.oNodeToSet;
 
-      if(oRange.startContainer.firstChild) {
-        oRange.setStart(oRange.startContainer.firstChild, iOffset);
+      if(this.props.caretPosition.isEnter) {
+        oRange.setStart(oNodeToSet, iOffset);
+        oRange.setEnd(oNodeToSet, iOffset);
+
       } else {
-        oRange.setStart(oRange.startContainer, iOffset);
+
+        if(oNodeToSet.firstChild) {
+          oRange.setStart(oNodeToSet.firstChild, iOffset);
+          oRange.setEnd(oNodeToSet.firstChild, iOffset);
+        } else {
+          oRange.setStart(oNodeToSet, iOffset);
+          oRange.setEnd(oNodeToSet, iOffset);
+        }
       }
 
-      if(oRange.endContainer.firstChild) {
-        oRange.setEnd(oRange.endContainer.firstChild, iOffset);
-      } else {
-        oRange.setEnd(oRange.endContainer, iOffset);
-      }
 
       var DOM = this.refs.storyContainer.getDOMNode();
       var oSelection = window.getSelection();
