@@ -26,7 +26,7 @@ var storyStore = (function () {
     sPathToUpdate = sPath;
   };
 
-  var isCapLockOn = function(e){
+  var _isCapLockOn = function(e){
     //var charKeyCode = e.keyCode ? e.keyCode : e.which; // To work with both MSIE & Netscape
 
     var charKeyCode = false;
@@ -401,8 +401,85 @@ var storyStore = (function () {
       var iIndex = returnedObject.indexPos;
       var parentUID = returnedObject.parentUID;
 
-      if (sel.focusOffset == 0) {
+      /**
+       * if current node is Br.then remove
+       */
+      if(returnedObject.flag == true){
+        if(aParent[iIndex-1]){
+          aParent.splice(iIndex, 1);
+          _triggerChange();
+          return null;
 
+        }
+        /**
+         * go to check current nodes prev charaStyle.
+         */
+        else if(!aParent[iIndex-1]){
+          var newPath = targetPath.split("/");
+          newPath.splice(0,1);
+          newPath.splice(-1,1);
+          //path.splice(-1,1);
+          var oReturnedParent = this.searchClosestCustomOfLastInPath(currentStory,newPath);
+          var aReturnParent = oReturnedParent.objectPos;
+          var iParent = oReturnedParent.indexPos;
+
+          if(aReturnParent[iParent-1]){
+            var lastOfChara = aReturnParent[iParent-1].Custom.length;
+            if(aReturnParent[iParent-1].Custom[lastOfChara-1].Br){
+              aReturnParent[iParent-1].Custom.splice(-1,1);
+              _triggerChange();
+              return null;
+            }
+          }
+          /**
+           * go to check parent nodes of charastyle i.e. for para.
+           */
+          else if( !aReturnParent[iParent-1]){
+            var newPath2 = targetPath.split("/");
+            newPath2.splice(0,1);
+            newPath2.splice(-1,1);
+            newPath2.splice(-1,1);
+
+            var oReturnedGrandParent = this.searchClosestCustomOfLastInPath(currentStory, newPath2);
+            var aReturnedGrandParent = oReturnedGrandParent.objectPos;
+            var iGrandParent = oReturnedGrandParent.indexPos;
+            if(aReturnedGrandParent[iGrandParent-1]){
+              var lastChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length;
+              var lastCustomOfChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange.length;
+
+              var restNew =
+              aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[lastCustomOfChara-1].Custom.splice(-1,1);
+              if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[lastCustomOfChara-1].Custom.length==0)
+              {
+                aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange.splice(-1,1);
+                if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange.length==0){
+                  aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.splice(-1,1);
+                  if(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom){
+                    _.assign(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
+                    aReturnedGrandParent.splice(iGrandParent,1);
+                    _triggerChange();
+                    return null;
+                  }
+                  aReturnedGrandParent.splice(iGrandParent-1,1);
+                }
+              }else {
+                _.assign(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
+                aReturnedGrandParent.splice(iGrandParent,1);
+              }
+
+              //aReturnedGrandParent[iGrandParent-2].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom);
+
+              //aReturnedGrandParent.splice(iGrandParent-1,1);
+              _triggerChange();
+              return null;
+            }
+
+
+          }
+        }
+      }
+
+      if (sel.focusOffset == 0) {
         /**
          * if iIndex th node is not the start node.....then do normal processing
          * i.e. remove the previous node ......remove previous BR and append next content data
@@ -413,22 +490,29 @@ var storyStore = (function () {
            * if previous node is br (prev node will always be BR)
            */
           if (aParent[iIndex - 1].Br) {
-            var rest = aParent.splice(iIndex + 1);
+
+            if(aParent[iIndex + 1]){
+              var rest = aParent.splice(iIndex + 1);
+            }
+
             var currentNode = aParent.splice(iIndex, 1);
             aParent.splice(iIndex - 1, 1);
 
             /**
              * if aParent length is  still not 0 after removing current and previous node.
              */
-            if (aParent.length != 0 && !aParent[iIndex - 1].Br) {
+            if (aParent.length != 0 &&  aParent[iIndex - 2] && !aParent[iIndex - 2].Br) {
               var previousContent = aParent.splice(iIndex - 2, 1);
               var preData = previousContent[0].Content[0]["_"];
               var currentData = currentNode[0].Content[0]["_"];
               previousContent[0].Content[0]["_"] = preData.concat(currentData);
               _.assign(aParent, aParent.concat(previousContent));
             }
-            _.assign(aParent, aParent.concat(rest));
+            if(rest){
+              _.assign(aParent, aParent.concat(rest));
+            }
             _triggerChange();
+            return null;
           }
 
         }
@@ -460,7 +544,6 @@ var storyStore = (function () {
             }
           }
         }
-
       }
       /**
        * if there is only one character in the selected node and focusOffset is also 1
@@ -585,6 +668,18 @@ var storyStore = (function () {
       var returnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
+
+
+      /**
+       * if key is pressed on BR node
+       */
+      if(returnedObject.flag==true){
+        aParent.splice(iIndex,1);
+        _triggerChange();
+        return null;
+      }
+
+
 
       /**
        * if key is pressed on the last position of the current node
