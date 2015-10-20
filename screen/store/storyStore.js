@@ -15,7 +15,7 @@ var storyStore = (function () {
   var sPathToUpdate = "";
   var oCaretPosition = {
     oSelection: {},
-    oSelectedDOM: {}
+    oRange: {}
   };
 
   var _triggerChange = function () {
@@ -645,12 +645,12 @@ var storyStore = (function () {
 
 
         if (oEvent.keyCode == 13) { //ENTER
-          oEvent.preventDefault();
+          oCaretPosition.endOffset = iRange.endOffset + 1;
           this.handleEnterKeyPress(oSel, sPath);
         }
 
         else if (oEvent.keyCode == 8) { //backSpace
-          oEvent.preventDefault();
+          oCaretPosition.endOffset = iRange.endOffset - 1;
           this.handleBackspacePressed(oEvent,oSel, sPath);
         }
 
@@ -659,9 +659,11 @@ var storyStore = (function () {
         }
 
         else if (oEvent.keyCode == 9) {  //Tab
+          oCaretPosition.endOffset = iRange.endOffset + 10;
           this.handleTabPressed(oEvent, oSel, sPath);
         }
         else{
+          oCaretPosition.endOffset = iRange.endOffset + 1;
           this.handleContentTextChanged(oEvent,oSel,sPath,oCurrentDom);
         }
         _triggerChange();

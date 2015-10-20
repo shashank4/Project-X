@@ -147,6 +147,7 @@ var Story = React.createClass({
   },
 
   handleKeyDown: function (oEvent) {
+    oEvent.preventDefault();
     /*if (oEvent.keyCode == 13) {
      this.handleEnterKeyPress(oEvent);
      }
@@ -174,8 +175,17 @@ var Story = React.createClass({
       var oRange = this.props.caretPosition.oRange;
       var iOffset = this.props.caretPosition.endOffset;
 
-      oRange.setStart(oRange.startContainer.firstChild, iOffset);
-      oRange.setEnd(oRange.endContainer, iOffset);
+      if(oRange.startContainer.firstChild) {
+        oRange.setStart(oRange.startContainer.firstChild, iOffset);
+      } else {
+        oRange.setStart(oRange.startContainer, iOffset);
+      }
+
+      if(oRange.endContainer.firstChild) {
+        oRange.setEnd(oRange.endContainer.firstChild, iOffset);
+      } else {
+        oRange.setEnd(oRange.endContainer, iOffset);
+      }
 
       var DOM = this.refs.storyContainer.getDOMNode();
       var oSelection = window.getSelection();
@@ -198,7 +208,7 @@ var Story = React.createClass({
         <div className="storyContainer"
              ref="storyContainer"
              contentEditable={true}
-             onInput={this.handleKeyDown}>
+             onKeyDown={this.handleKeyDown}>
           {wrapperArray}
         </div>
     );
