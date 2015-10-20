@@ -661,7 +661,7 @@ var storyStore = (function () {
         oCaretPosition.endOffset = iRange.endOffset;
         oCaretPosition.isEnter = false;
 
-        var iRangeForMultipleEnters = 2;
+        var iRangeForMultipleEnters = 0;
         var bFromText = false;
 
         var oCurrentDom;
@@ -673,6 +673,10 @@ var storyStore = (function () {
         else{
           oCurrentDom = iRange.commonAncestorContainer.parentNode;
           oCaretPosition.oNodeToSet = iRange.commonAncestorContainer.parentNode;
+          iRangeForMultipleEnters  =_.indexOf(oCaretPosition.oNodeToSet.parentNode.childNodes, oCurrentDom) + 1;
+          if(iRange.startOffset > 0) {
+            iRangeForMultipleEnters += 1;
+          }
           bFromText = true;
         }
 
