@@ -620,13 +620,25 @@ var storyStore = (function () {
         oCaretPosition.oSelection = oSel;
         oCaretPosition.oRange = iRange.cloneRange();
         oCaretPosition.endOffset = iRange.endOffset;
+        oCaretPosition.isEnter = false;
+
+        var iRangeForMultipleEnters = 0;
+        var bFromText = false;
 
         var oCurrentDom;
         if(iRange.commonAncestorContainer.nodeName != "#text"){
           oCurrentDom = iRange.commonAncestorContainer.childNodes[iRange.startOffset];
+          oCaretPosition.oNodeToSet = iRange.commonAncestorContainer;
+          iRangeForMultipleEnters = iRange.startOffset + 1;
         }
         else{
           oCurrentDom = iRange.commonAncestorContainer.parentNode;
+          oCaretPosition.oNodeToSet = iRange.commonAncestorContainer.parentNode;
+          iRangeForMultipleEnters  =_.indexOf(oCaretPosition.oNodeToSet.parentNode.childNodes, oCurrentDom) + 1;
+          if(iRange.startOffset > 0) {
+            iRangeForMultipleEnters += 1;
+          }
+          bFromText = true;
         }
 
         var sTargetUID = oCurrentDom.getAttribute("data-uid");
@@ -636,7 +648,11 @@ var storyStore = (function () {
 
 
         if (oEvent.keyCode == 13) { //ENTER
-          oCaretPosition.endOffset = iRange.endOffset + 1;
+          oCaretPosition.isEnter = true;
+          if(bFromText) {
+            oCaretPosition.oNodeToSet = oCaretPosition.oNodeToSet.parentNode;
+          }
+          oCaretPosition.endOffset = iRangeForMultipleEnters;
           this.handleEnterKeyPress(oSel, sPath);
         }
 
