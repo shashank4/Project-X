@@ -77,8 +77,9 @@ var CharacterStyleRange = React.createClass({
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
-    var sCharacterStyleId = this.props.data[0]['$']['data-uid'];
-    return _.contains(nextProps.pathToUpdate, sCharacterStyleId);
+   /* var sCharacterStyleId = this.props.data[0]['$']['data-uid'];
+    return _.contains(nextProps.pathToUpdate, sCharacterStyleId);*/
+    return true;
   },
 
   render: function () {
