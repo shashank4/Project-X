@@ -50,9 +50,16 @@ var ParagraphStyleRange = React.createClass({
 
   },
 
+  /**
+   * check this functionality
+   * @param nextProps
+   * @param nextState
+   * @returns {boolean}
+   */
   shouldComponentUpdate: function(nextProps, nextState) {
-    var sParagraphId = this.props.data[0]['$']['data-uid'];
-    return _.contains(nextProps.pathToUpdate, sParagraphId);
+   /* var sParagraphId = this.props.data[0]['$']['data-uid'];
+    return _.contains(nextProps.pathToUpdate, sParagraphId);*/
+    return true;
   },
 
   render: function () {

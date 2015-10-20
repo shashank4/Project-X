@@ -45,12 +45,9 @@ var storyStore = (function () {
 
 
 // Check both the condition as described above
-    if((charKeyCode >= 65 && charKeyCode <= 90 && !shiftKey)
-        || (charKeyCode >= 97 && charKeyCode <= 122 && shiftKey))
-    {
+    if((charKeyCode >= 65 && charKeyCode <= 90 && !shiftKey) || (charKeyCode >= 97 && charKeyCode <= 122 && shiftKey)){
       return true;  // Caps lock is on
-    }
-    else{
+    }else{
       return false;  // Caps lock is off.
     }
   };
@@ -117,7 +114,6 @@ var storyStore = (function () {
               var sCustomTagUID = oTag['$'][UID_KEY];
               if (sCustomTagUID == remainingPath[0]) {
                 if (remainingPath.length == 1) {
-                  //oClosestCustom = oCustom;
                   oClosestCustom = {
                     objectPos: aCustom,
                     indexPos: iCustomIndex,
@@ -140,49 +136,6 @@ var storyStore = (function () {
       }
     },
 
-
-
-
-    searchClosestCustomOfPara: function (obj, uuid) {
-      var objects = [];
-      for (var i in obj) {
-        if (i == "Custom") {
-          for (var j = 0; j < obj[i].length; j++) {
-            if (obj[i][j].ParagraphStyleRange
-                && obj[i][j].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0]["$"]["data-uid"] == uuid) {
-              return {reqObj: obj[i], iIndex: j};
-            }
-            else if (typeof obj[i][j] == 'object') {
-              objects = this.searchClosestCustomOfPara(obj[i][j], uuid);
-              if (objects) {
-                return objects;
-              }
-            }
-          }
-        } else if (typeof obj[i] == 'object') {
-          objects = this.searchClosestCustomOfPara(obj[i], uuid);
-          if (objects) {
-            return objects;
-          }
-        }
-      }
-    },
-
-    searchClosestCustomOfXmltag: function (obj, uuid) {
-      var objects = [];
-      for (var i in obj) {
-        if (obj[i] && obj[i].XMLElement
-            && obj[i].XMLElement[0].Custom && obj[i].XMLElement[0].Custom[0].Content
-            && obj[i].XMLElement[0].Custom[0].Content[0]["$"]["data-uid"] == uuid && typeof obj[i] == 'object') {
-          return {reqObj: obj, iIndex: i};
-        } else if (typeof obj[i] == 'object') {
-          objects = this.searchClosestCustomOfXmltag(obj[i], uuid);
-          if (objects) {
-            return objects;
-          }
-        }
-      }
-    },
 
     searchClosestCustomOfChara: function (obj, uuid) {
       var objects = [];
@@ -210,13 +163,15 @@ var storyStore = (function () {
     },
 
 
+
+
     handleContentTextChanged: function (oEvent, sel, targetPath,oCurrentDom) {
 
       var bIsCapsLock = isCapLockOn(oEvent);
       var pressedChar = String.fromCharCode(oEvent.keyCode);
 
       if(oEvent.keyCode!=16){ // If the pressed key is anything other than SHIFT
-        if(oEvent.keyCode >= 65 && oEvent.keyCode <= 90){ // If the key is a letter
+        if(oEvent.keyCode >= 65 && oEvent.keyCode <= 90 ){ // If the key is a letter
           if(oEvent.shiftKey /*|| bIsCapsLock*/ ){ // If the SHIFT/CAPS key is down, return the ASCII code for the capital letter
             pressedChar = String.fromCharCode(oEvent.keyCode);
           }else{ // If the SHIFT key is not down, convert to the ASCII code for the lowecase letter
@@ -339,10 +294,12 @@ var storyStore = (function () {
           var rest = aParent.splice(iIndex + 1);
           aParent.splice(iIndex, 1);
 
-          var newUid = utils.generateUUID();
-          var newContentStringBefore = aContentData.substring(0, iOffset);
-          var newContentObjBefore = {"Content": [{"_": newContentStringBefore, "$": {"data-uid": newUid}}]};
-          aParent.push(newContentObjBefore);
+          if(iOffset != 0){
+            var newUid = utils.generateUUID();
+            var newContentStringBefore = aContentData.substring(0, iOffset);
+            var newContentObjBefore = {"Content": [{"_": newContentStringBefore, "$": {"data-uid": newUid}}]};
+            aParent.push(newContentObjBefore);
+          }
 
           var newUid2 = utils.generateUUID();
           var newBrObj = {"Br": [{"$": {"data-uid": newUid2}}]};
@@ -428,10 +385,14 @@ var storyStore = (function () {
            * Paragraph Handling
            */
           if (sel.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
+            var pathForPara = targetPath.split("/");
+            pathForPara.splice(0, 1);
+            pathForPara.splice(-1,1);
+            pathForPara.splice(-1,1);
 
-            var oReturned = this.searchClosestCustomOfPara(data, parentUID);
-            var aCustomPara = oReturned.reqObj;
-            var iIndexPara = oReturned.iIndex;
+            var oReturned = this.searchClosestCustomOfContentNBr(currentStory, pathForPara);
+            var aCustomPara = oReturned.objectPos;
+            var iIndexPara = oReturned.indexPos;
 
             if (iIndexPara != 0) {
               var last1 = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom.length;
@@ -456,10 +417,10 @@ var storyStore = (function () {
       else if (sel.focusOffset==1 && sel.focusNode.data.length == 1 ) {
         if (aParent.length == 1) {
 
-          var path2=targetPath.split('/');
-          path2.splice(0,1);
-          path2.splice(-1,1);
-          var oUltimateParent = this.searchClosestCustomOfContentNBr(currentStory, path2);
+          var pathForChara=targetPath.split('/');
+          pathForChara.splice(0,1);
+          pathForChara.splice(-1,1);
+          var oUltimateParent = this.searchClosestCustomOfContentNBr(currentStory, pathForChara);
           var aUltimateCustom = oUltimateParent.objectPos;
           var jIndex = oUltimateParent.indexPos;
           /**
