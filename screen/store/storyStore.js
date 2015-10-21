@@ -71,6 +71,23 @@ var storyStore = (function () {
     }
   };
 
+  var createContentNode = function (sContent, sUID){
+    return {
+      "Content": [
+        {
+          "_": sContent,
+          "$": {"data-uid": sUID}
+        }
+      ]
+    };
+  };
+
+  var updateContentTextWithPushedCharacter = function(oCurrentStory, aPath, sPushedChar, iStartIndex, iSelectionSize){
+    var oCustomDetails = storyStore.searchClosestCustomOfLastInPath(oCurrentStory, aPath);
+    var oContent = oCustomDetails.objectPos[oCustomDetails.indexPos].Content[0];
+    oContent["_"] = utils.getSplicedString(oContent['_'],iStartIndex,iSelectionSize,sPushedChar);
+  }
+
   var handleCharaOfDelete = function(aParent, iIndex){
     /**
      * if next node is BR... then remove that node
@@ -133,7 +150,7 @@ var storyStore = (function () {
 
 
 
-  return {
+  var storyStore =  {
     setStoreData: function (data1) {
       data = data1;
     },
@@ -185,6 +202,7 @@ var storyStore = (function () {
     },
 
     searchClosestCustomOfLastInPath: function (obj, remainingPath, sParentId) {
+      remainingPath = _.clone(remainingPath);
       if (obj["Custom"]) {
         var aCustom = obj["Custom"];
         var oClosestCustom;
@@ -217,91 +235,100 @@ var storyStore = (function () {
       }
     },
 
-    handleContentTextChanged: function (oEvent, sel, targetPath,oCurrentDom) {
+    handleContentTextChanged: function (oEvent, oSelection, targetPath,oCurrentDom) {
 
       var bIsCapsLock = _isCapLockOn(oEvent);
       var pressedChar = String.fromCharCode(oEvent.keyCode);
 
-      if(oEvent.keyCode!=16){ // If the pressed key is anything other than SHIFT
-        if(oEvent.keyCode >= 65 && oEvent.keyCode <= 90 ){ // If the key is a letter
-          if(oEvent.shiftKey /*|| bIsCapsLock*/ ){ // If the SHIFT/CAPS key is down, return the ASCII code for the capital letter
-            pressedChar = String.fromCharCode(oEvent.keyCode);
-          }else{ // If the SHIFT key is not down, convert to the ASCII code for the lowecase letter
-            pressedChar = String.fromCharCode(oEvent.keyCode + 32);
+      if(oEvent.keyCode >= 65 && oEvent.keyCode <= 90 ){ // If the key is a letter
+        if(oEvent.shiftKey /*|| bIsCapsLock*/ ){ // If the SHIFT/CAPS key is down, return the ASCII code for the capital letter
+          pressedChar = String.fromCharCode(oEvent.keyCode);
+        }else{ // If the SHIFT key is not down, convert to the ASCII code for the lowecase letter
+          pressedChar = String.fromCharCode(oEvent.keyCode + 32);
+        }
+      }
+      if(oSelection.type == 'Caret'){
+        var path = targetPath.split("/");
+        var currentStoryId = path.splice(0, 1);
+        var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+
+        var oParentCustom = this.searchClosestCustomOfLastInPath(currentStory, path);
+        var aCustom = oParentCustom.objectPos;
+        var index = oParentCustom.indexPos;
+        var uuid = path[path.length - 1];
+        /**
+         * if key is pressed on any BR node.
+         */
+        if(oCurrentDom.className.indexOf('br')>(-1)){
+          var newUid21 = utils.generateUUID();
+          var newContentObj21 = createContentNode(pressedChar,newUid21);
+          aCustom.splice(index, 0, newContentObj21);
+        }
+        /**
+         * if a key is pressed either BEFORE or AFTER the BR node...
+         */
+        else if ((oSelection.focusNode.nextSibling
+            && oSelection.focusNode.nextSibling.className.indexOf("br") > (-1))
+            ||
+            ((oSelection.focusNode.previousSibling
+            && oSelection.focusNode.previousSibling.className.indexOf("br") > (-1)))) {
+
+          var newContentStringBefore = oSelection.focusNode.data.substring(0, oSelection.focusOffset) + pressedChar
+              + oSelection.focusNode.data.substring(oSelection.focusOffset, oSelection.length);
+          var newUid = utils.generateUUID();
+          var newContentObj = createContentNode(newContentStringBefore,newUid);
+
+          /**
+           * if a key is pressed AFTER the BR node...
+           */
+          if (oSelection.focusNode.previousSibling && oSelection.focusNode.previousSibling.className.indexOf("br") > (-1)) {
+            aCustom.splice(index + 1, 0, newContentObj);
+          }
+          /**
+           * * if a key is pressed BEFORE the BR node...
+           */
+          else if (oSelection.focusNode.nextSibling && oSelection.focusNode.nextSibling.className.indexOf("br") > (-1)) {
+            if (index != 0)
+              aCustom.splice(index - 1, 0, newContentObj);
+            else
+              aCustom.splice(index, 0, newContentObj);
+
+            aCustom.splice(-1);
           }
         }
-      }
-
-      var path = targetPath.split("/");
-      var currentStoryId = path.splice(0, 1);
-      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-
-      var oParentCustom = this.searchClosestCustomOfLastInPath(currentStory, path);
-      var aCustom = oParentCustom.objectPos;
-      var index = oParentCustom.indexPos;
-
-
-      var uuid = path[path.length - 1];
-
-      /**
-       * if key is pressed on any BR node.
-       */
-      if(oCurrentDom.className.indexOf('br')>(-1)){
-        var newUid21 = utils.generateUUID();
-        var newContentObj21 = {"Content": [{"_": pressedChar, "$": {"data-uid": newUid21}}]};
-        aCustom.splice(index, 0, newContentObj21);
-        _triggerChange();
-        return;
-      }
-
-      /**
-       * if a key is pressed either BEFORE or AFTER the BR node...
-       */
-      if ((sel.focusNode.nextSibling
-          && sel.focusNode.nextSibling.className.indexOf("br") > (-1))
-          ||
-          ((sel.focusNode.previousSibling
-          && sel.focusNode.previousSibling.className.indexOf("br") > (-1)))) {
-
-        var newContentStringBefore = sel.focusNode.data.substring(0, sel.focusOffset) + pressedChar
-                                      + sel.focusNode.data.substring(sel.focusOffset, sel.length);
-        var newUid = utils.generateUUID();
-        var newContentObj = {"Content": [{"_": newContentStringBefore, "$": {"data-uid": newUid}}]};
-
         /**
-         * if a key is pressed AFTER the BR node...
+         * if key is pressed in the middle of the node.(Normal processing)
          */
-        if (sel.focusNode.previousSibling && sel.focusNode.previousSibling.className.indexOf("br") > (-1)) {
-          aCustom.splice(index + 1, 0, newContentObj);
-          _triggerChange();
-          return null;
+        else {
+          updateContentTextWithPushedCharacter(currentStory, path,pressedChar, oSelection.focusOffset, 0);
         }
-        /**
-         * * if a key is pressed BEFORE the BR node...
-         */
-        else if (sel.focusNode.nextSibling && sel.focusNode.nextSibling.className.indexOf("br") > (-1)) {
-          if (index != 0)
-            aCustom.splice(index - 1, 0, newContentObj);
-          else
-            aCustom.splice(index, 0, newContentObj);
 
-          aCustom.splice(-1);
-          _triggerChange();
-          return null;
-        }
       }
       /**
-       * if key is pressed in the middle of the node.(Normal processing)
-       */
+      *   Handle range selection
+      */
       else {
-        var oContent = this.selfSearch(currentStory, uuid);
-        var x = aCustom[index];
-        oContent["_"] = sel.focusNode.data.substring(0, sel.focusOffset) + pressedChar
-                        + sel.focusNode.data.substring(sel.focusOffset, sel.length);
+        var oSelectionStartNode = oSelection.anchorNode;
+        var oSelectionEndNode = oSelection.focusNode;
 
-        _triggerChange();
-        return null;
+        if(oSelectionStartNode == oSelectionEndNode){
+          console.log(targetPath);
+          var iSelectionStartPosition = Math.min(oSelection.anchorOffset,oSelection.focusOffset);
+          var iSelectionEndPosition = Math.max(oSelection.anchorOffset,oSelection.focusOffset);
+          var iSelectionSize = iSelectionEndPosition - iSelectionStartPosition;
+          if(oSelectionStartNode.nodeName == '#text'){
+            var path = targetPath.split("/");
+            var currentStoryId = path.splice(0, 1);
+            var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+            updateContentTextWithPushedCharacter(currentStory, path,pressedChar, iSelectionStartPosition, iSelectionSize);
+          } else {
+
+          }
+
+        }
+
       }
+      _triggerChange();
     },
 
     handleEnterKeyPress: function (oSel, targetPath) {
@@ -350,7 +377,7 @@ var storyStore = (function () {
           if(iOffset != 0){
             var newUid = utils.generateUUID();
             var newContentStringBefore = aContentData.substring(0, iOffset);
-            var newContentObjBefore = {"Content": [{"_": newContentStringBefore, "$": {"data-uid": newUid}}]};
+            var newContentObjBefore = createContentNode(newContentStringBefore,newUid);
             aParent.push(newContentObjBefore);
           }
 
@@ -366,7 +393,7 @@ var storyStore = (function () {
           if (iOffset < aContentData.length) {
             var newUid3 = utils.generateUUID();
             var newContentStringAfter = aContentData.substring(iOffset, aContentData.length);
-            var newContentObjAfter = {"Content": [{"_": newContentStringAfter, "$": {"data-uid": newUid3}}]};
+            var newContentObjAfter = createContentNode(newContentStringAfter,newUid3);
             aParent.push(newContentObjAfter);
           }
 
@@ -738,7 +765,7 @@ var storyStore = (function () {
       if (sel.focusNode.firstChild && sel.focusNode.firstChild.className.indexOf("br") > (-1)) {
         var oChara = this.selfSearch(data, uuid);
         var newUid2 = utils.generateUUID();
-        var newContentObj2 = {"Content": [{"_": tenSpaces, "$": {"data-uid": newUid2}}]};
+        var newContentObj2 = createContentNode(tenSpaces,newUid2);
         oChara.Custom.splice(0, 0, newContentObj2);
         _triggerChange();
       } else {
@@ -863,6 +890,8 @@ var storyStore = (function () {
 
     }
   }
+
+  return storyStore;
 
 })();
 
