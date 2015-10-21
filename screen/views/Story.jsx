@@ -147,7 +147,6 @@ var Story = React.createClass({
   },
 
   handleKeyDown: function (oEvent) {
-    oEvent.preventDefault();
     /*if (oEvent.keyCode == 13) {
      this.handleEnterKeyPress(oEvent);
      }
