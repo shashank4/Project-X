@@ -626,15 +626,15 @@ var storyStore = (function () {
             var iGrandParent = oReturnedGrandParent.indexPos;
             if(aReturnedGrandParent[iGrandParent-1]){
               var lastChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length;
-              var lastCustomOfChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange.length;
+              var lastCustomOfChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.length;
 
               var restNew =
-              aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[lastCustomOfChara-1].Custom.splice(-1,1);
-              if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[lastCustomOfChara-1].Custom.length==0)
+              aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.splice(-1,1);
+              if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.length==0)
               {
-                aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange.splice(-1,1);
-                if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange.length==0){
-                  aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.splice(-1,1);
+                aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.splice(-1,1);
+                if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length==0){
+                  //aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.splice(-1,1);
                   if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length == 0){
                     aReturnedGrandParent.splice(iGrandParent-1,1);
                     _triggerChange();
@@ -818,7 +818,7 @@ var storyStore = (function () {
                 aCustom.splice(charIndex, 1);
                 _triggerChange();
               }
-              else if (charIndex == (aCustom.length - 1)) {
+              else if (charIndex == (aCustom.length - 1) || charIndex == 0) {
                 aCustom.splice(charIndex, 1);
                 _triggerChange();
               }
