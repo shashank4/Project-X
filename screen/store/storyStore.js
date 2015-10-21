@@ -1046,16 +1046,19 @@ var storyStore = (function () {
                   if(oCaretPosition.oNodeToSet.firstChild) {
                     iRangeForMultipleEnters = oCaretPosition.oNodeToSet.firstChild.length;
                   } else {
-                    iRangeForMultipleEnters = _.indexOf(oCaretPosition.oNodeToSet.parentNode.childNodes, oCaretPosition.oNodeToSet);
+                    oCaretPosition.isEnter = true;
+                    iRangeForMultipleEnters = _.indexOf(oCaretPosition.oNodeToSet.parentNode.childNodes, oCaretPosition.oNodeToSet) + 1;
                     oCaretPosition.oNodeToSet = oCaretPosition.oNodeToSet.parentNode;
                   }
                 } else {
-                  iRangeForMultipleEnters = _.indexOf(oPreviousNode.parentNode, oPreviousNode);
+                  oCaretPosition.isEnter = true;
+                  iRangeForMultipleEnters = _.indexOf(oPreviousNode.parentNode, oPreviousNode) + 1;
                   oCaretPosition.oNodeToSet = oPreviousNode.parentNode;
                 }
               }
             } else {
-              iRangeForMultipleEnters = _.indexOf(oCurrentDom.parentNode, oCurrentDom);
+              oCaretPosition.isEnter = true;
+              iRangeForMultipleEnters = _.indexOf(oCurrentDom.parentNode, oCurrentDom) + 1;
               oCaretPosition.oNodeToSet = oCurrentDom.parentNode;
             }
           }
