@@ -297,7 +297,7 @@ var storyStore = (function () {
     return null;
   };
 
-  return {
+  var storyStore =  {
     setStoreData: function (data1) {
       data = data1;
     },
@@ -1076,7 +1076,7 @@ var storyStore = (function () {
       }
 
     }
-  }
+  };
 
   return storyStore;
 
