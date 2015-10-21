@@ -812,22 +812,29 @@ var storyStore = (function () {
 
         else if (oEvent.keyCode == 8) { //backSpace
 
-          if(bFromText && iRange.endOffset > 0) {
+          if(bFromText && iRange.endOffset > 1) {
             iRangeForMultipleEnters = iRange.endOffset - 1;
-          } else {
-            var oPreviousBrNode = _getPreviousDOMLastChild(oCurrentDom);
-            if(oPreviousBrNode) {
-              oCaretPosition.oNodeToSet =_getPreviousDOMLastChild(oPreviousBrNode);
-              if(oCaretPosition.oNodeToSet) {
-                if(oCaretPosition.oNodeToSet.firstChild) {
-                  iRangeForMultipleEnters = oCaretPosition.oNodeToSet.firstChild.length;
-                } else {
-                  iRangeForMultipleEnters = _.indexOf(oCaretPosition.oNodeToSet.parentNode.childNodes, oCaretPosition.oNodeToSet);
-                  oCaretPosition.oNodeToSet = oCaretPosition.oNodeToSet.parentNode;
-                }
+          }
+          else
+          {
+            var oPreviousNode = _getPreviousDOMLastChild(oCurrentDom);
+            if(oPreviousNode) {
+              if(oPreviousNode.firstChild) {
+                oCaretPosition.oNodeToSet = oPreviousNode;
+                iRangeForMultipleEnters = oPreviousNode.firstChild.length;
               } else {
-                iRangeForMultipleEnters = _.indexOf(oPreviousBrNode.parentNode, oPreviousBrNode);
-                oCaretPosition.oNodeToSet = oPreviousBrNode.parentNode;
+                oCaretPosition.oNodeToSet =_getPreviousDOMLastChild(oPreviousNode);
+                if(oCaretPosition.oNodeToSet) {
+                  if(oCaretPosition.oNodeToSet.firstChild) {
+                    iRangeForMultipleEnters = oCaretPosition.oNodeToSet.firstChild.length;
+                  } else {
+                    iRangeForMultipleEnters = _.indexOf(oCaretPosition.oNodeToSet.parentNode.childNodes, oCaretPosition.oNodeToSet);
+                    oCaretPosition.oNodeToSet = oCaretPosition.oNodeToSet.parentNode;
+                  }
+                } else {
+                  iRangeForMultipleEnters = _.indexOf(oPreviousNode.parentNode, oPreviousNode);
+                  oCaretPosition.oNodeToSet = oPreviousNode.parentNode;
+                }
               }
             } else {
               iRangeForMultipleEnters = _.indexOf(oCurrentDom.parentNode, oCurrentDom);
