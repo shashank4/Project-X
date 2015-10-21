@@ -507,7 +507,11 @@ var storyStore = (function () {
               var currentData = currentNode[0].Content[0]["_"];
               previousContent[0].Content[0]["_"] = preData.concat(currentData);
               _.assign(aParent, aParent.concat(previousContent));
+            }else{
+              _.assign(aParent, aParent.concat(currentNode));
             }
+
+
             if(rest){
               _.assign(aParent, aParent.concat(rest));
             }
