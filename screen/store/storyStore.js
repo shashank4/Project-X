@@ -756,7 +756,12 @@ var storyStore = (function () {
 
       if (window.getSelection()) {
         //Keys not to prevent default
-        if((oEvent.keyCode >= 35 && oEvent.keyCode <= 40) || oEvent.keyCode == 16) {
+        if(
+         /*Arrow Keys, HOME and END*/  (oEvent.keyCode >= 35 && oEvent.keyCode <= 40) ||
+        /*Function Keys*/               (oEvent.keyCode >= 112 && oEvent.keyCode <= 123) ||
+        /*SHIFT Key*/                   oEvent.keyCode == 16)
+
+        {
           return;
         }
 
