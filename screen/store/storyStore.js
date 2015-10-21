@@ -588,9 +588,6 @@ var storyStore = (function () {
       if(returnedObject.flag == true){
         if(aParent[iIndex-1]){
           aParent.splice(iIndex, 1);
-          _triggerChange();
-          return null;
-
         }
         /**
          * go to check current nodes prev charaStyle.
@@ -599,7 +596,6 @@ var storyStore = (function () {
           var newPath = targetPath.split("/");
           newPath.splice(0,1);
           newPath.splice(-1,1);
-          //path.splice(-1,1);
           var oReturnedParent = this.searchClosestCustomOfLastInPath(currentStory,newPath);
           var aReturnParent = oReturnedParent.objectPos;
           var iParent = oReturnedParent.indexPos;
@@ -608,8 +604,6 @@ var storyStore = (function () {
             var lastOfChara = aReturnParent[iParent-1].Custom.length;
             if(aReturnParent[iParent-1].Custom[lastOfChara-1].Br){
               aReturnParent[iParent-1].Custom.splice(-1,1);
-              _triggerChange();
-              return null;
             }
           }
           /**
@@ -626,49 +620,40 @@ var storyStore = (function () {
             var iGrandParent = oReturnedGrandParent.indexPos;
             if(aReturnedGrandParent[iGrandParent-1]){
               var lastChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length;
-              var lastCustomOfChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.length;
+              //var lastCustomOfChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.length;
 
-              var restNew =
               aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.splice(-1,1);
               if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.length==0)
               {
                 aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.splice(-1,1);
                 if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length==0){
-                  //aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.splice(-1,1);
                   if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length == 0){
                     aReturnedGrandParent.splice(iGrandParent-1,1);
-                    _triggerChange();
-                    return null;
                   }
                   else if(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom){
                     _.assign(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
                     aReturnedGrandParent.splice(iGrandParent,1);
-                    _triggerChange();
-                    return null;
                   }
-
                 }
               }else {
                 _.assign(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
                 aReturnedGrandParent.splice(iGrandParent,1);
               }
 
-              //aReturnedGrandParent[iGrandParent-2].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom);
-
-              //aReturnedGrandParent.splice(iGrandParent-1,1);
-              _triggerChange();
-              return null;
             }
 
 
           }
         }
+
+        _triggerChange();
+        return null;
       }
 
 
       /**if current node is not br*/
       /**And its rangeOffSet is '0'*/
-      if (iRange.endOffset == 0) {
+      else if (iRange.endOffset == 0) {
         /**
          * if iIndex th node is not the start node.....then do normal processing
          * i.e. remove the previous node ......remove previous BR and append next content data
@@ -694,18 +679,7 @@ var storyStore = (function () {
 
         }
         else if (iIndex==0){
-/*
-            var pathForChara=targetPath.split('/');
-            pathForChara.splice(0,1);
-            pathForChara.splice(-1,1);
-            var oUltimateParent = this.searchClosestCustomOfLastInPath(currentStory, pathForChara);
-            var aUltimateCustom = oUltimateParent.objectPos;
-            var jIndex = oUltimateParent.indexPos;*/
-
-            //handleCharaOfBackSpace(aUltimateCustom , jIndex-1, targetPath);
-
           /**
-           * if iIndex == 0.
            * Paragraph Handling
            */
           if (sel.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
@@ -729,6 +703,7 @@ var storyStore = (function () {
               _.assign(aCustomPara, aCustomPara.concat(restPara));
               _triggerChange();
             }
+
           }
         }
       }
