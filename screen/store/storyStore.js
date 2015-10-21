@@ -71,12 +71,12 @@ var storyStore = (function () {
     }
   };
 
-  var createContentNode = function (sContent, sUID){
+  var createContentNode = function (sContent){
     return {
       "Content": [
         {
           "_": sContent,
-          "$": {"data-uid": sUID}
+          "$": {"data-uid": utils.generateUUID()}
         }
       ]
     };
@@ -86,7 +86,8 @@ var storyStore = (function () {
     var oCustomDetails = storyStore.searchClosestCustomOfLastInPath(oCurrentStory, aPath);
     var oContent = oCustomDetails.objectPos[oCustomDetails.indexPos].Content[0];
     oContent["_"] = utils.getSplicedString(oContent['_'],iStartIndex,iSelectionSize,sPushedChar);
-  }
+    oCaretPosition.endOffset -= iSelectionSize;
+  };
 
   var handleCharaOfDelete = function(aParent, iIndex){
     /**
@@ -409,8 +410,8 @@ var storyStore = (function () {
          * if key is pressed on any BR node.
          */
         if(oCurrentDom.className.indexOf('br')>(-1)){
-          var newUid21 = utils.generateUUID();
-          var newContentObj21 = createContentNode(pressedChar,newUid21);
+          //var newUid21 = utils.generateUUID();
+          var newContentObj21 = createContentNode(pressedChar);
           aCustom.splice(index, 0, newContentObj21);
         }
         /**
@@ -465,13 +466,18 @@ var storyStore = (function () {
           var iSelectionStartPosition = Math.min(oSelection.anchorOffset,oSelection.focusOffset);
           var iSelectionEndPosition = Math.max(oSelection.anchorOffset,oSelection.focusOffset);
           var iSelectionSize = iSelectionEndPosition - iSelectionStartPosition;
+          var path = targetPath.split("/");
+          var currentStoryId = path.splice(0, 1);
+          var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
           if(oSelectionStartNode.nodeName == '#text'){
-            var path = targetPath.split("/");
-            var currentStoryId = path.splice(0, 1);
-            var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
             updateContentTextWithPushedCharacter(currentStory, path,pressedChar, iSelectionStartPosition, iSelectionSize);
           } else {
-
+            var oCustomDetails = this.searchClosestCustomOfLastInPath(currentStory, path);
+            utils.generateUUID();
+            var oNewContent = createContentNode();
+            oCustomDetails.objectPos.splice(iSelectionStartPosition,iSelectionSize,oNewContent);
+            oCaretPosition.endOffset -= iSelectionSize;
+            debugger;
           }
 
         }
@@ -524,9 +530,8 @@ var storyStore = (function () {
           aParent.splice(iIndex, 1);
 
           if(iOffset != 0){
-            var newUid = utils.generateUUID();
             var newContentStringBefore = aContentData.substring(0, iOffset);
-            var newContentObjBefore = createContentNode(newContentStringBefore,newUid);
+            var newContentObjBefore = createContentNode(newContentStringBefore);
             aParent.push(newContentObjBefore);
           }
 
@@ -540,9 +545,9 @@ var storyStore = (function () {
            * then break the string insert one br and append next string
            */
           if (iOffset < aContentData.length) {
-            var newUid3 = utils.generateUUID();
+            //var newUid3 = utils.generateUUID();
             var newContentStringAfter = aContentData.substring(iOffset, aContentData.length);
-            var newContentObjAfter = createContentNode(newContentStringAfter,newUid3);
+            var newContentObjAfter = createContentNode(newContentStringAfter);
             aParent.push(newContentObjAfter);
           }
 
@@ -951,8 +956,7 @@ var storyStore = (function () {
         } else {
 
           oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
-          var newUid2 = utils.generateUUID();
-          var newContentObj2 = {"Content": [{"_": tenSpaces, "$": {"data-uid": newUid2}}]};
+          var newContentObj2 = createContentNode(tenSpaces);
           if(!_.isEmpty(oReturnedObject)) {
             if((oReturnedObject.objectPos.length - 1) == oReturnedObject.indexPos){
               oReturnedObject.objectPos.splice(oReturnedObject.indexPos, 1, newContentObj2);
@@ -1074,7 +1078,7 @@ var storyStore = (function () {
         }
         _triggerChange();
       }
-
+      //document.querySelector('[data-abc]')
     }
   };
 
