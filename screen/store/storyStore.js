@@ -132,6 +132,153 @@ var storyStore = (function () {
   };
 
 
+  var handleParaBackSpace = function(){
+
+  };
+
+
+  var handleCharaOfBackSpace = function(aUltimateCustom, jIndex){ //jIndex
+
+    /**xml tag :either you can totally remove or normal processing. We can't combine xml tags. */
+    /*if (aUltimateCustom[jIndex].XMLElement) {
+      handleXMLOfBackSpace(aUltimateCustom, jIndex);
+
+    }*/
+
+    /**  characterStyleRange handling*/
+    if (aUltimateCustom[jIndex].CharacterStyleRange) {
+      var aCustom = aUltimateCustom;    //aCustom is a para of characterStyleRange
+      var charIndex =  jIndex;
+
+      /**if aCustom is having more than 1 child elements i.e. more than one characterStyleRanges. */
+      if (aCustom.length > 1) {
+
+        var lastElementIndex = aCustom[charIndex].CharacterStyleRange[0].Custom.length;
+
+
+        /**if last element of prev chara is BR*/
+        if(aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex-1].Br){
+
+
+          /** if last Br is NOT the only child*/
+          if(lastElementIndex != 1){
+            aCustom[charIndex].CharacterStyleRange[0].Custom.splice(lastElementIndex, 1);
+          }
+          /** if last Br is the ONLY child*/
+          else if(lastElementIndex == 1){
+            /** if aCustom has more than 1 element , i.e. AaCustom has more than one charaStyles*/
+            aCustom.splice(charIndex, 1);
+          }
+
+          _triggerChange();
+          return null;
+        }
+        /** if charaStyles node's last element is CONTENT */
+        else if(aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex].Content){
+
+          var tempStr = aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex-1].Content[0]["_"];
+
+          /** if CONTENT string length is greater than 1 */
+          if(tempStr.length > 1){
+            tempStr = tempStr.slice(0, tempStr.length-1);
+            aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex-1].Content[0]["_"] = tempStr;
+            _triggerChange();
+            return null;
+          }
+          /** if strLength is 1 then remove that node */
+          else if (tempStr.length ==  1){
+            aCustom[charIndex].CharacterStyleRange[0].Custom.splice(lastElementIndex-1, 1);
+            /** if this CONTENT node was the only node of that charaStyle, then remove that charaStyle also*/
+            if(aCustom[charIndex].CharacterStyleRange[0].Custom.length == 0){
+                aCustom.splice(charIndex, 1);
+            }
+          }
+        }
+
+        //TODO: write here XML element
+
+
+        /*
+        if (aCustom[charIndex + 1] && aCustom[charIndex - 1] &&
+            (aCustom[charIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle == aCustom[charIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle)) {
+
+          if (aCustom[charIndex + 2]){
+            var restArray = aCustom.splice(charIndex + 2);
+          }
+
+          var last = aCustom[charIndex - 1].CharacterStyleRange[0].Custom.length - 1;
+          if (aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content
+              && aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content)
+          {
+            aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] =
+                aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"]
+                + aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+
+            aCustom[charIndex + 1].CharacterStyleRange[0].Custom.splice(0, 1);
+          }
+
+
+          if (aCustom[charIndex + 1].CharacterStyleRange[0].Custom.length > 0) {
+            aCustom[charIndex - 1].CharacterStyleRange[0].Custom =
+                aCustom[charIndex - 1].CharacterStyleRange[0].Custom.concat(aCustom[charIndex + 1].CharacterStyleRange[0].Custom);
+          }
+
+          aCustom.splice(charIndex + 1);
+          aCustom.splice(charIndex);
+
+          if (restArray) {
+            _.assign(aCustom, aCustom.concat(restArray));
+          }
+          _triggerChange();
+        } else if (charIndex == (aCustom.length - 1)) {
+          aCustom.splice(charIndex, 1);
+          _triggerChange();
+        }*/
+      }
+      /** if its the only present charaStyle, then remove its parent also...i.e. remove that paraStyle  *//*
+      else if(aCustom.length == 1){
+        var pathForPara2=targetPath.split('/');
+        pathForPara2.splice(0,1);
+        pathForPara2.splice(-1,1);
+        var oUltimateParentForPara = this.searchClosestCustomOfLastInPath(currentStory, pathForPara2);
+        var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
+        var jIndexForPara = oUltimateParentForPara.indexPos;
+        aUltimateCustomForPara.splice(jIndexForPara,1);
+        _triggerChange();
+      }*/
+    }
+
+    //TODO: handle content n Br here also
+
+  };
+
+  var handleXMLOfBackSpace = function(aParent, i){
+    var lastIndex = aParent[i].XMLElement[0].Custom.length;
+    /**if last node is Br.  then remove that node*/
+    if(aParent[i].XMLElement[0].Custom[lastIndex-1].Br){
+      aParent[i].XMLElement[0].Custom.splice(lastIndex-1, 1);
+    }
+
+    /** if last node is Content */
+    else if(aParent[i].XMLElement[0].Custom[lastIndex-1].Content){
+      var str = aParent[i].XMLElement[0].Custom[lastIndex-1].Content[0]["_"];
+      /** if content stringLength is greater than '1'*/
+      if (str.length != 1) {
+        aParent[iIndex + 1].XMLElement[0].Custom[lastIndex-1].Content[0]["_"] = str.slice(0, str.length-1);
+      } else {
+        aParent[iIndex + 1].XMLElement[0].Custom.splice(0, 1);
+      }
+    }
+
+    /** if last node is another characterStyle. Then pass the last node of this character style to CharaHandling Function. */
+    else if(aParent[i].XMLElement[0].Custom[lastIndex-1].CharacterStyleRange){
+      var lastOfChara = aParent[i].XMLElement[0].Custom[lastIndex-1].CharacterStyleRange[0].Custom.length;
+      handleCharaOfBackSpace(aParent[i].XMLElement[0].Custom[lastIndex-1].CharacterStyleRange[0].Custom, lastOfChara-1)
+    }
+
+    _triggerChange()
+    return null;
+  };
 
   return {
     setStoreData: function (data1) {
@@ -224,11 +371,20 @@ var storyStore = (function () {
 
       if(oEvent.keyCode!=16){ // If the pressed key is anything other than SHIFT
         if(oEvent.keyCode >= 65 && oEvent.keyCode <= 90 ){ // If the key is a letter
-          if(oEvent.shiftKey /*|| bIsCapsLock*/ ){ // If the SHIFT/CAPS key is down, return the ASCII code for the capital letter
-            pressedChar = String.fromCharCode(oEvent.keyCode);
-          }else{ // If the SHIFT key is not down, convert to the ASCII code for the lowecase letter
-            pressedChar = String.fromCharCode(oEvent.keyCode + 32);
+          if(!bIsCapsLock){  //If caps lock is not on.
+            if(oEvent.shiftKey ){ // If the SHIFT , return the ASCII code for the capital letter
+              pressedChar = String.fromCharCode(oEvent.keyCode);
+            }else{ // If the SHIFT key is not down, convert to the ASCII code for the lowercase letter
+              pressedChar = String.fromCharCode(oEvent.keyCode + 32);
+            }
+          }else if(bIsCapsLock){ //If caps lock is ON.
+            if(oEvent.shiftKey ){ // If the SHIFT , return the ASCII code for the lowercase letter
+              pressedChar = String.fromCharCode(oEvent.keyCode +32);
+            }else{ // If the SHIFT key is not down, convert to the ASCII code for the lowercase letter
+              pressedChar = String.fromCharCode(oEvent.keyCode);
+            }
           }
+
         }
       }
 
@@ -393,6 +549,8 @@ var storyStore = (function () {
     },
 
     handleBackspacePressed: function (oEvent, sel, targetPath) {
+      var iRange = sel.getRangeAt(0);
+
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
@@ -401,9 +559,7 @@ var storyStore = (function () {
       var iIndex = returnedObject.indexPos;
       var parentUID = returnedObject.parentUID;
 
-      /**
-       * if current node is Br.then remove
-       */
+      /**if current node is Br.then remove */
       if(returnedObject.flag == true){
         if(aParent[iIndex-1]){
           aParent.splice(iIndex, 1);
@@ -454,13 +610,18 @@ var storyStore = (function () {
                 aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange.splice(-1,1);
                 if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange.length==0){
                   aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.splice(-1,1);
-                  if(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom){
+                  if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length == 0){
+                    aReturnedGrandParent.splice(iGrandParent-1,1);
+                    _triggerChange();
+                    return null;
+                  }
+                  else if(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom){
                     _.assign(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
                     aReturnedGrandParent.splice(iGrandParent,1);
                     _triggerChange();
                     return null;
                   }
-                  aReturnedGrandParent.splice(iGrandParent-1,1);
+
                 }
               }else {
                 _.assign(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
@@ -479,48 +640,45 @@ var storyStore = (function () {
         }
       }
 
-      if (sel.focusOffset == 0) {
+
+      /**if current node is not br*/
+      /**And its rangeOffSet is '0'*/
+      if (iRange.endOffset == 0) {
         /**
          * if iIndex th node is not the start node.....then do normal processing
          * i.e. remove the previous node ......remove previous BR and append next content data
          * to previous content data.
          */
         if (iIndex != 0) {
-          /**
-           * if previous node is br (prev node will always be BR)
-           */
+
+          /** if previous node is br */
           if (aParent[iIndex - 1].Br) {
-
-            if(aParent[iIndex + 1]){
-              var rest = aParent.splice(iIndex + 1);
-            }
-
-            var currentNode = aParent.splice(iIndex, 1);
-            aParent.splice(iIndex - 1, 1);
-
-            /**
-             * if aParent length is  still not 0 after removing current and previous node.
-             */
-            if (aParent.length != 0 &&  aParent[iIndex - 2] && !aParent[iIndex - 2].Br) {
-              var previousContent = aParent.splice(iIndex - 2, 1);
-              var preData = previousContent[0].Content[0]["_"];
-              var currentData = currentNode[0].Content[0]["_"];
-              previousContent[0].Content[0]["_"] = preData.concat(currentData);
-              _.assign(aParent, aParent.concat(previousContent));
-            }else{
-              _.assign(aParent, aParent.concat(currentNode));
-            }
-
-
-            if(rest){
-              _.assign(aParent, aParent.concat(rest));
-            }
+            aParent.splice(iIndex-1, 1);
             _triggerChange();
             return null;
           }
 
+          /** if prev node is XMLElement*/
+          else if (aParent[iIndex - 1].XMLElement){
+            handleXMLOfBackSpace(aParent, iIndex-1);
+          }
+          /** if prev node is characterSrtleRange*/
+          else if(aParent[iIndex - 1].CharacterStyleRange){
+            handleCharaOfBackSpace(aParent, iIndex-1);
+          }
+
         }
-        else {
+        else if (iIndex==0){
+/*
+            var pathForChara=targetPath.split('/');
+            pathForChara.splice(0,1);
+            pathForChara.splice(-1,1);
+            var oUltimateParent = this.searchClosestCustomOfLastInPath(currentStory, pathForChara);
+            var aUltimateCustom = oUltimateParent.objectPos;
+            var jIndex = oUltimateParent.indexPos;*/
+
+            //handleCharaOfBackSpace(aUltimateCustom , jIndex-1, targetPath);
+
           /**
            * if iIndex == 0.
            * Paragraph Handling
@@ -567,9 +725,7 @@ var storyStore = (function () {
            * xml tag :either you can totally remove or normal processing. We can't combine xml tags.
            */
           if (sel.focusNode.parentNode.parentNode.className == "xmlElementContainer") {
-            //var oUltimateParent = this.searchClosestCustomOfXmltag(data, targetPath);
-            //var aUltimateCustom = oUltimateParent.reqObj;
-            //var jIndex = oUltimateParent.iIndex;
+
 
             var restUltimate = aUltimateCustom.splice(jIndex + 1);
             aUltimateCustom.splice(jIndex, 1);
@@ -629,10 +785,31 @@ var storyStore = (function () {
                   _.assign(aCustom, aCustom.concat(restArray));
                 }
                 _triggerChange();
-              } else if (charIndex == (aCustom.length - 1)) {
+              }
+              /** if next and prev styles are  not same*/
+              else if(aCustom[charIndex + 1] && aCustom[charIndex - 1] &&
+                  (aCustom[charIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle != aCustom[charIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle))
+              {
                 aCustom.splice(charIndex, 1);
                 _triggerChange();
               }
+              else if (charIndex == (aCustom.length - 1)) {
+                aCustom.splice(charIndex, 1);
+                _triggerChange();
+              }
+            }
+            /**
+             * if its the only present charaStyle, then remove its parent also...i.e. remove that paraStyle
+             */
+            else if(aCustom.length == 1){
+              var pathForPara2=targetPath.split('/');
+              pathForPara2.splice(0,1);
+              pathForPara2.splice(-1,1);
+              var oUltimateParentForPara = this.searchClosestCustomOfLastInPath(currentStory, pathForPara2);
+              var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
+              var jIndexForPara = oUltimateParentForPara.indexPos;
+              aUltimateCustomForPara.splice(jIndexForPara,1);
+              _triggerChange();
             }
           }
 
@@ -654,7 +831,7 @@ var storyStore = (function () {
       /**
        * for normal backSpace.
        */
-      else if(sel.focusOffset >= 1){
+      else if(iRange.endOffset >= 1){
         var str = sel.focusNode.data;
         aParent[iIndex].Content[0]["_"] = str.slice(0,sel.focusOffset-1) + str.slice(sel.focusOffset);
         _triggerChange();
@@ -774,7 +951,7 @@ var storyStore = (function () {
         var bFromText = false;
 
         var oCurrentDom;
-        if(iRange.commonAncestorContainer.nodeName != "#text"){
+        if(oSel.focusNode.nodeName != "#text" ){
           oCurrentDom = iRange.commonAncestorContainer.childNodes[iRange.startOffset];
           oCaretPosition.oNodeToSet = iRange.commonAncestorContainer;
         }
