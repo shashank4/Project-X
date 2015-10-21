@@ -664,8 +664,6 @@ var storyStore = (function () {
     },
 
     handleDeletePressed: function (oEvent, sel, targetPath) {
-      oEvent.preventDefault();
-
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
@@ -731,25 +729,44 @@ var storyStore = (function () {
       }
     },
 
-    handleTabPressed: function (oEvent, sel, uuid) {
-      oEvent.preventDefault();
+    handleTabPressed: function (oEvent, sel, targetPath) {
       var tenSpaces = "          ";
+      var path = targetPath.split("/");
+      var currentStoryId = path.splice(0, 1);
+      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+      var oReturnedObject = {};
 
-      if (sel.focusNode.firstChild && sel.focusNode.firstChild.className.indexOf("br") > (-1)) {
-        var oChara = this.selfSearch(data, uuid);
-        var newUid2 = utils.generateUUID();
-        var newContentObj2 = {"Content": [{"_": tenSpaces, "$": {"data-uid": newUid2}}]};
-        oChara.Custom.splice(0, 0, newContentObj2);
-        _triggerChange();
-      } else {
-        var str = sel.focusNode.data;
-        var offset = sel.focusOffset;
-        var preText = str.substring(0, offset);
-        var postText = str.substring(offset, str.length);
-        var oContent = this.selfSearch(data, uuid);
-        oContent["_"] = preText + tenSpaces + postText;
-        _triggerChange();
+      if(sel.focusNode) {
+        var sClassNames = sel.focusNode.className;
+        if(_.contains(sClassNames, "content") || _.contains(sel.focusNode.nodeName, "#text")) {
+          var str = sel.focusNode.data;
+          if(_.contains(sClassNames, "content")) {
+            str = sel.focusNode.firstChild.data;
+          }
+          var offset = sel.focusOffset;
+          var preText = str.substring(0, offset);
+          var postText = str.substring(offset, str.length);
+          oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
+          if(!_.isEmpty(oReturnedObject)) {
+            oReturnedObject.objectPos[oReturnedObject.indexPos].Content[0]["_"] = preText + tenSpaces + postText;
+          }
+
+        } else {
+
+          oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
+          var newUid2 = utils.generateUUID();
+          var newContentObj2 = {"Content": [{"_": tenSpaces, "$": {"data-uid": newUid2}}]};
+          if(!_.isEmpty(oReturnedObject)) {
+            if((oReturnedObject.objectPos.length - 1) == oReturnedObject.indexPos){
+              oReturnedObject.objectPos.splice(oReturnedObject.indexPos, 1, newContentObj2);
+            } else {
+              oReturnedObject.objectPos.splice(oReturnedObject.indexPos, 0, newContentObj2);
+            }
+          }
+        }
       }
+
+      _triggerChange();
     },
 
     handleOnKeyDown: function (oEvent) {
