@@ -298,7 +298,6 @@ var storyStore = (function () {
   };
 
   return {
-  var storyStore =  {
     setStoreData: function (data1) {
       data = data1;
     },
