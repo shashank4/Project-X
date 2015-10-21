@@ -241,23 +241,10 @@ var utils = (function () {
       return uuid;
     },
 
-    searchClosestCustomOfLastInPath: function (obj, key, val) {
-
-      var objects = [];
-      for (var i in obj) {
-        if ( i == "Custom" && typeof obj[i] == 'object') {
-          for (var j = 0; j < obj[i].length; j++) {
-            if (obj[i][j].Content && obj[i][j].Content[0]["$"]["data-uid"] == val) {
-              return obj[i];
-            } else if(typeof obj[i][j] == 'object'){
-              objects = objects.concat(this.searchClosestCustomOfLastInPath(obj[i][j], key, val));
-            }
-          }
-        } else if (typeof obj[i] == 'object') {
-          objects = objects.concat(this.searchClosestCustomOfLastInPath(obj[i], key, val));
-        }
-      }
-      return objects;
+    getSplicedString: function(sString, iStartIndex, iSize, sStringToSplice){
+      return sString.substring(0, iStartIndex)
+      + sStringToSplice
+      + sString.substring(iStartIndex + iSize, sString.length)
     }
 
     /*  getCharaStyleName: function (node) {
