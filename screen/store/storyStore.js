@@ -751,6 +751,13 @@ var storyStore = (function () {
     handleOnKeyDown: function (oEvent) {
 
       if (window.getSelection()) {
+        //Keys not to prevent default
+        if((oEvent.keyCode >= 35 && oEvent.keyCode <= 40) || oEvent.keyCode == 16) {
+          return;
+        }
+
+        oEvent.preventDefault();
+
         var oSel = window.getSelection();               //o-object, a-array, i-index, s-string.
         var iRange = oSel.getRangeAt(0);
 
