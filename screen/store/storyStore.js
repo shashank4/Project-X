@@ -961,11 +961,11 @@ var storyStore = (function () {
         oEvent.preventDefault();
 
         var oSel = window.getSelection();               //o-object, a-array, i-index, s-string.
-        var iRange = oSel.getRangeAt(0);
+        var oRange = oSel.getRangeAt(0);
 
         oCaretPosition.oSelection = oSel;
-        oCaretPosition.oRange = iRange.cloneRange();
-        oCaretPosition.endOffset = iRange.endOffset;
+        oCaretPosition.oRange = oRange.cloneRange();
+        oCaretPosition.endOffset = oRange.endOffset;
         oCaretPosition.isEnter = false;
 
         var iRangeForMultipleEnters = 0;
@@ -973,12 +973,12 @@ var storyStore = (function () {
 
         var oCurrentDom;
         if(oSel.focusNode.nodeName != "#text" ){
-          oCurrentDom = iRange.commonAncestorContainer.childNodes[iRange.startOffset];
-          oCaretPosition.oNodeToSet = iRange.commonAncestorContainer;
+          oCurrentDom = oRange.commonAncestorContainer.childNodes[oRange.startOffset];
+          oCaretPosition.oNodeToSet = oRange.commonAncestorContainer;
         }
         else{
-          oCurrentDom = iRange.commonAncestorContainer.parentNode;
-          oCaretPosition.oNodeToSet = iRange.commonAncestorContainer.parentNode;
+          oCurrentDom = oRange.commonAncestorContainer.parentNode;
+          oCaretPosition.oNodeToSet = oRange.commonAncestorContainer.parentNode;
           bFromText = true;
         }
 
@@ -993,11 +993,11 @@ var storyStore = (function () {
           if(bFromText) {
             oCaretPosition.oNodeToSet = oCaretPosition.oNodeToSet.parentNode;
             iRangeForMultipleEnters  =_.indexOf(oCaretPosition.oNodeToSet.childNodes, oCurrentDom) + 1;
-            if(iRange.startOffset > 0) {
+            if(oRange.startOffset > 0) {
               iRangeForMultipleEnters += 1;
             }
           } else {
-            iRangeForMultipleEnters = iRange.startOffset + 1;
+            iRangeForMultipleEnters = oRange.startOffset + 1;
           }
           oCaretPosition.endOffset = iRangeForMultipleEnters;
           this.handleEnterKeyPress(oSel, sPath);
@@ -1005,8 +1005,8 @@ var storyStore = (function () {
 
         else if (oEvent.keyCode == 8) { //backSpace
 
-          if(bFromText && iRange.endOffset > 1) {
-            iRangeForMultipleEnters = iRange.endOffset - 1;
+          if(bFromText && oRange.endOffset > 1) {
+            iRangeForMultipleEnters = oRange.endOffset - 1;
           }
           else
           {
@@ -1047,11 +1047,11 @@ var storyStore = (function () {
         }
 
         else if (oEvent.keyCode == 9) {  //Tab
-          oCaretPosition.endOffset = iRange.endOffset + 10;
+          oCaretPosition.endOffset = oRange.endOffset + 10;
           this.handleTabPressed(oEvent, oSel, sPath);
         }
         else{
-          oCaretPosition.endOffset = iRange.endOffset + 1;
+          oCaretPosition.endOffset = oRange.endOffset + 1;
           this.handleContentTextChanged(oEvent,oSel,sPath,oCurrentDom);
         }
         _triggerChange();
