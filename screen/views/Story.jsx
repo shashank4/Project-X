@@ -169,7 +169,7 @@ var Story = React.createClass({
 
   componentDidUpdate: function () {
 
-    if (window.getSelection) {
+    /*if (window.getSelection) {
       if (window.getSelection().empty) {  // Chrome
         window.getSelection().empty();
       } else if (window.getSelection().removeAllRanges) {  // Firefox
@@ -177,7 +177,7 @@ var Story = React.createClass({
       }
     } else if (document.selection) {  // IE?
       document.selection.empty();
-    }
+    }*/
 
     var oOldSelection = this.props.caretPosition.oSelection;
     if (oOldSelection.rangeCount) {
