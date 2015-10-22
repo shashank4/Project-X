@@ -14,8 +14,6 @@ var storyStore = (function () {
   var data = {};
   var sPathToUpdate = "";
   var oCaretPosition = {
-    oSelection: {},
-    oRange: {},
     focusId: '',
     indexToFocus: 0
   };
@@ -939,16 +937,7 @@ var storyStore = (function () {
         var oSel = window.getSelection();               //o-object, a-array, i-index, s-string.
         var oRange = oSel.getRangeAt(0);
 
-        oCaretPosition.oSelection = oSel;
-        oCaretPosition.oRange = oRange.cloneRange();
-        oCaretPosition.endOffset = oRange.endOffset;
-        oCaretPosition.isEnter = false;
-
-        var iRangeForMultipleEnters = 0;
-        var bFromText = false;
-
         var oCurrentDom;
-
         if(oRange.startContainer.nodeName == "#text" || _.contains(oRange.startContainer.classList, "content")) {
           if(_.contains(oRange.startContainer.classList, "content")) {
             oCurrentDom = oRange.startContainer;
