@@ -12,7 +12,8 @@ var CharacterStyleRange = React.createClass({
     data: React.PropTypes.array,
     key: React.PropTypes.object,
     path: React.PropTypes.string,
-    pathToUpdate: React.PropTypes.string
+    pathToUpdate: React.PropTypes.string,
+    caretPosition: React.PropTypes.object
   },
 
   getCharacter: function (arr) {
@@ -31,7 +32,8 @@ var CharacterStyleRange = React.createClass({
                   key={j}
                   path={sPath}
                   data={aCharacterStyleRange}
-                  pathToUpdate={this.props.pathToUpdate}/>
+                  pathToUpdate={this.props.pathToUpdate}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
 
@@ -44,7 +46,8 @@ var CharacterStyleRange = React.createClass({
                   key={j}
                   path={sPath}
                   data={aToXMLElement}
-                  pathToUpdate={this.props.pathToUpdate}/>
+                  pathToUpdate={this.props.pathToUpdate}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
 
@@ -56,7 +59,8 @@ var CharacterStyleRange = React.createClass({
                   key={j}
                   path={sPath}
                   data={aContent}
-                  parent={arr[i].Custom}/>
+                  parent={arr[i].Custom}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
 
@@ -67,7 +71,8 @@ var CharacterStyleRange = React.createClass({
               <BrTag
                   key={j}
                   path={sPath}
-                  data={aBr}/>
+                  data={aBr}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
       }

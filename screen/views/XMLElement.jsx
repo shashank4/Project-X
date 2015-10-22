@@ -11,8 +11,8 @@ var XMLElement = React.createClass({
   propTypes: {
     data: React.PropTypes.array,
     path: React.PropTypes.string,
-    pathToUpdate: React.PropTypes.string
-
+    pathToUpdate: React.PropTypes.string,
+    caretPosition: React.PropTypes.object
   },
 
   getAXmlElements: function (obj) {
@@ -31,7 +31,8 @@ var XMLElement = React.createClass({
                   key={j}
                   path={sPath}
                   data={aToXMLElement}
-                  pathToUpdate={this.props.pathToUpdate}/>
+                  pathToUpdate={this.props.pathToUpdate}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
 
@@ -43,7 +44,8 @@ var XMLElement = React.createClass({
                   key={j}
                   path={sPath}
                   data={aToParagraphStyleRange}
-                  pathToUpdate={this.props.pathToUpdate}/>
+                  pathToUpdate={this.props.pathToUpdate}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
 
@@ -55,7 +57,8 @@ var XMLElement = React.createClass({
                   key={j}
                   path={sPath}
                   data={aCharacterStyleRange}
-                  pathToUpdate={this.props.pathToUpdate}/>
+                  pathToUpdate={this.props.pathToUpdate}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
 
@@ -67,7 +70,8 @@ var XMLElement = React.createClass({
                   key={j}
                   path={sPath}
                   data={aContent}
-                  parent={obj[i].Custom}/>
+                  parent={obj[i].Custom}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
 
@@ -78,7 +82,8 @@ var XMLElement = React.createClass({
               <Br
                   key={j}
                   path={sPath}
-                  data={aBr}/>
+                  data={aBr}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
       }

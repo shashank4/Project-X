@@ -15,7 +15,9 @@ var storyStore = (function () {
   var sPathToUpdate = "";
   var oCaretPosition = {
     oSelection: {},
-    oRange: {}
+    oRange: {},
+    focusId: '',
+    indexToFocus: 0
   };
 
   var _triggerChange = function () {
@@ -86,6 +88,8 @@ var storyStore = (function () {
     var oCustomDetails = storyStore.searchClosestCustomOfLastInPath(oCurrentStory, aPath);
     var oContent = oCustomDetails.objectPos[oCustomDetails.indexPos].Content[0];
     oContent["_"] = utils.getSplicedString(oContent['_'],iStartIndex,iSelectionSize,sPushedChar);
+    oCaretPosition.focusId = oContent["$"]["data-uid"];
+    oCaretPosition.indexToFocus = iStartIndex + 1;
     oCaretPosition.endOffset -= iSelectionSize;
   };
 
@@ -413,6 +417,8 @@ var storyStore = (function () {
           //var newUid21 = utils.generateUUID();
           var newContentObj21 = createContentNode(pressedChar);
           aCustom.splice(index, 0, newContentObj21);
+          oCaretPosition.focusId = newContentObj21.Content[0]["$"]["data-uid"];
+          oCaretPosition.indexToFocus = 1;
         }
         /**
          * if a key is pressed either BEFORE or AFTER the BR node...
@@ -427,6 +433,8 @@ var storyStore = (function () {
               + oSelection.focusNode.data.substring(oSelection.focusOffset, oSelection.length);
           var newUid = utils.generateUUID();
           var newContentObj = createContentNode(newContentStringBefore,newUid);
+          oCaretPosition.focusId = newContentObj.Content[0]["$"]["data-uid"];
+          oCaretPosition.indexToFocus = 1;
 
           /**
            * if a key is pressed AFTER the BR node...
@@ -473,9 +481,10 @@ var storyStore = (function () {
             updateContentTextWithPushedCharacter(currentStory, path,pressedChar, iSelectionStartPosition, iSelectionSize);
           } else {
             var oCustomDetails = this.searchClosestCustomOfLastInPath(currentStory, path);
-            utils.generateUUID();
-            var oNewContent = createContentNode();
+            var oNewContent = createContentNode('');
             oCustomDetails.objectPos.splice(iSelectionStartPosition,iSelectionSize,oNewContent);
+            oCaretPosition.focusId = oNewContent.Content[0]["$"]["data-uid"];
+            oCaretPosition.indexToFocus = 0;
             oCaretPosition.endOffset -= iSelectionSize;
             debugger;
           }
@@ -505,6 +514,7 @@ var storyStore = (function () {
         var newUid5 = utils.generateUUID();
         var newBrObj5 = {"Br": [{"$": {"data-uid": newUid5}}]};
         aParent.splice(iIndex,0,newBrObj5);
+        oCaretPosition.focusId = newBrObj5.Br[0]["$"]["data-uid"];
         _triggerChange();
         return null;
       }
@@ -519,6 +529,7 @@ var storyStore = (function () {
           var newUid6 = utils.generateUUID();
           var newBrObj6 = {"Br": [{"$": {"data-uid": newUid6}}]};
           aParent.splice(iIndex, 0, newBrObj6);
+          oCaretPosition.focusId = newBrObj6.Br[0]["$"]["data-uid"];
           _triggerChange();
           return null;
         }
@@ -537,6 +548,7 @@ var storyStore = (function () {
 
           var newUid2 = utils.generateUUID();
           var newBrObj = {"Br": [{"$": {"data-uid": newUid2}}]};
+          oCaretPosition.focusId = newBrObj.Br[0]["$"]["data-uid"];
           aParent.push(newBrObj);
 
 
@@ -548,6 +560,8 @@ var storyStore = (function () {
             //var newUid3 = utils.generateUUID();
             var newContentStringAfter = aContentData.substring(iOffset, aContentData.length);
             var newContentObjAfter = createContentNode(newContentStringAfter);
+            oCaretPosition.focusId = newContentObjAfter.Content[0]["$"]["data-uid"];
+            oCaretPosition.indexToFocus = 0;
             aParent.push(newContentObjAfter);
           }
 
@@ -562,9 +576,13 @@ var storyStore = (function () {
               && oSel.focusNode.parentNode.parentNode.parentNode.nextSibling == null ) {
             var newUid4 = utils.generateUUID();
             var newBrObjExtremeLast = {"Br": [{"$": {"data-uid": newUid4}}]};
+            oCaretPosition.focusId = newBrObjExtremeLast.Br[0]["$"]["data-uid"];
             aParent.push(newBrObjExtremeLast);
           }
 
+          if(rest.Br) {
+            oCaretPosition.focusId = rest.Br[0]["$"]["data-uid"];
+          }
           _.assign(aParent, aParent.concat(rest));
           _triggerChange();
         }
@@ -932,6 +950,8 @@ var storyStore = (function () {
 
           oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
           var newContentObj2 = createContentNode(tenSpaces);
+          oCaretPosition.focusId = newContentObj2.Content[0]["$"]["data-uid"];
+          oCaretPosition.indexToFocus = 10;
           if(!_.isEmpty(oReturnedObject)) {
             if((oReturnedObject.objectPos.length - 1) == oReturnedObject.indexPos){
               oReturnedObject.objectPos.splice(oReturnedObject.indexPos, 1, newContentObj2);

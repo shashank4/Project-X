@@ -38,7 +38,8 @@ var Story = React.createClass({
                   key={j}
                   pathToUpdate={this.props.pathToUpdate}
                   data={aToXMLElement}
-                  path={sPath}/>
+                  path={sPath}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
 
@@ -53,7 +54,8 @@ var Story = React.createClass({
                   data={aToParagraphStyleRange}
                   path={sPath}
                   styleName={cssName}
-                  pathToUpdate={this.props.pathToUpdate}/>
+                  pathToUpdate={this.props.pathToUpdate}
+                  caretPosition={this.props.caretPosition}/>
           );
         }
       }
@@ -179,7 +181,7 @@ var Story = React.createClass({
       document.selection.empty();
     }*/
 
-    var oOldSelection = this.props.caretPosition.oSelection;
+   /* var oOldSelection = this.props.caretPosition.oSelection;
     if (oOldSelection.rangeCount) {
       var oRange = this.props.caretPosition.oRange;
       var iOffset = this.props.caretPosition.endOffset;
@@ -207,7 +209,10 @@ var Story = React.createClass({
       oSelection.addRange(oRange);
 
       DOM.focus();
-    }
+    }*/
+
+    var DOM = this.refs.storyContainer.getDOMNode();
+    DOM.focus();
 
   },
 
