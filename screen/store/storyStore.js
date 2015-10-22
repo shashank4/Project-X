@@ -99,7 +99,7 @@ var storyStore = (function () {
     var oContent = oCustomDetails.objectPos[oCustomDetails.indexPos].Content[0];
     oContent["_"] = utils.getSplicedString(oContent['_'],iStartIndex,iSelectionSize,sPushedChar);
     oCaretPosition.focusId = oContent["$"]["data-uid"];
-    oCaretPosition.indexToFocus = iStartIndex + 1;
+    oCaretPosition.indexToFocus = oContent["_"].length > iStartIndex ? iStartIndex + 1 : oContent["_"].length;
     oCaretPosition.endOffset -= iSelectionSize;
   };
 
@@ -581,7 +581,6 @@ var storyStore = (function () {
           }
 
           var newBrObj = createBrNode();
-          oCaretPosition.focusId = newBrObj.Br[0]["$"]["data-uid"];
           aParent.push(newBrObj);
 
 
@@ -589,32 +588,35 @@ var storyStore = (function () {
            * if cursor is not at the last position of the current content node.
            * then break the string insert one br and append next string
            */
-          if (iOffset < aContentData.length) {
+          //if (iOffset < aContentData.length) {
             //var newUid3 = utils.generateUUID();
             var newContentStringAfter = aContentData.substring(iOffset, aContentData.length);
             var newContentObjAfter = createContentNode(newContentStringAfter);
             oCaretPosition.focusId = newContentObjAfter.Content[0]["$"]["data-uid"];
             oCaretPosition.indexToFocus = 0;
             aParent.push(newContentObjAfter);
-          }
+          //}
 
 
           /**
            * if enter is pressed on extreme last position i.e. after last content or br of last Paragraph Node
            * then push one extra br to get cursor on new line.
            */
-          if (oSel.focusNode.length == oSel.focusOffset
+          /*if (oSel.focusNode.length == oSel.focusOffset
               && oSel.focusNode.parentNode.nextSibling == null
               && oSel.focusNode.parentNode.parentNode.nextSibling == null
               && oSel.focusNode.parentNode.parentNode.parentNode.nextSibling == null ) {
-            var newBrObjExtremeLast = createBrNode();
-            oCaretPosition.focusId = newBrObjExtremeLast.Br[0]["$"]["data-uid"];
-            aParent.push(newBrObjExtremeLast);
+            /!*var newBrObjExtremeLast = createBrNode();
+            oCaretPosition.focusId = newBrObjExtremeLast.Br[0]["$"]["data-uid"];*!/
+            var newSecondContentObjAfter = createContentNode('');
+            oCaretPosition.focusId = newSecondContentObjAfter.Content[0]["$"]["data-uid"];
+            oCaretPosition.indexToFocus = 0;
+            aParent.push(newSecondContentObjAfter);
           }
 
           if(rest.Br) {
             oCaretPosition.focusId = rest.Br[0]["$"]["data-uid"];
-          }
+          }*/
           _.assign(aParent, aParent.concat(rest));
           _triggerChange();
         }
@@ -1024,15 +1026,23 @@ var storyStore = (function () {
         var bFromText = false;
 
         var oCurrentDom;
-        if(oSel.focusNode.nodeName != "#text" ){
+
+        if(oRange.startContainer.nodeName == "#text" || _.contains(oRange.startContainer.classList, "content")) {
+          if(_.contains(oRange.startContainer.classList, "content")) {
+            oCurrentDom = oRange.startContainer;
+          } else {
+            oCurrentDom = oRange.startContainer.parentNode;
+          }
+        } else {
           oCurrentDom = oRange.commonAncestorContainer.childNodes[oRange.startOffset];
-          oCaretPosition.oNodeToSet = oRange.commonAncestorContainer;
+        }
+
+/*        if(oSel.focusNode.nodeName != "#text" ){
+          oCurrentDom = oRange.commonAncestorContainer.childNodes[oRange.startOffset];
         }
         else{
           oCurrentDom = oRange.commonAncestorContainer.parentNode;
-          oCaretPosition.oNodeToSet = oRange.commonAncestorContainer.parentNode;
-          bFromText = true;
-        }
+        }*/
 
         var sTargetUID = oCurrentDom.getAttribute("data-uid");
         var sPath = oCurrentDom.getAttribute("data-path");
@@ -1041,56 +1051,10 @@ var storyStore = (function () {
 
 
         if (oEvent.keyCode == 13) { //ENTER
-          oCaretPosition.isEnter = true;
-          if(bFromText) {
-            oCaretPosition.oNodeToSet = oCaretPosition.oNodeToSet.parentNode;
-            iRangeForMultipleEnters  =_.indexOf(oCaretPosition.oNodeToSet.childNodes, oCurrentDom) + 1;
-            if(oRange.startOffset > 0) {
-              iRangeForMultipleEnters += 1;
-            }
-          } else {
-            iRangeForMultipleEnters = oRange.startOffset + 1;
-          }
-          oCaretPosition.endOffset = iRangeForMultipleEnters;
           this.handleEnterKeyPress(oSel, sPath);
         }
 
         else if (oEvent.keyCode == 8) { //backSpace
-
-          if(bFromText && oRange.endOffset > 1) {
-            iRangeForMultipleEnters = oRange.endOffset - 1;
-          }
-          else
-          {
-            var oPreviousNode = _getPreviousDOMLastChild(oCurrentDom);
-            if(oPreviousNode) {
-              if(oPreviousNode.firstChild) {
-                oCaretPosition.oNodeToSet = oPreviousNode;
-                iRangeForMultipleEnters = oPreviousNode.firstChild.length;
-              } else {
-                oCaretPosition.oNodeToSet =_getPreviousDOMLastChild(oPreviousNode);
-                if(oCaretPosition.oNodeToSet) {
-                  if(oCaretPosition.oNodeToSet.firstChild) {
-                    iRangeForMultipleEnters = oCaretPosition.oNodeToSet.firstChild.length;
-                  } else {
-                    oCaretPosition.isEnter = true;
-                    iRangeForMultipleEnters = _.indexOf(oCaretPosition.oNodeToSet.parentNode.childNodes, oCaretPosition.oNodeToSet) + 1;
-                    oCaretPosition.oNodeToSet = oCaretPosition.oNodeToSet.parentNode;
-                  }
-                } else {
-                  oCaretPosition.isEnter = true;
-                  iRangeForMultipleEnters = _.indexOf(oPreviousNode.parentNode, oPreviousNode) + 1;
-                  oCaretPosition.oNodeToSet = oPreviousNode.parentNode;
-                }
-              }
-            } else {
-              oCaretPosition.isEnter = true;
-              iRangeForMultipleEnters = _.indexOf(oCurrentDom.parentNode, oCurrentDom) + 1;
-              oCaretPosition.oNodeToSet = oCurrentDom.parentNode;
-            }
-          }
-
-          oCaretPosition.endOffset = iRangeForMultipleEnters;
           this.handleBackspacePressed(oEvent,oSel, sPath);
         }
 
@@ -1099,11 +1063,9 @@ var storyStore = (function () {
         }
 
         else if (oEvent.keyCode == 9) {  //Tab
-          oCaretPosition.endOffset = oRange.endOffset + 10;
           this.handleTabPressed(oEvent, oSel, sPath);
         }
         else{
-          oCaretPosition.endOffset = oRange.endOffset + 1;
           this.handleContentTextChanged(oEvent,oSel,sPath,oCurrentDom);
         }
         _triggerChange();

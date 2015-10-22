@@ -25,7 +25,7 @@ var Content = React.createClass({
   setCaretPosition: function () {
     var oCaretPosition = this.props.caretPosition;
     if(oCaretPosition.focusId == this.props.data[0]["$"]["data-uid"]) {
-      var oDOMNode = this.getDOMNode().firstChild;
+      var oDOMNode = this.getDOMNode().firstChild ? this.getDOMNode().firstChild : this.getDOMNode();
       var oRange = document.createRange();
       oRange.setStart(oDOMNode, oCaretPosition.indexToFocus);
       oRange.setEnd(oDOMNode, oCaretPosition.indexToFocus);
