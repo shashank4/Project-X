@@ -315,7 +315,6 @@ var storyStore = (function () {
     var oSelectionEndNode = oSelection.focusNode;
 
     if (oSelectionStartNode == oSelectionEndNode) {
-      console.log(targetPath);
       var iSelectionStartPosition = Math.min(oSelection.anchorOffset, oSelection.focusOffset);
       var iSelectionEndPosition = Math.max(oSelection.anchorOffset, oSelection.focusOffset);
       var iSelectionSize = iSelectionEndPosition - iSelectionStartPosition;
@@ -350,13 +349,28 @@ var storyStore = (function () {
          * Remove Br and add Content in it's place
          */
         else {
-          var oNewContent = createContentNode(pressedChar);
-          oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize, oNewContent);
-          oCaretPosition.focusId = oNewContent.Content[0]["$"]["data-uid"];
+          var oNewContent;
+          if(pressedChar != ''){
+            oNewContent = createContentNode(pressedChar);
+            oCaretPosition.focusId = oNewContent.Content[0]["$"]["data-uid"];
+            oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize, oNewContent);
+          } else {
+            var oFocusedNode = oCustomDetails.objectPos[brIndex];
+            if(oFocusedNode.Content){
+              oCaretPosition.focusId = oFocusedNode.Content[0]["$"]["data-uid"];
+            } else if (oFocusedNode.Br){
+              oCaretPosition.focusId = oFocusedNode.Br[0]["$"]["data-uid"];
+            }
+            oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize);
+          }
           oCaretPosition.indexToFocus = 0;
           oCaretPosition.endOffset -= iSelectionSize;
         }
       }
+    } else {
+
+
+
     }
   };
 
@@ -547,267 +561,293 @@ var storyStore = (function () {
 
     handleBackspacePressed: function (oEvent, sel, targetPath) {
       var iRange = sel.getRangeAt(0);
+      if (oSelection.type == 'Caret') {
+        var path = targetPath.split("/");
+        var currentStoryId = path.splice(0, 1);
+        var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+        var returnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
+        var aParent = returnedObject.objectPos;
+        var iIndex = returnedObject.indexPos;
 
-      var path = targetPath.split("/");
-      var currentStoryId = path.splice(0, 1);
-      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-      var returnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
-      var aParent = returnedObject.objectPos;
-      var iIndex = returnedObject.indexPos;
-
-      /**if current node is Br.then remove */
-      if(returnedObject.flag == true){
-        if(aParent[iIndex-1]){
-          aParent.splice(iIndex, 1);
-        }
-        /**
-         * go to check current nodes prev charaStyle.
-         */
-        else if(!aParent[iIndex-1]){
-          var newPath = targetPath.split("/");
-          newPath.splice(0,1);
-          newPath.splice(-1,1);
-          var oReturnedParent = this.searchClosestCustomOfLastInPath(currentStory,newPath);
-          var aReturnParent = oReturnedParent.objectPos;
-          var iParent = oReturnedParent.indexPos;
-
-          if(aReturnParent[iParent-1]){
-            var lastOfChara = aReturnParent[iParent-1].Custom.length;
-            if(aReturnParent[iParent-1].Custom[lastOfChara-1].Br){
-              aReturnParent[iParent-1].Custom.splice(-1,1);
-            }
+        /**if current node is Br.then remove */
+        if (returnedObject.flag == true) {
+          if (aParent[iIndex - 1]) {
+            aParent.splice(iIndex, 1);
           }
           /**
-           * go to check parent nodes of charastyle i.e. for para.
+           * go to check current nodes prev charaStyle.
            */
-          else if( !aReturnParent[iParent-1]){
-            var newPath2 = targetPath.split("/");
-            newPath2.splice(0,1);
-            newPath2.splice(-1,1);
-            newPath2.splice(-1,1);
+          else if (!aParent[iIndex - 1]) {
+            var newPath = targetPath.split("/");
+            newPath.splice(0, 1);
+            newPath.splice(-1, 1);
+            var oReturnedParent = this.searchClosestCustomOfLastInPath(currentStory, newPath);
+            var aReturnParent = oReturnedParent.objectPos;
+            var iParent = oReturnedParent.indexPos;
 
-            var oReturnedGrandParent = this.searchClosestCustomOfLastInPath(currentStory, newPath2);
-            var aReturnedGrandParent = oReturnedGrandParent.objectPos;
-            var iGrandParent = oReturnedGrandParent.indexPos;
-            if(aReturnedGrandParent[iGrandParent-1]){
-              var lastChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length;
-              //var lastCustomOfChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.length;
-
-              aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.splice(-1,1);
-              if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.length==0)
-              {
-                aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.splice(-1,1);
-                if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length==0){
-                  if(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.length == 0){
-                    aReturnedGrandParent.splice(iGrandParent-1,1);
-                  }
-                  else if(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom){
-                    _.assign(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
-                    aReturnedGrandParent.splice(iGrandParent,1);
-                  }
-                }
-              }else {
-                _.assign(aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
-                aReturnedGrandParent.splice(iGrandParent,1);
+            if (aReturnParent[iParent - 1]) {
+              var lastOfChara = aReturnParent[iParent - 1].Custom.length;
+              if (aReturnParent[iParent - 1].Custom[lastOfChara - 1].Br) {
+                aReturnParent[iParent - 1].Custom.splice(-1, 1);
               }
+            }
+            /**
+             * go to check current nodes prev charaStyle.
+             */
+            else if (!aParent[iIndex - 1]) {
+              var newPath = targetPath.split("/");
+              newPath.splice(0, 1);
+              newPath.splice(-1, 1);
+              var oReturnedParent = this.searchClosestCustomOfLastInPath(currentStory, newPath);
+              var aReturnParent = oReturnedParent.objectPos;
+              var iParent = oReturnedParent.indexPos;
 
+              if (aReturnParent[iParent - 1]) {
+                var lastOfChara = aReturnParent[iParent - 1].Custom.length;
+                if (aReturnParent[iParent - 1].Custom[lastOfChara - 1].Br) {
+                  aReturnParent[iParent - 1].Custom.splice(-1, 1);
+                }
+              }
+              /**
+               * go to check parent nodes of charastyle i.e. for para.
+               */
+              else if (!aReturnParent[iParent - 1]) {
+                var newPath2 = targetPath.split("/");
+                newPath2.splice(0, 1);
+                newPath2.splice(-1, 1);
+                newPath2.splice(-1, 1);
+
+                var oReturnedGrandParent = this.searchClosestCustomOfLastInPath(currentStory, newPath2);
+                var aReturnedGrandParent = oReturnedGrandParent.objectPos;
+                var iGrandParent = oReturnedGrandParent.indexPos;
+                if (aReturnedGrandParent[iGrandParent - 1]) {
+                  var lastChara = aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.length;
+                  //var lastCustomOfChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.length;
+
+                  aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom[lastChara - 1].CharacterStyleRange[0].Custom.splice(-1, 1);
+                  if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom[lastChara - 1].CharacterStyleRange[0].Custom.length == 0) {
+                    aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.splice(-1, 1);
+                    if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.length == 0) {
+                      if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.length == 0) {
+                        aReturnedGrandParent.splice(iGrandParent - 1, 1);
+                      }
+                      else if (aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom) {
+                        _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
+                        aReturnedGrandParent.splice(iGrandParent, 1);
+                      }
+                    }
+                  } else {
+                    _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
+                    aReturnedGrandParent.splice(iGrandParent, 1);
+                  }
+
+                }
+
+
+              }
             }
 
-
-          }
-        }
-
-        _triggerChange();
-        return null;
-      }
-
-
-      /**if current node is not br*/
-      /**And its rangeOffSet is '0'*/
-      else if (iRange.endOffset == 0) {
-        /**
-         * if iIndex th node is not the start node.....then do normal processing
-         * i.e. remove the previous node ......remove previous BR and append next content data
-         * to previous content data.
-         */
-        if (iIndex != 0) {
-
-          /** if previous node is br */
-          if (aParent[iIndex - 1].Br) {
-            aParent.splice(iIndex-1, 1);
             _triggerChange();
             return null;
           }
 
-          /** if prev node is XMLElement*/
-          else if (aParent[iIndex - 1].XMLElement){
-            handleXMLOfBackSpace(aParent, iIndex-1);
-          }
-          /** if prev node is characterSrtleRange*/
-          else if(aParent[iIndex - 1].CharacterStyleRange){
-            handleCharaOfBackSpace(aParent, iIndex-1);
-          }
 
-        }
-        else if (iIndex==0){
-          /**
-           * Paragraph Handling
-           */
-          if (sel.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
-            var pathForPara = targetPath.split("/");
-            pathForPara.splice(0, 1);
-            pathForPara.splice(-1,1);
-            pathForPara.splice(-1,1);
-
-            var oReturned = this.searchClosestCustomOfLastInPath(currentStory, pathForPara);
-            var aCustomPara = oReturned.objectPos;
-            var iIndexPara = oReturned.indexPos;
-
-            if (iIndexPara != 0) {
-              var last1 = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom.length;
-              var last2 = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange.length;
-              var last3 = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.length;
-              aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.splice(last3 - 1, 1);
-              aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom.concat(aCustomPara[iIndexPara].ParagraphStyleRange[0].Custom);
-              var restPara = aCustomPara.splice(iIndexPara + 1);
-              aCustomPara.splice(iIndexPara, 1);
-              _.assign(aCustomPara, aCustomPara.concat(restPara));
-              _triggerChange();
-            }
-
-          }
-        }
-      }
-      /**
-       * if there is only one character in the selected node and focusOffset is also 1
-       * then remove current node and check, if next and previous node is same or not. If same charaStyle then combine.
-       * Check for chara and XML tag.
-       */
-      else if (sel.focusOffset==1 && sel.focusNode.data.length == 1 ) {
-        if (aParent.length == 1) {
-
-          var pathForChara=targetPath.split('/');
-          pathForChara.splice(0,1);
-          pathForChara.splice(-1,1);
-          var oUltimateParent = this.searchClosestCustomOfLastInPath(currentStory, pathForChara);
-          var aUltimateCustom = oUltimateParent.objectPos;
-          var jIndex = oUltimateParent.indexPos;
-          /**
-           * xml tag :either you can totally remove or normal processing. We can't combine xml tags.
-           */
-          if (sel.focusNode.parentNode.parentNode.className == "xmlElementContainer") {
-
-
-            var restUltimate = aUltimateCustom.splice(jIndex + 1);
-            aUltimateCustom.splice(jIndex, 1);
-            _.assign(aUltimateCustom, aUltimateCustom.concat(restUltimate));
-            _triggerChange();
-          }
-
-          /**
-           * characterStyleRange handling
-           */
-          if (sel.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
-            var aCustom = aUltimateCustom;
-            var charIndex =  jIndex;
+          /**if current node is not br*/
+          /**And its rangeOffSet is '0'*/
+          else if (iRange.endOffset == 0) {
             /**
-             * if aCustom is having more than 1 child elements i.e. more than one characterStyleRanges.
+             * if iIndex th node is not the start node.....then do normal processing
+             * i.e. remove the previous node ......remove previous BR and append next content data
+             * to previous content data.
              */
-            if (aCustom.length > 1) {
+            if (iIndex != 0) {
+
+              /** if previous node is br */
+              if (aParent[iIndex - 1].Br) {
+                aParent.splice(iIndex - 1, 1);
+                _triggerChange();
+                return null;
+              }
+
+              /** if prev node is XMLElement*/
+              else if (aParent[iIndex - 1].XMLElement) {
+                handleXMLOfBackSpace(aParent, iIndex - 1);
+              }
+              /** if prev node is characterSrtleRange*/
+              else if (aParent[iIndex - 1].CharacterStyleRange) {
+                handleCharaOfBackSpace(aParent, iIndex - 1);
+              }
+
+            }
+            else if (iIndex == 0) {
               /**
-               * if next charaStyle and previous charaStyle are same, then remove current node and combine
+               * Paragraph Handling
                */
-              if (aCustom[charIndex + 1] && aCustom[charIndex - 1] &&
-                  (aCustom[charIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle == aCustom[charIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle)) {
-                /**
-                 * if next nodes are present ,then store it to rest to append.
-                 */
-                if (aCustom[charIndex + 2]){
-                  var restArray = aCustom.splice(charIndex + 2);
+              if (oSelection.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
+                var pathForPara = targetPath.split("/");
+                pathForPara.splice(0, 1);
+                pathForPara.splice(-1, 1);
+                pathForPara.splice(-1, 1);
+
+                var oReturned = this.searchClosestCustomOfLastInPath(currentStory, pathForPara);
+                var aCustomPara = oReturned.objectPos;
+                var iIndexPara = oReturned.indexPos;
+
+                if (iIndexPara != 0) {
+                  var last1 = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom.length;
+                  var last2 = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange.length;
+                  var last3 = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.length;
+                  aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.splice(last3 - 1, 1);
+                  aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom.concat(aCustomPara[iIndexPara].ParagraphStyleRange[0].Custom);
+                  var restPara = aCustomPara.splice(iIndexPara + 1);
+                  aCustomPara.splice(iIndexPara, 1);
+                  _.assign(aCustomPara, aCustomPara.concat(restPara));
+                  _triggerChange();
                 }
 
-                var last = aCustom[charIndex - 1].CharacterStyleRange[0].Custom.length - 1;
-                /**
-                 * if pre charaStyle has last node as CONTENT and next charaStyle has its first element as CONTENT, then merge these two CONTENTS
-                 */
-                if (aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content
-                    && aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content)
-                {
-                  aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] =
-                        aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"]
-                      + aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+              }
+            }
+          }
+          /**
+           * if there is only one character in the selected node and focusOffset is also 1
+           * then remove current node and check, if next and previous node is same or not. If same charaStyle then combine.
+           * Check for chara and XML tag.
+           */
+          else if (oSelection.focusOffset == 1 && oSelection.focusNode.data.length == 1) {
+            if (aParent.length == 1) {
 
-                  aCustom[charIndex + 1].CharacterStyleRange[0].Custom.splice(0, 1);
-                }
+              var pathForChara = targetPath.split('/');
+              pathForChara.splice(0, 1);
+              pathForChara.splice(-1, 1);
+              var oUltimateParent = this.searchClosestCustomOfLastInPath(currentStory, pathForChara);
+              var aUltimateCustom = oUltimateParent.objectPos;
+              var jIndex = oUltimateParent.indexPos;
+              /**
+               * xml tag :either you can totally remove or normal processing. We can't combine xml tags.
+               */
+              if (oSelection.focusNode.parentNode.parentNode.className == "xmlElementContainer") {
 
-                /**
-                 * if next charaStyle has more nodes then append remaining nodes to pre charaStyle.
-                 */
-                if (aCustom[charIndex + 1].CharacterStyleRange[0].Custom.length > 0) {
-                  aCustom[charIndex - 1].CharacterStyleRange[0].Custom =
-                      aCustom[charIndex - 1].CharacterStyleRange[0].Custom.concat(aCustom[charIndex + 1].CharacterStyleRange[0].Custom);
-                }
 
-                aCustom.splice(charIndex + 1);
-                aCustom.splice(charIndex);
-
-                if (restArray) {
-                  _.assign(aCustom, aCustom.concat(restArray));
-                }
+                var restUltimate = aUltimateCustom.splice(jIndex + 1);
+                aUltimateCustom.splice(jIndex, 1);
+                _.assign(aUltimateCustom, aUltimateCustom.concat(restUltimate));
                 _triggerChange();
               }
-              /** if next and prev styles are  not same*/
-              else if(aCustom[charIndex + 1] && aCustom[charIndex - 1] &&
-                  (aCustom[charIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle != aCustom[charIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle))
-              {
-                aCustom.splice(charIndex, 1);
-                _triggerChange();
+
+              /**
+               * characterStyleRange handling
+               */
+              if (sel.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
+                var aCustom = aUltimateCustom;
+                var charIndex = jIndex;
+                /**
+                 * characterStyleRange handling
+                 */
+                if (oSelection.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
+                  //var oCharacterOfParent = this.searchClosestCustomOfChara(data, parentUID);
+                  var aCustom = aUltimateCustom;
+                  var charIndex = jIndex;
+                  /**
+                   * if aCustom is having more than 1 child elements i.e. more than one characterStyleRanges.
+                   */
+                  if (aCustom.length > 1) {
+                    /**
+                     * if next charaStyle and previous charaStyle are same, then remove current node and combine
+                     */
+                    if (aCustom[charIndex + 1] && aCustom[charIndex - 1] &&
+                        (aCustom[charIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle == aCustom[charIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle)) {
+                      /**
+                       * if next nodes are present ,then store it to rest to append.
+                       */
+                      if (aCustom[charIndex + 2]) {
+                        var restArray = aCustom.splice(charIndex + 2);
+                      }
+
+                      var last = aCustom[charIndex - 1].CharacterStyleRange[0].Custom.length - 1;
+                      /**
+                       * if pre charaStyle has last node as CONTENT and next charaStyle has its first element as CONTENT, then merge these two CONTENTS
+                       */
+                      if (aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content
+                          && aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content) {
+                        aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] =
+                            aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"]
+                            + aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+
+                        aCustom[charIndex + 1].CharacterStyleRange[0].Custom.splice(0, 1);
+                      }
+
+                      /**
+                       * if next charaStyle has more nodes then append remaining nodes to pre charaStyle.
+                       */
+                      if (aCustom[charIndex + 1].CharacterStyleRange[0].Custom.length > 0) {
+                        aCustom[charIndex - 1].CharacterStyleRange[0].Custom =
+                            aCustom[charIndex - 1].CharacterStyleRange[0].Custom.concat(aCustom[charIndex + 1].CharacterStyleRange[0].Custom);
+                      }
+
+                      aCustom.splice(charIndex + 1);
+                      aCustom.splice(charIndex);
+
+                      if (restArray) {
+                        _.assign(aCustom, aCustom.concat(restArray));
+                      }
+                      _triggerChange();
+                    }
+                    /** if next and prev styles are  not same*/
+                    else if (aCustom[charIndex + 1] && aCustom[charIndex - 1] &&
+                        (aCustom[charIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle != aCustom[charIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle)) {
+                      aCustom.splice(charIndex, 1);
+                      _triggerChange();
+                    }
+                    else if (charIndex == (aCustom.length - 1) || charIndex == 0) {
+                      aCustom.splice(charIndex, 1);
+                      _triggerChange();
+                    }
+                  }
+                  /**
+                   * if its the only present charaStyle, then remove its parent also...i.e. remove that paraStyle
+                   */
+                  else if (aCustom.length == 1) {
+                    var pathForPara2 = targetPath.split('/');
+                    pathForPara2.splice(0, 1);
+                    pathForPara2.splice(-1, 1);
+                    var oUltimateParentForPara = this.searchClosestCustomOfLastInPath(currentStory, pathForPara2);
+                    var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
+                    var jIndexForPara = oUltimateParentForPara.indexPos;
+                    aUltimateCustomForPara.splice(jIndexForPara, 1);
+                    _triggerChange();
+                  }
+                }
+
               }
-              else if (charIndex == (aCustom.length - 1) || charIndex == 0) {
-                aCustom.splice(charIndex, 1);
+              else if (aParent.length > 1) {
+                /**
+                 * delete only current node and append all other remaining to previous.
+                 */
+                if ((iIndex + 1) != aParent.length) {
+                  var afterNodes = aParent.splice(iIndex + 1);
+                }
+                aParent.splice(iIndex, 1);
+                if (afterNodes) {
+                  _.assign(aParent, aParent.concat(afterNodes));
+                }
                 _triggerChange();
               }
             }
             /**
-             * if its the only present charaStyle, then remove its parent also...i.e. remove that paraStyle
+             * for normal backSpace.
              */
-            else if(aCustom.length == 1){
-              var pathForPara2=targetPath.split('/');
-              pathForPara2.splice(0,1);
-              pathForPara2.splice(-1,1);
-              var oUltimateParentForPara = this.searchClosestCustomOfLastInPath(currentStory, pathForPara2);
-              var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
-              var jIndexForPara = oUltimateParentForPara.indexPos;
-              aUltimateCustomForPara.splice(jIndexForPara,1);
+            else if (iRange.endOffset >= 1) {
+              var str = oSelection.focusNode.data;
+              aParent[iIndex].Content[0]["_"] = str.slice(0, oSelection.focusOffset - 1) + str.slice(oSelection.focusOffset);
               _triggerChange();
+              return null;
             }
           }
-
-        }
-        else if (aParent.length > 1) {
-          /**
-           * delete only current node and append all other remaining to previous.
-           */
-          if ((iIndex + 1) != aParent.length) {
-            var afterNodes = aParent.splice(iIndex + 1);
-          }
-          aParent.splice(iIndex, 1);
-          if (afterNodes) {
-            _.assign(aParent, aParent.concat(afterNodes));
-          }
-          _triggerChange();
         }
       }
-      /**
-       * for normal backSpace.
-       */
-      else if(iRange.endOffset >= 1){
-        var str = sel.focusNode.data;
-        aParent[iIndex].Content[0]["_"] = str.slice(0,sel.focusOffset-1) + str.slice(sel.focusOffset);
-        _triggerChange();
-        return null;
+      else {
+        handleContentTextChangedForRangeSelection(oSelection, targetPath, "");
       }
-
     },
 
     handleTabPressed: function (oEvent, sel, targetPath) {
@@ -928,7 +968,7 @@ var storyStore = (function () {
         if(
          /*Arrow Keys, HOME and END*/  (oEvent.keyCode >= 35 && oEvent.keyCode <= 40) ||
         /*Function Keys*/               (oEvent.keyCode >= 112 && oEvent.keyCode <= 123) ||
-        /*SHIFT Key*/                   oEvent.keyCode == 16)
+        /*SHIFT Key*/                   oEvent.keyCode == 16 || oEvent.metaKey || oEvent.ctrlKey)
 
         {
           return;
