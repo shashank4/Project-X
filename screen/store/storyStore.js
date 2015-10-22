@@ -830,6 +830,8 @@ var storyStore = (function () {
           oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
           if(!_.isEmpty(oReturnedObject)) {
             oReturnedObject.objectPos[oReturnedObject.indexPos].Content[0]["_"] = preText + tenSpaces + postText;
+            oCaretPosition.focusId = oReturnedObject.objectPos[oReturnedObject.indexPos].Content[0]["$"]["data-uid"];
+            oCaretPosition.indexToFocus = preText.length + 10;
           }
 
         } else {
