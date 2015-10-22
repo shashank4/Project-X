@@ -1,5 +1,6 @@
 var React = require('react');
 var Canvas = require('../views/canvas.jsx');
+//var StylesPane = require('../views/StylesPane.jsx');
 var EventDispatcher = require('./../../libraries/eventDispacher/EventDispatcher');
 
 var Events={
@@ -53,14 +54,21 @@ var AppController = React.createClass({
   render: function () {
     var sPathToUpdate = this.props.storyStore.getPathToUpdate();
     var oCaretPosition = this.props.storyStore.getCaretPosition();
+    var oStyles = {"CaracterStyles": ["ABCd", "DEFG"], "ParagraphStyles": ["bsfbfb", "eradf"]};
     return (
         <div className="appController">
-         <button className="myButton" onClick={this.handleOnClick}>Save</button>
-          <Canvas
+          <div className="toolBarWrapper">
+            <button className="myButton" onClick={this.handleOnClick}>Save</button>
+          </div>
+          <div className="mainContent">
+            {/*<StylesPane
+              stylesData={oStyles}/>*/}
+            <Canvas
               layoutStoreData={this.state.layoutData}
               storyStoreData={this.state.storyData}
               pathToUpdate={sPathToUpdate}
               caretPosition={oCaretPosition}/>
+          </div>
         </div>
     );
   }
