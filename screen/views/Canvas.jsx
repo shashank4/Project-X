@@ -22,23 +22,24 @@ var Canvas = React.createClass({
     var cHeight = (spreadCount * (pageHeight + 144)) + (72 * 2) + (36 * (spreadCount - 1));
     var cWidth = (2448 * 2);
     var oCstyle = {
-      padding: "72px",
+      padding: "20px",
       height: cHeight + "px",
       width: cWidth + "px",
-      left: "100px",
-      top: "100px"
+      position: "relative"
     };
 
     var toSpread = this.props.layoutStoreData;
 
     return (
 
-        <div className="canva" style={oCstyle}>
-          <Spread
+        <div className="canvasWrapper">
+          <div className="canva" style={oCstyle}>
+            <Spread
               layoutStoreData={toSpread}
               storyStoreData={this.props.storyStoreData}
               pathToUpdate={this.props.pathToUpdate}
               caretPosition={this.props.caretPosition}/>
+          </div>
         </div>
     );
   }

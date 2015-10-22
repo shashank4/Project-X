@@ -290,7 +290,6 @@ var storyStore = (function () {
     var oSelectionEndNode = oSelection.focusNode;
 
     if (oSelectionStartNode == oSelectionEndNode) {
-      console.log(targetPath);
       var iSelectionStartPosition = Math.min(oSelection.anchorOffset, oSelection.focusOffset);
       var iSelectionEndPosition = Math.max(oSelection.anchorOffset, oSelection.focusOffset);
       var iSelectionSize = iSelectionEndPosition - iSelectionStartPosition;
@@ -325,13 +324,28 @@ var storyStore = (function () {
          * Remove Br and add Content in it's place
          */
         else {
-          var oNewContent = createContentNode(pressedChar);
-          oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize, oNewContent);
-          oCaretPosition.focusId = oNewContent.Content[0]["$"]["data-uid"];
+          var oNewContent;
+          if(pressedChar != ''){
+            oNewContent = createContentNode(pressedChar);
+            oCaretPosition.focusId = oNewContent.Content[0]["$"]["data-uid"];
+            oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize, oNewContent);
+          } else {
+            var oFocusedNode = oCustomDetails.objectPos[brIndex];
+            if(oFocusedNode.Content){
+              oCaretPosition.focusId = oFocusedNode.Content[0]["$"]["data-uid"];
+            } else if (oFocusedNode.Br){
+              oCaretPosition.focusId = oFocusedNode.Br[0]["$"]["data-uid"];
+            }
+            oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize);
+          }
           oCaretPosition.indexToFocus = 0;
           oCaretPosition.endOffset -= iSelectionSize;
         }
       }
+    } else {
+
+
+
     }
   };
 
@@ -972,7 +986,7 @@ var storyStore = (function () {
         if(
          /*Arrow Keys, HOME and END*/  (oEvent.keyCode >= 35 && oEvent.keyCode <= 40) ||
         /*Function Keys*/               (oEvent.keyCode >= 112 && oEvent.keyCode <= 123) ||
-        /*SHIFT Key*/                   oEvent.keyCode == 16)
+        /*SHIFT Key*/                   oEvent.keyCode == 16 || oEvent.metaKey || oEvent.ctrlKey)
 
         {
           return;
