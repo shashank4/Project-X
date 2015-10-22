@@ -1,3 +1,7 @@
+body,html{
+    height: 100%;
+}
+
 body * {
     box-sizing: border-box;
     white-space:PRE;
@@ -5,6 +9,10 @@ body * {
 
 span{
     white-space: pre-wrap;
+}
+
+#MainContainerBody{
+    height: 100%;
 }
 
 #container{
@@ -89,4 +97,31 @@ p{
 
 .myButton{
     margin-left: 1224px;
+}
+
+.style-pane{
+    background: white;
+    float: left;
+    border: 1px solid black;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+    display: inline-block;
+    width: 20%;
+}
+
+.toolBarWrapper{
+    height: 20px;
+}
+
+.mainContent{
+    width: 100%;
+    height: calc(100% - 20px);
+}
+
+.canvasWrapper{
+    display: inline-block;
+    overflow: scroll;
+    height: 100%;
+    width: 80%;
 }
