@@ -84,6 +84,16 @@ var storyStore = (function () {
     };
   };
 
+  var createBrNode = function (){
+    return {
+      "Br": [
+        {
+          "$": {"data-uid": utils.generateUUID()}
+        }
+      ]
+    };
+  };
+
   var updateContentTextWithPushedCharacter = function(oCurrentStory, aPath, sPushedChar, iStartIndex, iSelectionSize){
     var oCustomDetails = storyStore.searchClosestCustomOfLastInPath(oCurrentStory, aPath);
     var oContent = oCustomDetails.objectPos[oCustomDetails.indexPos].Content[0];
@@ -241,6 +251,117 @@ var storyStore = (function () {
     return null;
   };
 
+  var handleContentTextChangedForCaretSelection = function (targetPath, oCurrentDom, pressedChar, oSelection) {
+    var path = targetPath.split("/");
+    var currentStoryId = path.splice(0, 1);
+    var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+
+    var oParentCustom = storyStore.searchClosestCustomOfLastInPath(currentStory, path);
+    var aCustom = oParentCustom.objectPos;
+    var index = oParentCustom.indexPos;
+    var uuid = path[path.length - 1];
+    /**
+     * if key is pressed on any BR node.
+     */
+    if (oCurrentDom.className.indexOf('br') > (-1)) {
+      //var newUid21 = utils.generateUUID();
+      var newContentObj21 = createContentNode(pressedChar);
+      aCustom.splice(index, 0, newContentObj21);
+      oCaretPosition.focusId = newContentObj21.Content[0]["$"]["data-uid"];
+      oCaretPosition.indexToFocus = 1;
+    }
+    /**
+     * if a key is pressed either BEFORE or AFTER the BR node...
+     */
+    else if ((oSelection.focusNode.nextSibling
+        && oSelection.focusNode.nextSibling.className.indexOf("br") > (-1))
+        ||
+        ((oSelection.focusNode.previousSibling
+        && oSelection.focusNode.previousSibling.className.indexOf("br") > (-1)))) {
+
+      var newContentStringBefore = oSelection.focusNode.data.substring(0, oSelection.focusOffset) + pressedChar
+          + oSelection.focusNode.data.substring(oSelection.focusOffset, oSelection.length);
+      var newUid = utils.generateUUID();
+      var newContentObj = createContentNode(newContentStringBefore, newUid);
+      oCaretPosition.focusId = newContentObj.Content[0]["$"]["data-uid"];
+      oCaretPosition.indexToFocus = 1;
+
+      /**
+       * if a key is pressed AFTER the BR node...
+       */
+      if (oSelection.focusNode.previousSibling && oSelection.focusNode.previousSibling.className.indexOf("br") > (-1)) {
+        aCustom.splice(index + 1, 0, newContentObj);
+      }
+      /**
+       * * if a key is pressed BEFORE the BR node...
+       */
+      else if (oSelection.focusNode.nextSibling && oSelection.focusNode.nextSibling.className.indexOf("br") > (-1)) {
+        if (index != 0)
+          aCustom.splice(index - 1, 0, newContentObj);
+        else
+          aCustom.splice(index, 0, newContentObj);
+
+        aCustom.splice(-1);
+      }
+    }
+    /**
+     * if key is pressed in the middle of the node.(Normal processing)
+     */
+    else {
+      updateContentTextWithPushedCharacter(currentStory, path, pressedChar, oSelection.focusOffset, 0);
+    }
+  };
+
+  var handleContentTextChangedForRangeSelection = function (oSelection, targetPath, pressedChar) {
+    var oSelectionStartNode = oSelection.anchorNode;
+    var oSelectionEndNode = oSelection.focusNode;
+
+    if (oSelectionStartNode == oSelectionEndNode) {
+      console.log(targetPath);
+      var iSelectionStartPosition = Math.min(oSelection.anchorOffset, oSelection.focusOffset);
+      var iSelectionEndPosition = Math.max(oSelection.anchorOffset, oSelection.focusOffset);
+      var iSelectionSize = iSelectionEndPosition - iSelectionStartPosition;
+      var path = targetPath.split("/");
+      var currentStoryId = path.splice(0, 1);
+      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+      /**
+       * Handling for text content
+       */
+      if (oSelectionStartNode.nodeName == '#text') {
+        updateContentTextWithPushedCharacter(currentStory, path, pressedChar, iSelectionStartPosition, iSelectionSize);
+      }
+      /**
+       * Handling for Br
+       */
+      else {
+        var oCustomDetails = storyStore.searchClosestCustomOfLastInPath(currentStory, path);
+        var brIndex = oCustomDetails.indexPos;
+        /**
+         * Handling for removal of br above text content (merge typed string into content)
+         */
+        if (brIndex < oCustomDetails.objectPos.length - 1
+            && oCustomDetails.objectPos[brIndex + 1].Content) {
+          var oContent = oCustomDetails.objectPos[brIndex + 1].Content[0];
+          oContent["_"] = utils.getSplicedString(oContent['_'], iSelectionStartPosition, 0, pressedChar);
+          oCaretPosition.focusId = oContent["$"]["data-uid"];
+          oCaretPosition.indexToFocus = iSelectionStartPosition + 1;
+          oCaretPosition.endOffset -= iSelectionSize;
+          oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize);
+        }
+        /**
+         * Remove Br and add Content in it's place
+         */
+        else {
+          var oNewContent = createContentNode(pressedChar);
+          oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize, oNewContent);
+          oCaretPosition.focusId = oNewContent.Content[0]["$"]["data-uid"];
+          oCaretPosition.indexToFocus = 0;
+          oCaretPosition.endOffset -= iSelectionSize;
+        }
+      }
+    }
+  };
+
   var storyStore =  {
 
     setStoreData: function (data1) {
@@ -295,16 +416,16 @@ var storyStore = (function () {
                   };
                 } else {
                   remainingPath.splice(0, 1);
-                  oClosestCustom = this.searchClosestCustomOfLastInPath(oTag, remainingPath, oTag['$'][UID_KEY]);
+                  oClosestCustom = storyStore.searchClosestCustomOfLastInPath(oTag, remainingPath, oTag['$'][UID_KEY]);
                 }
                 return false;
               }
             }
-          }.bind(this));
+          });
           if (oClosestCustom) {
             return false;
           }
-        }.bind(this));
+        });
         return oClosestCustom;
       }
     },
@@ -324,95 +445,10 @@ var storyStore = (function () {
         }
       }
       if(oSelection.type == 'Caret'){
-        var path = targetPath.split("/");
-        var currentStoryId = path.splice(0, 1);
-        var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-
-        var oParentCustom = this.searchClosestCustomOfLastInPath(currentStory, path);
-        var aCustom = oParentCustom.objectPos;
-        var index = oParentCustom.indexPos;
-        var uuid = path[path.length - 1];
-        /**
-         * if key is pressed on any BR node.
-         */
-        if(oCurrentDom.className.indexOf('br')>(-1)){
-          //var newUid21 = utils.generateUUID();
-          var newContentObj21 = createContentNode(pressedChar);
-          aCustom.splice(index, 0, newContentObj21);
-          oCaretPosition.focusId = newContentObj21.Content[0]["$"]["data-uid"];
-          oCaretPosition.indexToFocus = 1;
-        }
-        /**
-         * if a key is pressed either BEFORE or AFTER the BR node...
-         */
-        else if ((oSelection.focusNode.nextSibling
-            && oSelection.focusNode.nextSibling.className.indexOf("br") > (-1))
-            ||
-            ((oSelection.focusNode.previousSibling
-            && oSelection.focusNode.previousSibling.className.indexOf("br") > (-1)))) {
-
-          var newContentStringBefore = oSelection.focusNode.data.substring(0, oSelection.focusOffset) + pressedChar
-              + oSelection.focusNode.data.substring(oSelection.focusOffset, oSelection.length);
-          var newUid = utils.generateUUID();
-          var newContentObj = createContentNode(newContentStringBefore,newUid);
-          oCaretPosition.focusId = newContentObj.Content[0]["$"]["data-uid"];
-          oCaretPosition.indexToFocus = 1;
-
-          /**
-           * if a key is pressed AFTER the BR node...
-           */
-          if (oSelection.focusNode.previousSibling && oSelection.focusNode.previousSibling.className.indexOf("br") > (-1)) {
-            aCustom.splice(index + 1, 0, newContentObj);
-          }
-          /**
-           * * if a key is pressed BEFORE the BR node...
-           */
-          else if (oSelection.focusNode.nextSibling && oSelection.focusNode.nextSibling.className.indexOf("br") > (-1)) {
-            if (index != 0)
-              aCustom.splice(index - 1, 0, newContentObj);
-            else
-              aCustom.splice(index, 0, newContentObj);
-
-            aCustom.splice(-1);
-          }
-        }
-        /**
-         * if key is pressed in the middle of the node.(Normal processing)
-         */
-        else {
-          updateContentTextWithPushedCharacter(currentStory, path,pressedChar, oSelection.focusOffset, 0);
-        }
-
+        handleContentTextChangedForCaretSelection(targetPath, oCurrentDom, pressedChar, oSelection);
       }
-      /**
-      *   Handle range selection
-      */
       else {
-        var oSelectionStartNode = oSelection.anchorNode;
-        var oSelectionEndNode = oSelection.focusNode;
-
-        if(oSelectionStartNode == oSelectionEndNode){
-          console.log(targetPath);
-          var iSelectionStartPosition = Math.min(oSelection.anchorOffset,oSelection.focusOffset);
-          var iSelectionEndPosition = Math.max(oSelection.anchorOffset,oSelection.focusOffset);
-          var iSelectionSize = iSelectionEndPosition - iSelectionStartPosition;
-          var path = targetPath.split("/");
-          var currentStoryId = path.splice(0, 1);
-          var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-          if(oSelectionStartNode.nodeName == '#text'){
-            updateContentTextWithPushedCharacter(currentStory, path,pressedChar, iSelectionStartPosition, iSelectionSize);
-          } else {
-            var oCustomDetails = this.searchClosestCustomOfLastInPath(currentStory, path);
-            var oNewContent = createContentNode('');
-            oCustomDetails.objectPos.splice(iSelectionStartPosition,iSelectionSize,oNewContent);
-            oCaretPosition.focusId = oNewContent.Content[0]["$"]["data-uid"];
-            oCaretPosition.indexToFocus = 0;
-            oCaretPosition.endOffset -= iSelectionSize;
-            debugger;
-          }
-
-        }
-
+        handleContentTextChangedForRangeSelection(oSelection, targetPath, pressedChar);
       }
       _triggerChange();
     },
@@ -433,8 +469,7 @@ var storyStore = (function () {
        * append directly
        */
       if (bFlag == true) {
-        var newUid5 = utils.generateUUID();
-        var newBrObj5 = {"Br": [{"$": {"data-uid": newUid5}}]};
+        var newBrObj5 = createBrNode();
         aParent.splice(iIndex,0,newBrObj5);
         oCaretPosition.focusId = newBrObj5.Br[0]["$"]["data-uid"];
         _triggerChange();
@@ -448,8 +483,7 @@ var storyStore = (function () {
          * if offset is 0 and first node of character style or xmlElement
          */
         if (iIndex == 0 && iOffset == 0 ) {
-          var newUid6 = utils.generateUUID();
-          var newBrObj6 = {"Br": [{"$": {"data-uid": newUid6}}]};
+          var newBrObj6 = createBrNode();
           aParent.splice(iIndex, 0, newBrObj6);
           oCaretPosition.focusId = newBrObj6.Br[0]["$"]["data-uid"];
           _triggerChange();
@@ -468,8 +502,7 @@ var storyStore = (function () {
             aParent.push(newContentObjBefore);
           }
 
-          var newUid2 = utils.generateUUID();
-          var newBrObj = {"Br": [{"$": {"data-uid": newUid2}}]};
+          var newBrObj = createBrNode();
           oCaretPosition.focusId = newBrObj.Br[0]["$"]["data-uid"];
           aParent.push(newBrObj);
 
@@ -496,8 +529,7 @@ var storyStore = (function () {
               && oSel.focusNode.parentNode.nextSibling == null
               && oSel.focusNode.parentNode.parentNode.nextSibling == null
               && oSel.focusNode.parentNode.parentNode.parentNode.nextSibling == null ) {
-            var newUid4 = utils.generateUUID();
-            var newBrObjExtremeLast = {"Br": [{"$": {"data-uid": newUid4}}]};
+            var newBrObjExtremeLast = createBrNode();
             oCaretPosition.focusId = newBrObjExtremeLast.Br[0]["$"]["data-uid"];
             aParent.push(newBrObjExtremeLast);
           }

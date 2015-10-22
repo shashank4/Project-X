@@ -1,4 +1,5 @@
 var React = require("react");
+var _ = require("lodash");
 
 var Br = React.createClass({
   propTypes: {
@@ -19,9 +20,7 @@ var Br = React.createClass({
     if (this.props.caretPosition.focusId == this.props.data[0]["$"]["data-uid"]) {
       var oDOMNode = this.getDOMNode();
       var oRange = document.createRange();
-
-      oRange.setStart(oDOMNode, 0);
-      oRange.setEnd(oDOMNode, 0);
+      oRange.setStartAfter(oDOMNode);
 
       var oSelection = window.getSelection();
       oSelection.removeAllRanges();
