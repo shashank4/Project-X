@@ -1,6 +1,6 @@
 var React = require('react');
 var Canvas = require('../views/canvas.jsx');
-//var StylesPane = require('../views/StylesPane.jsx');
+var StylesPane = require('../views/StylesPane.jsx');
 var EventDispatcher = require('./../../libraries/eventDispacher/EventDispatcher');
 
 var Events={
@@ -61,8 +61,8 @@ var AppController = React.createClass({
             <button className="myButton" onClick={this.handleOnClick}>Save</button>
           </div>
           <div className="mainContent">
-            {/*<StylesPane
-              stylesData={oStyles}/>*/}
+            <StylesPane
+              stylesData={oStyles}/>
             <Canvas
               layoutStoreData={this.state.layoutData}
               storyStoreData={this.state.storyData}
