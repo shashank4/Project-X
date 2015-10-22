@@ -163,11 +163,29 @@ var storyStore = (function () {
 
         /** if last Br is NOT the only child*/
         if (lastElementIndex != 1) {
+          var oNode = _getLastChildNode(aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1]);
+          if(oNode) {
+            if(oNode.Content) {
+              oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
+              oCaretPosition.indexToFocus = oNode.Content[0]["_"].length;
+            } else {
+              oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
+            }
+          }
           aCustom[charIndex].CharacterStyleRange[0].Custom.splice(lastElementIndex, 1);
         }
         /** if last Br is the ONLY child*/
         else if (lastElementIndex == 1) {
           /** if aCustom has more than 1 element , i.e. AaCustom has more than one charaStyles*/
+          oNode = _getLastChildNode(aCustom[charIndex - 1]);
+          if(oNode) {
+            if(oNode.Content) {
+              oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
+              oCaretPosition.indexToFocus = oNode.Content[0]["_"].length;
+            } else {
+              oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
+            }
+          }
           aCustom.splice(charIndex, 1);
         }
       }
@@ -181,12 +199,25 @@ var storyStore = (function () {
         if (tempStr.length > 1) {
           tempStr = tempStr.slice(0, tempStr.length - 1);
           aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].Content[0]["_"] = tempStr;
+          oCaretPosition.focusId = aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].Content[0]["_"]["$"];
+          oCaretPosition.indexToFocus = tempStr.length;
         }
         /** if strLength is 1 then remove that node */
         else if (tempStr.length == 1) {
           aCustom[charIndex].CharacterStyleRange[0].Custom.splice(lastElementIndex - 1, 1);
           /** if this CONTENT node was the only node of that charaStyle, then remove that charaStyle also*/
           if (aCustom[charIndex].CharacterStyleRange[0].Custom.length == 0) {
+
+            oNode = _getLastChildNode(aCustom[charIndex - 1]);
+            if(oNode) {
+              if(oNode.Content) {
+                oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
+                oCaretPosition.indexToFocus = oNode.Content[0]["_"].length;
+              } else {
+                oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
+              }
+            }
+
             aCustom.splice(charIndex, 1);
           }
         }
@@ -206,6 +237,18 @@ var storyStore = (function () {
     var lastIndex = aParent[i].XMLElement[0].Custom.length;
     /**if last node is Br.  then remove that node*/
     if(aParent[i].XMLElement[0].Custom[lastIndex-1].Br){
+      var oNode = aParent[i].XMLElement[0].Custom[lastIndex-2];
+      if(oNode) {
+        oNode = _getLastChildNode(oNode);
+        if(oNode) {
+          if(oNode.Content) {
+            oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
+            oCaretPosition.indexToFocus = oNode.Content[0]["_"].length;
+          } else {
+            oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
+          }
+        }
+      }
       aParent[i].XMLElement[0].Custom.splice(lastIndex-1, 1);
     }
 
@@ -215,8 +258,19 @@ var storyStore = (function () {
       /** if content stringLength is greater than '1'*/
       if (str.length != 1) {
         aParent[iIndex + 1].XMLElement[0].Custom[lastIndex-1].Content[0]["_"] = str.slice(0, str.length-1);
+        oCaretPosition.focusId = aParent[iIndex + 1].XMLElement[0].Custom[lastIndex-1].Content[0]["$"]["data-uid"];
+        oCaretPosition.indexToFocus = aParent[iIndex + 1].XMLElement[0].Custom[lastIndex-1].Content[0]["_"].length;
       } else {
         aParent[iIndex + 1].XMLElement[0].Custom.splice(0, 1);
+        oNode = _getLastChildNode(aParent[iIndex + 1].XMLElement[0].Custom[0]);
+        if(oNode) {
+          if(oNode.Content) {
+            oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
+            oCaretPosition.indexToFocus = oNode.Content[0]["_"].length;
+          } else {
+            oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
+          }
+        }
       }
     }
 
@@ -226,7 +280,7 @@ var storyStore = (function () {
       handleCharaOfBackSpace(aParent[i].XMLElement[0].Custom[lastIndex-1].CharacterStyleRange[0].Custom, lastOfChara-1)
     }
 
-    _triggerChange()
+    _triggerChange();
     return null;
   };
 
@@ -736,6 +790,17 @@ var storyStore = (function () {
 
             /** if previous node is br */
             if (aParent[iReturnedObjectIndex - 1].Br) {
+              var oNode = aParent[iReturnedObjectIndex - 2];
+              if(oNode) {
+                oNode = _getLastChildNode(oNode);
+                if(oNode.Content) {
+                  oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
+                  oCaretPosition.indexToFocus = oNode.Content[0]["$"]["_"].length;
+                } else if(oNode.Br){
+                  oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
+                }
+              }
+
               aParent.splice(iReturnedObjectIndex - 1, 1);
               _triggerChange();
               return null;
@@ -772,6 +837,16 @@ var storyStore = (function () {
                 aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.splice(last3 - 1, 1);
                 aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom.concat(aCustomPara[iIndexPara].ParagraphStyleRange[0].Custom);
                 var restPara = aCustomPara.splice(iIndexPara + 1);
+
+                var oLastNode = _getLastChildNode(aCustomPara[iIndexPara - 1]);
+                if(oLastNode.Content)
+                {
+                  oCaretPosition.focusId = oLastNode.Content[0]["$"]["data-uid"];
+                  oCaretPosition.indexToFocus = oLastNode.Content[0]["_"].length;
+                } else {
+                  oCaretPosition.focusId = oLastNode.Br[0]["$"]["data-uid"];
+                }
+
                 aCustomPara.splice(iIndexPara, 1);
                 _.assign(aCustomPara, aCustomPara.concat(restPara));
                 _triggerChange();
@@ -793,15 +868,16 @@ var storyStore = (function () {
             pathForChara.splice(-1, 1);
             var oUltimateParent = _searchClosestCustomOfLastInPath(currentStory, pathForChara);
             var aUltimateCustom = oUltimateParent.objectPos;
-            var jIndex = oUltimateParent.indexPos;
+            var iIndex = oUltimateParent.indexPos;
             /**
              * xml tag :either you can totally remove or normal processing. We can't combine xml tags.
              */
             if (oCurrentDom.parentNode.className == "xmlElementContainer") {
 
+              _setCaretPosition(aUltimateCustom, iIndex, pathForChara, currentStory);
 
-              var restUltimate = aUltimateCustom.splice(jIndex + 1);
-              aUltimateCustom.splice(jIndex, 1);
+              var restUltimate = aUltimateCustom.splice(iIndex + 1);
+              aUltimateCustom.splice(iIndex, 1);
               _.assign(aUltimateCustom, aUltimateCustom.concat(restUltimate));
               _triggerChange();
             }
@@ -811,7 +887,7 @@ var storyStore = (function () {
              */
             if (oCurrentDom.parentNode.className.indexOf("characterContainer") > (-1)) {
               var aCustom = aUltimateCustom;
-              var charIndex = jIndex;
+              var charIndex = iIndex;
               /**
                * if aCustom is having more than 1 child elements i.e. more than one characterStyleRanges.
                */
@@ -834,11 +910,14 @@ var storyStore = (function () {
                    */
                   if (aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content
                       && aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content) {
-                    aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] =
-                        aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"]
+                    var iContentLength = aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"].length;
+                    aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] +=
                         + aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
 
                     aCustom[charIndex + 1].CharacterStyleRange[0].Custom.splice(0, 1);
+
+                    oCaretPosition.focusId = aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["$"]["data-uid"];
+                    oCaretPosition.indexToFocus = iContentLength;
                   }
 
                   /**
@@ -861,6 +940,7 @@ var storyStore = (function () {
                 else if (aCustom[charIndex + 1] && aCustom[charIndex - 1] &&
                     (aCustom[charIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle != aCustom[charIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle)) {
                   aCustom.splice(charIndex, 1);
+                  _setCaretPosition(aCustom, charIndex, pathForChara, currentStory);
                   _triggerChange();
                 }
                 else if (charIndex == (aCustom.length - 1) || charIndex == 0) {
@@ -892,8 +972,10 @@ var storyStore = (function () {
               var afterNodes = aParent.splice(iReturnedObjectIndex + 1);
             }
 
+            //Caret positioning
             var aPath = targetPath.split('/');
             aPath.splice(0, 1);
+            //TODO: Make Following API Reusable for backspaced
             _setCaretPosition(aParent, iReturnedObjectIndex, aPath, currentStory);
 
             aParent.splice(iReturnedObjectIndex, 1);
