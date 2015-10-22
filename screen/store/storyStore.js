@@ -159,119 +159,58 @@ var storyStore = (function () {
   };
 
 
-  var handleCharaOfBackSpace = function(aUltimateCustom, jIndex){ //jIndex
-
-    /**xml tag :either you can totally remove or normal processing. We can't combine xml tags. */
-    /*if (aUltimateCustom[jIndex].XMLElement) {
-      handleXMLOfBackSpace(aUltimateCustom, jIndex);
-
-    }*/
+  var handleCharaOfBackSpace = function (aUltimateCustom, jIndex) { //jIndex
 
     /**  characterStyleRange handling*/
-    if (aUltimateCustom[jIndex].CharacterStyleRange) {
-      var aCustom = aUltimateCustom;    //aCustom is a para of characterStyleRange
-      var charIndex =  jIndex;
+    var aCustom = aUltimateCustom;    //aCustom is a parent of characterStyleRange
+    var charIndex = jIndex;
 
-      /**if aCustom is having more than 1 child elements i.e. more than one characterStyleRanges. */
-      if (aCustom.length > 1) {
+    /**if aCustom is having more than 1 child elements i.e. more than one characterStyleRanges. */
+    if (aCustom.length > 1) {
 
-        var lastElementIndex = aCustom[charIndex].CharacterStyleRange[0].Custom.length;
+      var lastElementIndex = aCustom[charIndex].CharacterStyleRange[0].Custom.length;
+      /**if last element of prev chara is BR*/
+      if (aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].Br) {
 
+        /** if last Br is NOT the only child*/
+        if (lastElementIndex != 1) {
+          aCustom[charIndex].CharacterStyleRange[0].Custom.splice(lastElementIndex, 1);
+        }
+        /** if last Br is the ONLY child*/
+        else if (lastElementIndex == 1) {
+          /** if aCustom has more than 1 element , i.e. AaCustom has more than one charaStyles*/
+          aCustom.splice(charIndex, 1);
+        }
+      }
 
-        /**if last element of prev chara is BR*/
-        if(aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex-1].Br){
+      /** if charaStyles node's last element is CONTENT */
+      else if (aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].Content) {
 
+        var tempStr = aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].Content[0]["_"];
 
-          /** if last Br is NOT the only child*/
-          if(lastElementIndex != 1){
-            aCustom[charIndex].CharacterStyleRange[0].Custom.splice(lastElementIndex, 1);
-          }
-          /** if last Br is the ONLY child*/
-          else if(lastElementIndex == 1){
-            /** if aCustom has more than 1 element , i.e. AaCustom has more than one charaStyles*/
+        /** if CONTENT string length is greater than 1 */
+        if (tempStr.length > 1) {
+          tempStr = tempStr.slice(0, tempStr.length - 1);
+          aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].Content[0]["_"] = tempStr;
+        }
+        /** if strLength is 1 then remove that node */
+        else if (tempStr.length == 1) {
+          aCustom[charIndex].CharacterStyleRange[0].Custom.splice(lastElementIndex - 1, 1);
+          /** if this CONTENT node was the only node of that charaStyle, then remove that charaStyle also*/
+          if (aCustom[charIndex].CharacterStyleRange[0].Custom.length == 0) {
             aCustom.splice(charIndex, 1);
           }
-
-          _triggerChange();
-          return null;
         }
-        /** if charaStyles node's last element is CONTENT */
-        else if(aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex].Content){
-
-          var tempStr = aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex-1].Content[0]["_"];
-
-          /** if CONTENT string length is greater than 1 */
-          if(tempStr.length > 1){
-            tempStr = tempStr.slice(0, tempStr.length-1);
-            aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex-1].Content[0]["_"] = tempStr;
-            _triggerChange();
-            return null;
-          }
-          /** if strLength is 1 then remove that node */
-          else if (tempStr.length ==  1){
-            aCustom[charIndex].CharacterStyleRange[0].Custom.splice(lastElementIndex-1, 1);
-            /** if this CONTENT node was the only node of that charaStyle, then remove that charaStyle also*/
-            if(aCustom[charIndex].CharacterStyleRange[0].Custom.length == 0){
-                aCustom.splice(charIndex, 1);
-            }
-          }
-        }
-
-        //TODO: write here XML element
-
-
-        /*
-        if (aCustom[charIndex + 1] && aCustom[charIndex - 1] &&
-            (aCustom[charIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle == aCustom[charIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle)) {
-
-          if (aCustom[charIndex + 2]){
-            var restArray = aCustom.splice(charIndex + 2);
-          }
-
-          var last = aCustom[charIndex - 1].CharacterStyleRange[0].Custom.length - 1;
-          if (aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content
-              && aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content)
-          {
-            aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] =
-                aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"]
-                + aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
-
-            aCustom[charIndex + 1].CharacterStyleRange[0].Custom.splice(0, 1);
-          }
-
-
-          if (aCustom[charIndex + 1].CharacterStyleRange[0].Custom.length > 0) {
-            aCustom[charIndex - 1].CharacterStyleRange[0].Custom =
-                aCustom[charIndex - 1].CharacterStyleRange[0].Custom.concat(aCustom[charIndex + 1].CharacterStyleRange[0].Custom);
-          }
-
-          aCustom.splice(charIndex + 1);
-          aCustom.splice(charIndex);
-
-          if (restArray) {
-            _.assign(aCustom, aCustom.concat(restArray));
-          }
-          _triggerChange();
-        } else if (charIndex == (aCustom.length - 1)) {
-          aCustom.splice(charIndex, 1);
-          _triggerChange();
-        }*/
       }
-      /** if its the only present charaStyle, then remove its parent also...i.e. remove that paraStyle  *//*
-      else if(aCustom.length == 1){
-        var pathForPara2=targetPath.split('/');
-        pathForPara2.splice(0,1);
-        pathForPara2.splice(-1,1);
-        var oUltimateParentForPara = this.searchClosestCustomOfLastInPath(currentStory, pathForPara2);
-        var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
-        var jIndexForPara = oUltimateParentForPara.indexPos;
-        aUltimateCustomForPara.splice(jIndexForPara,1);
-        _triggerChange();
-      }*/
+
+      /** if charaStyles node's last element is XMLElement */
+      else if (aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].XMLElement) {
+        handleXMLOfBackSpace(aCustom[charIndex].CharacterStyleRange[0].Custom, lastElementIndex - 1);
+      }
+
+      _triggerChange();
+      return null;
     }
-
-    //TODO: handle content n Br here also
-
   };
 
   var handleXMLOfBackSpace = function(aParent, i){
@@ -303,6 +242,7 @@ var storyStore = (function () {
   };
 
   var storyStore =  {
+
     setStoreData: function (data1) {
       data = data1;
     },
@@ -333,24 +273,6 @@ var storyStore = (function () {
           alert("Save Complete");
         }
       });
-    },
-
-    selfSearch: function (obj, uuid) {
-      var objects = [];
-      for (var i in obj) {
-        if (obj[i] && obj[i]["$"]
-            && obj[i]["$"]["data-uid"]
-            && obj[i]["$"]["data-uid"] == uuid
-            && typeof obj[i] == 'object') {
-          return obj[i];
-        }
-        else if (typeof obj[i] == 'object') {
-          objects = this.selfSearch(obj[i], uuid);
-          if (objects) {
-            return objects;
-          }
-        }
-      }
     },
 
     searchClosestCustomOfLastInPath: function (obj, remainingPath, sParentId) {
@@ -600,7 +522,6 @@ var storyStore = (function () {
       var returnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
-      var parentUID = returnedObject.parentUID;
 
       /**if current node is Br.then remove */
       if(returnedObject.flag == true){
@@ -755,7 +676,6 @@ var storyStore = (function () {
            * characterStyleRange handling
            */
           if (sel.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
-            //var oCharacterOfParent = this.searchClosestCustomOfChara(data, parentUID);
             var aCustom = aUltimateCustom;
             var charIndex =  jIndex;
             /**
@@ -858,6 +778,47 @@ var storyStore = (function () {
 
     },
 
+    handleTabPressed: function (oEvent, sel, targetPath) {
+      var tenSpaces = "          ";
+      var path = targetPath.split("/");
+      var currentStoryId = path.splice(0, 1);
+      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+      var oReturnedObject = {};
+
+      if(sel.focusNode) {
+        var sClassNames = sel.focusNode.className;
+        if(_.contains(sClassNames, "content") || _.contains(sel.focusNode.nodeName, "#text")) {
+          var str = sel.focusNode.data;
+          if(_.contains(sClassNames, "content")) {
+            str = sel.focusNode.firstChild.data;
+          }
+          var offset = sel.focusOffset;
+          var preText = str.substring(0, offset);
+          var postText = str.substring(offset, str.length);
+          oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
+          if(!_.isEmpty(oReturnedObject)) {
+            oReturnedObject.objectPos[oReturnedObject.indexPos].Content[0]["_"] = preText + tenSpaces + postText;
+          }
+
+        } else {
+
+          oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
+          var newContentObj2 = createContentNode(tenSpaces);
+          oCaretPosition.focusId = newContentObj2.Content[0]["$"]["data-uid"];
+          oCaretPosition.indexToFocus = 10;
+          if(!_.isEmpty(oReturnedObject)) {
+            if((oReturnedObject.objectPos.length - 1) == oReturnedObject.indexPos){
+              oReturnedObject.objectPos.splice(oReturnedObject.indexPos, 1, newContentObj2);
+            } else {
+              oReturnedObject.objectPos.splice(oReturnedObject.indexPos, 0, newContentObj2);
+            }
+          }
+        }
+      }
+
+      _triggerChange();
+    },
+
     handleDeletePressed: function (oEvent, sel, targetPath) {
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
@@ -924,46 +885,7 @@ var storyStore = (function () {
       }
     },
 
-    handleTabPressed: function (oEvent, sel, targetPath) {
-      var tenSpaces = "          ";
-      var path = targetPath.split("/");
-      var currentStoryId = path.splice(0, 1);
-      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-      var oReturnedObject = {};
 
-      if(sel.focusNode) {
-        var sClassNames = sel.focusNode.className;
-        if(_.contains(sClassNames, "content") || _.contains(sel.focusNode.nodeName, "#text")) {
-          var str = sel.focusNode.data;
-          if(_.contains(sClassNames, "content")) {
-            str = sel.focusNode.firstChild.data;
-          }
-          var offset = sel.focusOffset;
-          var preText = str.substring(0, offset);
-          var postText = str.substring(offset, str.length);
-          oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
-          if(!_.isEmpty(oReturnedObject)) {
-            oReturnedObject.objectPos[oReturnedObject.indexPos].Content[0]["_"] = preText + tenSpaces + postText;
-          }
-
-        } else {
-
-          oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
-          var newContentObj2 = createContentNode(tenSpaces);
-          oCaretPosition.focusId = newContentObj2.Content[0]["$"]["data-uid"];
-          oCaretPosition.indexToFocus = 10;
-          if(!_.isEmpty(oReturnedObject)) {
-            if((oReturnedObject.objectPos.length - 1) == oReturnedObject.indexPos){
-              oReturnedObject.objectPos.splice(oReturnedObject.indexPos, 1, newContentObj2);
-            } else {
-              oReturnedObject.objectPos.splice(oReturnedObject.indexPos, 0, newContentObj2);
-            }
-          }
-        }
-      }
-
-      _triggerChange();
-    },
 
     handleOnKeyDown: function (oEvent) {
 
