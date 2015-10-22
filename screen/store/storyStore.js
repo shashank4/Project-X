@@ -101,69 +101,70 @@ var storyStore = (function () {
     oCaretPosition.endOffset -= iSelectionSize;
   };
 
-  var handleCharaOfDelete = function(aParent, iIndex){
-    /**
-     * if next node is BR... then remove that node
-     */
-    if (aParent[iIndex + 1].Br)
-    {
-      /**
-       * if there are more next siblings to current node, then append next content to current content.
-       */
-      if (aParent[iIndex] && aParent[iIndex + 1 + 1] && aParent[iIndex + 1 + 1].Content){
-        aParent[iIndex].Content[0]["_"] = aParent[iIndex].Content[0]["_"].concat(aParent[iIndex + 2].Content[0]["_"])
-        aParent.splice(iIndex + 1 +1, 1);
-      }
-      aParent.splice(iIndex + 1, 1);
-      _triggerChange();
-      return null;
+  var handleCharaOfDelete = function(aParent, iIndex, aGrandParent, iGrandIndex){
 
+    /** if next node is BR... then remove that node */
+    if (aParent[iIndex].Br)
+    {
+      /**if there are more next siblings to current node, then append next content to current content.  */
+      if (aParent[iIndex-1] && aParent[iIndex + 1] && aParent[iIndex + 1].Content){
+        var tempStr = "";
+
+        /** to handle empty ContentNode*/
+        if(aParent[iIndex + 1].Content[0]["_"].length == 0){
+          if(aParent[iIndex + 2] && aParent[iIndex + 2].Content){
+            tempStr = aParent[iIndex + 2].Content[0]["_"];
+          }
+          aParent.splice(iIndex + 1 , 1);
+        }
+        else{
+          tempStr = aParent[iIndex + 1].Content[0]["_"];
+        }
+        aParent[iIndex-1].Content[0]["_"] = aParent[iIndex-1].Content[0]["_"].concat(tempStr);
+        aParent.splice(iIndex + 1 , 1);
+      }
+      aParent.splice(iIndex, 1);
     }
-    /**
-     * if next node is CONTENT, then remove its first character.
-     */
-    else if(aParent[iIndex + 1].Content){
-      var strContent = aParent[iIndex + 1].Content[0]["_"];
+
+    /** if next node is CONTENT, then remove its first character.*/
+    else if(aParent[iIndex].Content)
+    {
+      var strContent = aParent[iIndex].Content[0]["_"];
       if (strContent.length != 1) {
-        aParent[iIndex + 1].Content[0]["_"] = /*str.slice(0, 0) +*/ strContent.slice(1, strContent.length);    //on error fisrt check here.
+        aParent[iIndex].Content[0]["_"] = strContent.slice(1, strContent.length);
       } else {
-        aParent[iIndex + 1].splice(0, 1);
-      }
-
-    }
-    /**
-     * if next node is XMLElement.
-     */
-    else if (aParent[iIndex + 1].XMLElement)
-    {
-      /**
-       * if first node of XMLElement is CONTENT.
-       */
-      if(aParent[iIndex + 1].XMLElement[0].Custom[0].Content)
-      {
-        var str = aParent[iIndex + 1].XMLElement[0].Custom[0].Content[0]["_"];
-        if (str.length != 1) {
-          aParent[iIndex + 1].XMLElement[0].Custom[0].Content[0]["_"] = /*str.slice(0, 0) +*/ str.slice(1, str.length);    //on error fisrt check here.
-        } else {
-          aParent[iIndex + 1].XMLElement[0].Custom.splice(0, 1);
+        aParent.splice(0, 1);
+        if(aParent.length == 0){
+          aGrandParent.splice(iGrandIndex,1);
         }
       }
-      /**
-       * if first node of XMLElement is BR.
-       */
-      else if (aParent[iIndex + 1].XMLElement[0].Custom[0].Br){
-        aParent[iIndex + 1].XMLElement[0].Custom.splice(0, 1);
-      }
-
-      _triggerChange();
-      return null;
     }
 
-  };
+    /**if next node is XMLElement.  */
+    else if (aParent[iIndex].XMLElement)
+    {
+      /** if first node of XMLElement is CONTENT.   */
+      if(aParent[iIndex].XMLElement[0].Custom[0].Content){
+        var str = aParent[iIndex].XMLElement[0].Custom[0].Content[0]["_"];
+        if (str.length != 1) {
+          aParent[iIndex].XMLElement[0].Custom[0].Content[0]["_"] = str.slice(1, str.length);
+        } else {
+          aParent[iIndex].XMLElement[0].Custom.splice(0, 1);
+        }
+      }
+      /** if first node of XMLElement is BR.   */
+      else if (aParent[iIndex].XMLElement[0].Custom[0].Br){
+        aParent[iIndex].XMLElement[0].Custom.splice(0, 1);
+      }
+      /** if first node of XMLElement is CharaStyle */
+      else if(aParent[iIndex].XMLElement[0].Custom[0].CharacterStyleRange){
+        handleCharaOfDelete(aParent[iIndex].XMLElement[0].Custom[0].CharacterStyleRange[0].Custom, 0, aParent[iIndex].XMLElement[0].Custom, 0);
+      }
 
+    }
 
-  var handleParaBackSpace = function(){
-
+    _triggerChange();
+    return null;
   };
 
 
@@ -359,6 +360,52 @@ var storyStore = (function () {
       }
     }
   };
+
+
+
+  var _ifTheOnlyChild = function(currentStory, path){
+    path.splice(-1, 1);
+
+    var oGrandparent = this.searchClosestCustomOfLastInPath(currentStory, path);
+    var aGrandparent = oGrandparent.objectPos;
+    var iGrandparent = oGrandparent.indexPos;
+
+    if(aGrandparent[iGrandparent].ParagraphStyleRange && aGrandparent.length==1){
+      return ;
+    }
+
+    if(aGrandparent[iGrandparent].XMLElement){
+      return ;
+    }
+
+    aGrandparent.splice(iGrandparent, 1);
+    if (aGrandparent.length == 0) {
+      _ifTheOnlyChild(currentStory, aGrandparent, path);
+    }
+
+  };
+
+  var _ifNoNextNOde = function(currentStory, pathForChara){
+    pathForChara.splice(-1,1);
+    var oParentOfCharacter = this.searchClosestCustomOfLastInPath(currentStory,pathForChara);
+    var aCustom = oParentOfCharacter.objectPos;
+    var charIndex = oParentOfCharacter.indexPos;
+
+    /** if parent node has next node */
+    if (aCustom[charIndex + 1]) {
+      if(aCustom[charIndex + 1].CharacterStyleRange){
+        handleCharaOfDelete(aCustom[charIndex + 1].CharacterStyleRange[0].Custom, 0);
+      }
+      else if(aCustom[charIndex + 1].XMLElement){
+         //TODO: /** handleXMLofDelete();*/
+      }
+    }
+    /** if this is the last CharacterStyle*/
+    else if(!aCustom[charIndex+1]){
+      _ifNoNextNOde(currentStory, pathForChara);
+    }
+  };
+
 
   var storyStore =  {
 
@@ -852,6 +899,8 @@ var storyStore = (function () {
     },
 
     handleDeletePressed: function (oEvent, sel, targetPath) {
+      var iRange = sel.getRangeAt(0);
+
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
@@ -860,32 +909,40 @@ var storyStore = (function () {
       var iIndex = returnedObject.indexPos;
 
 
-      /**
-       * if key is pressed on BR node
-       */
+      /** if key is pressed on BR node */
       if(returnedObject.flag==true){
+
         aParent.splice(iIndex,1);
+
+        var pathCharaBr = targetPath.split('/');
+        pathCharaBr.splice(0,1);
+        pathCharaBr.splice(-1,1);
+
+        /** if Br is the only node in that charaStyle then remove that CharaStyle */
+        if(aParent.length == 0){
+          _ifTheOnlyChild(currentStory, aParent, pathCharaBr);
+        }
+
         _triggerChange();
         return null;
       }
 
 
 
-      /**
-       * if key is pressed on the last position of the current node
-       */
-      if (sel.focusOffset == aParent[iIndex].Content[0]["_"].length)
+      /** if key is pressed on the last position of the current node */
+      else if (iRange.endOffset == aParent[iIndex].Content[0]["_"].length)
       {
-        /**
-         * if current node has next node. (Current node will always be CONTENT)
-         */
-        if (aParent[iIndex + 1])
-        {
-          handleCharaOfDelete(aParent, iIndex);
+
+        /** if current node has next node. (Current node will always be CONTENT and next will always be either XMLTag or Br)  */
+        if (aParent[iIndex + 1]){
+
+            handleCharaOfDelete(aParent, iIndex+1);
+
+
         }
-        /**
-         * if current node is the last node of its parent , i.e. it is the last node of current characterStyle.
-         */
+
+
+        /** if current node is the last node of its parent , i.e. it is the last node of current characterStyle.  */
         else if (iIndex == aParent.length - 1) {
 
           var pathForChara = targetPath.split("/");
@@ -895,26 +952,71 @@ var storyStore = (function () {
           var aCustom = oParentOfCharacter.objectPos;
           var charIndex = oParentOfCharacter.indexPos;
 
-          /**
-           * if current node has next characterStyle
-           */
+          /**if parent node has next node*/
           if (aCustom[charIndex + 1]) {
-            handleCharaOfDelete(aCustom[charIndex + 1].CharacterStyleRange[0].Custom, -1);
 
-          }else if(!aCustom[iIndex+1]){
-            //handleParaOfDelete()
+            pathForChara.splice(-1,1);
+            var oParentOfXML = this.searchClosestCustomOfLastInPath(currentStory,pathForChara);
+            var aCustomXML = oParentOfXML.objectPos;
+            var charIndexXML = oParentOfXML.indexPos;
+
+            if(aCustom[charIndex + 1].CharacterStyleRange){
+              handleCharaOfDelete(aCustom[charIndex + 1].CharacterStyleRange[0].Custom, 0, aCustom, charIndex + 1);
+            }else /*if(aCustom[charIndex + 1].XMLElement)*/{
+              handleCharaOfDelete(aCustom, charIndex + 1, aCustomXML, charIndexXML);
+            }
+
+
+          }
+           /**if this is the last CharacterStyle.  handle paragraph merging*/
+          else if(!aCustom[iIndex+1]){
+            var pathForPara = targetPath.split("/");
+            pathForPara.splice(0,1);
+            pathForPara.splice(-1,1);
+            pathForPara.splice(-1,1);
+            var oParentOfPara = this.searchClosestCustomOfLastInPath(currentStory,pathForPara);
+            var aCustomPara = oParentOfPara.objectPos;
+            var paraIndex = oParentOfPara.indexPos;
+
+            /** next paraIndex exists*/
+            if(aCustomPara[paraIndex+1]){
+              if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange){
+
+                if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Br){
+                  aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom.splice(0,1);
+
+                  if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom.length == 0){
+                    aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom.splice(0,1);
+
+                    if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom.length == 0){
+                      aCustomPara.splice(paraIndex+1,1);
+                    }
+                  }
+                }
+                else if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Content){
+                  var tempStr = aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+                  if(tempStr.length>1){
+                    aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Content[0]["_"] = tempStr.slice(1,tempStr.length);
+                  }else if(tempStr.length == 1){
+                    aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom.splice(0,1);
+                  }
+                  _.assign(aCustomPara[paraIndex].ParagraphStyleRange[0].Custom, aCustomPara[paraIndex].ParagraphStyleRange[0].Custom.concat(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom));
+                  aCustomPara.splice(paraIndex+1,1);
+                }
+              }
+            }
           }
         }
       }
-      else if (sel.focusOffset < aParent[iIndex].Content[0]["_"].length){
+      else if (iRange.endOffset < aParent[iIndex].Content[0]["_"].length){
         var strContent = aParent[iIndex].Content[0]["_"];
         if (strContent.length != 1) {
-          aParent[iIndex].Content[0]["_"] = strContent.slice(0, sel.focusOffset) + strContent.slice(sel.focusOffset+1, strContent.length);    //on error fisrt check here.
+          aParent[iIndex].Content[0]["_"] = strContent.slice(0, iRange.endOffset) + strContent.slice(iRange.endOffset+1, strContent.length);
         } else {
           aParent[iIndex].splice(0, 1);
         }
-        _triggerChange();
       }
+      _triggerChange();
     },
 
 
@@ -934,7 +1036,7 @@ var storyStore = (function () {
 
         oEvent.preventDefault();
 
-        var oSel = window.getSelection();               //o-object, a-array, i-index, s-string.
+        var oSel = window.getSelection();
         var oRange = oSel.getRangeAt(0);
 
         var oCurrentDom;
