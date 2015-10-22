@@ -79,7 +79,6 @@ var storyStore = (function () {
     oContent["_"] = utils.getSplicedString(oContent['_'],iStartIndex,iSelectionSize,sPushedChar);
     oCaretPosition.focusId = oContent["$"]["data-uid"];
     oCaretPosition.indexToFocus = oContent["_"].length > iStartIndex ? iStartIndex + 1 : oContent["_"].length;
-    oCaretPosition.endOffset -= iSelectionSize;
   };
 
   var handleCharaOfDelete = function(aParent, iIndex, aGrandParent, iGrandIndex){
@@ -324,7 +323,6 @@ var storyStore = (function () {
           oContent["_"] = utils.getSplicedString(oContent['_'], iSelectionStartPosition, 0, pressedChar);
           oCaretPosition.focusId = oContent["$"]["data-uid"];
           oCaretPosition.indexToFocus = iSelectionStartPosition + 1;
-          oCaretPosition.endOffset -= iSelectionSize;
           oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize);
         }
         /**
@@ -346,7 +344,6 @@ var storyStore = (function () {
             oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize);
           }
           oCaretPosition.indexToFocus = 0;
-          oCaretPosition.endOffset -= iSelectionSize;
         }
       }
     } else {
@@ -649,7 +646,9 @@ var storyStore = (function () {
       }
     },
 
-    handleBackspacePressed: function (oEvent, oCurrentDom, iStartIndex, targetPath, sType) {
+    handleBackspacePressed: function (oEvent, oCurrentDom, iStartIndex, targetPath, oSelection) {
+
+      var sType = oSelection.type;
 
       if(sType == "Caret") {
         var path = targetPath.split("/");
@@ -1141,7 +1140,7 @@ var storyStore = (function () {
         }
 
         else if (oEvent.keyCode == 8) { //backSpace
-          this.handleBackspacePressed(oEvent,oCurrentDom, iStartRange, sPath, oSel.type);
+          this.handleBackspacePressed(oEvent,oCurrentDom, iStartRange, sPath, oSel);
         }
 
         else if (oEvent.keyCode == 46) { // Delete
