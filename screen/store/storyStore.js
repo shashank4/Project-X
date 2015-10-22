@@ -84,6 +84,16 @@ var storyStore = (function () {
     };
   };
 
+  var createBrNode = function (){
+    return {
+      "Br": [
+        {
+          "$": {"data-uid": utils.generateUUID()}
+        }
+      ]
+    };
+  };
+
   var updateContentTextWithPushedCharacter = function(oCurrentStory, aPath, sPushedChar, iStartIndex, iSelectionSize){
     var oCustomDetails = storyStore.searchClosestCustomOfLastInPath(oCurrentStory, aPath);
     var oContent = oCustomDetails.objectPos[oCustomDetails.indexPos].Content[0];
@@ -481,7 +491,7 @@ var storyStore = (function () {
             updateContentTextWithPushedCharacter(currentStory, path,pressedChar, iSelectionStartPosition, iSelectionSize);
           } else {
             var oCustomDetails = this.searchClosestCustomOfLastInPath(currentStory, path);
-            var oNewContent = createContentNode('');
+            var oNewContent = createContentNode(pressedChar);
             oCustomDetails.objectPos.splice(iSelectionStartPosition,iSelectionSize,oNewContent);
             oCaretPosition.focusId = oNewContent.Content[0]["$"]["data-uid"];
             oCaretPosition.indexToFocus = 0;
@@ -511,8 +521,7 @@ var storyStore = (function () {
        * append directly
        */
       if (bFlag == true) {
-        var newUid5 = utils.generateUUID();
-        var newBrObj5 = {"Br": [{"$": {"data-uid": newUid5}}]};
+        var newBrObj5 = createBrNode();
         aParent.splice(iIndex,0,newBrObj5);
         oCaretPosition.focusId = newBrObj5.Br[0]["$"]["data-uid"];
         _triggerChange();
@@ -526,8 +535,7 @@ var storyStore = (function () {
          * if offset is 0 and first node of character style or xmlElement
          */
         if (iIndex == 0 && iOffset == 0 ) {
-          var newUid6 = utils.generateUUID();
-          var newBrObj6 = {"Br": [{"$": {"data-uid": newUid6}}]};
+          var newBrObj6 = createBrNode();
           aParent.splice(iIndex, 0, newBrObj6);
           oCaretPosition.focusId = newBrObj6.Br[0]["$"]["data-uid"];
           _triggerChange();
@@ -546,8 +554,7 @@ var storyStore = (function () {
             aParent.push(newContentObjBefore);
           }
 
-          var newUid2 = utils.generateUUID();
-          var newBrObj = {"Br": [{"$": {"data-uid": newUid2}}]};
+          var newBrObj = createBrNode();
           oCaretPosition.focusId = newBrObj.Br[0]["$"]["data-uid"];
           aParent.push(newBrObj);
 
@@ -574,8 +581,7 @@ var storyStore = (function () {
               && oSel.focusNode.parentNode.nextSibling == null
               && oSel.focusNode.parentNode.parentNode.nextSibling == null
               && oSel.focusNode.parentNode.parentNode.parentNode.nextSibling == null ) {
-            var newUid4 = utils.generateUUID();
-            var newBrObjExtremeLast = {"Br": [{"$": {"data-uid": newUid4}}]};
+            var newBrObjExtremeLast = createBrNode();
             oCaretPosition.focusId = newBrObjExtremeLast.Br[0]["$"]["data-uid"];
             aParent.push(newBrObjExtremeLast);
           }
