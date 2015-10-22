@@ -92,8 +92,9 @@ var XMLElement = React.createClass({
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
-    var sXMLElementId = this.props.data[0]['$']['data-uid'];
-    return _.contains(nextProps.pathToUpdate, sXMLElementId);
+/*    var sXMLElementId = this.props.data[0]['$']['data-uid'];
+    return _.contains(nextProps.pathToUpdate, sXMLElementId);*/
+    return true;
   },
 
   render: function () {

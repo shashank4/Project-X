@@ -52,25 +52,6 @@ var storyStore = (function () {
     }
   };
 
-  var _getLastChild = function (oDOMNode) {
-    if(oDOMNode.lastChild && oDOMNode.lastChild.nodeName != "#text") {
-      return _getLastChild(oDOMNode.lastChild);
-    }
-    return oDOMNode;
-  };
-
-  var _getPreviousDOMLastChild = function (oDOMNode) {
-    if(oDOMNode.previousSibling) {
-      return _getLastChild(oDOMNode.previousSibling);
-    } else {
-      if(_.contains(oDOMNode.parentNode.className, "storyContainer")) {
-        return false;
-      } else {
-        return _getPreviousDOMLastChild(oDOMNode.parentNode);
-      }
-    }
-  };
-
   var createContentNode = function (sContent){
     return {
       "Content": [
@@ -93,7 +74,7 @@ var storyStore = (function () {
   };
 
   var updateContentTextWithPushedCharacter = function(oCurrentStory, aPath, sPushedChar, iStartIndex, iSelectionSize){
-    var oCustomDetails = storyStore.searchClosestCustomOfLastInPath(oCurrentStory, aPath);
+    var oCustomDetails = _searchClosestCustomOfLastInPath(oCurrentStory, aPath);
     var oContent = oCustomDetails.objectPos[oCustomDetails.indexPos].Content[0];
     oContent["_"] = utils.getSplicedString(oContent['_'],iStartIndex,iSelectionSize,sPushedChar);
     oCaretPosition.focusId = oContent["$"]["data-uid"];
@@ -160,12 +141,6 @@ var storyStore = (function () {
     }
 
   };
-
-
-  var handleParaBackSpace = function(){
-
-  };
-
 
   var handleCharaOfBackSpace = function (aUltimateCustom, jIndex) { //jIndex
 
@@ -254,7 +229,7 @@ var storyStore = (function () {
     var currentStoryId = path.splice(0, 1);
     var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
 
-    var oParentCustom = storyStore.searchClosestCustomOfLastInPath(currentStory, path);
+    var oParentCustom = _searchClosestCustomOfLastInPath(currentStory, path);
     var aCustom = oParentCustom.objectPos;
     var index = oParentCustom.indexPos;
     var uuid = path[path.length - 1];
@@ -332,7 +307,7 @@ var storyStore = (function () {
        * Handling for Br
        */
       else {
-        var oCustomDetails = storyStore.searchClosestCustomOfLastInPath(currentStory, path);
+        var oCustomDetails = _searchClosestCustomOfLastInPath(currentStory, path);
         var brIndex = oCustomDetails.indexPos;
         /**
          * Handling for removal of br above text content (merge typed string into content)
@@ -359,6 +334,102 @@ var storyStore = (function () {
       }
     }
   };
+
+  var _getLastChildNode = function (oNode) {
+    var oCustomLength = 0;
+    if(oNode.ParagraphStyleRange) {
+      oCustomLength = oNode.ParagraphStyleRange[0].Custom.length;
+      return _getLastChildNode(oNode.ParagraphStyleRange[0].Custom[oCustomLength-1]);
+
+    } else if(oNode.CharacterStyleRange) {
+      oCustomLength = oNode.CharacterStyleRange[0].Custom.length;
+      return _getLastChildNode(oNode.CharacterStyleRange[0].Custom[oCustomLength-1]);
+
+    } else if(oNode.XMLElement) {
+      oCustomLength = oNode.XMLElement[0].Custom.length;
+      return _getLastChildNode(oNode.XMLElement[0].Custom[oCustomLength-1]);
+
+    } else if (oNode.Content || oNode.Br) {
+      return oNode;
+    }
+  };
+
+  var _getFirstDeepChildNodeFromDOM = function (oDOMNode) {
+    if(oDOMNode.firstChild && oDOMNode.firstChild.nodeName != "#text"){
+      return _getFirstDeepChildNodeFromDOM(oDOMNode.firstChild);
+    }
+
+    return oDOMNode;
+  };
+
+  var _searchClosestCustomOfLastInPath = function (obj, remainingPath, sParentId) {
+    remainingPath = _.clone(remainingPath);
+    if (obj["Custom"]) {
+      var aCustom = obj["Custom"];
+      var oClosestCustom;
+      _.forEach(aCustom, function (oCustom, iCustomIndex) {
+        _.forEach(oCustom, function (oTag, sTagKey) {
+          if (oTag[0]['$']) {
+            oTag = oTag[0];
+            var sCustomTagUID = oTag['$'][UID_KEY];
+            if (sCustomTagUID == remainingPath[0]) {
+              if (remainingPath.length == 1) {
+                oClosestCustom = {
+                  objectPos: aCustom,
+                  indexPos: iCustomIndex,
+                  parentUID: sParentId,
+                  flag: (sTagKey == 'Br')
+                };
+              } else {
+                remainingPath.splice(0, 1);
+                oClosestCustom = _searchClosestCustomOfLastInPath(oTag, remainingPath, oTag['$'][UID_KEY]);
+              }
+              return false;
+            }
+          }
+        });
+        if (oClosestCustom) {
+          return false;
+        }
+      });
+      return oClosestCustom;
+    }
+  };
+
+
+
+  var _setCaretPosition = function (aParent, iReturnedObjectIndex, sPath, currentStory) {
+    //Set cursor logic
+    var oNodeToSetCaret = {};
+    var oPreviousNode = aParent[iReturnedObjectIndex - 1];
+    if (!_.isEmpty(oPreviousNode)) {
+      oNodeToSetCaret = _getLastChildNode(oPreviousNode);
+
+    } else {
+      sPath.splice(-1, 1);
+      var oSearchedObject = _searchClosestCustomOfLastInPath(currentStory, sPath);
+      var oGrandParent = oSearchedObject.objectPos;
+      var iIndex = oSearchedObject.indexPos;
+      if (iIndex > 0) {
+        oNodeToSetCaret = _getLastChildNode(oGrandParent[iIndex - 1]);
+      } else {
+        _setCaretPosition(oGrandParent, iIndex + 1, sPath, currentStory);
+      }
+    }
+
+    if(!_.isEmpty(oNodeToSetCaret)) {
+      if(oNodeToSetCaret.Content) {
+        oCaretPosition.focusId = oNodeToSetCaret.Content[0]["$"]["data-uid"];
+        oCaretPosition.indexToFocus = oNodeToSetCaret.Content[0]["_"].length;
+      } else if(oNodeToSetCaret.Br){
+        oCaretPosition.focusId = oNodeToSetCaret.Br[0]["$"]["data-uid"];
+      }
+      return null;
+    }
+  };
+
+
+
 
   var storyStore =  {
 
@@ -394,40 +465,6 @@ var storyStore = (function () {
       });
     },
 
-    searchClosestCustomOfLastInPath: function (obj, remainingPath, sParentId) {
-      remainingPath = _.clone(remainingPath);
-      if (obj["Custom"]) {
-        var aCustom = obj["Custom"];
-        var oClosestCustom;
-        _.forEach(aCustom, function (oCustom, iCustomIndex) {
-          _.forEach(oCustom, function (oTag, sTagKey) {
-            if (oTag[0]['$']) {
-              oTag = oTag[0];
-              var sCustomTagUID = oTag['$'][UID_KEY];
-              if (sCustomTagUID == remainingPath[0]) {
-                if (remainingPath.length == 1) {
-                  oClosestCustom = {
-                    objectPos: aCustom,
-                    indexPos: iCustomIndex,
-                    parentUID: sParentId,
-                    flag: (sTagKey == 'Br')
-                  };
-                } else {
-                  remainingPath.splice(0, 1);
-                  oClosestCustom = storyStore.searchClosestCustomOfLastInPath(oTag, remainingPath, oTag['$'][UID_KEY]);
-                }
-                return false;
-              }
-            }
-          });
-          if (oClosestCustom) {
-            return false;
-          }
-        });
-        return oClosestCustom;
-      }
-    },
-
     handleContentTextChanged: function (oEvent, oSelection, targetPath,oCurrentDom) {
 
       var bIsCapsLock = _isCapLockOn(oEvent);
@@ -451,16 +488,16 @@ var storyStore = (function () {
       _triggerChange();
     },
 
-    handleEnterKeyPress: function (oSel, targetPath) {
+    handleEnterKeyPress: function (oCurrentDOM, iStartRange, targetPath) {
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-      var returnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
-      var aContentData = oSel.focusNode.data;
+      var returnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
+      var aContentData = oCurrentDOM.firstChild ? oCurrentDOM.firstChild.data : null;
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
       var bFlag = returnedObject.flag;
-      var iOffset = oSel.focusOffset;
+      var iOffset = iStartRange;
 
       /**
        * true = 'BR' node....if key is down on Br node
@@ -545,29 +582,28 @@ var storyStore = (function () {
       }
     },
 
-    handleBackspacePressed: function (oEvent, sel, targetPath) {
-      var iRange = sel.getRangeAt(0);
+    handleBackspacePressed: function (oEvent, oCurrentDom, iStartIndex, targetPath) {
 
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-      var returnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
+      var returnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
       var aParent = returnedObject.objectPos;
-      var iIndex = returnedObject.indexPos;
+      var iReturnedObjectIndex = returnedObject.indexPos;
 
       /**if current node is Br.then remove */
       if(returnedObject.flag == true){
-        if(aParent[iIndex-1]){
-          aParent.splice(iIndex, 1);
+        if(aParent[iReturnedObjectIndex-1]){
+          aParent.splice(iReturnedObjectIndex, 1);
         }
         /**
          * go to check current nodes prev charaStyle.
          */
-        else if(!aParent[iIndex-1]){
+        else if(!aParent[iReturnedObjectIndex-1]){
           var newPath = targetPath.split("/");
           newPath.splice(0,1);
           newPath.splice(-1,1);
-          var oReturnedParent = this.searchClosestCustomOfLastInPath(currentStory,newPath);
+          var oReturnedParent = _searchClosestCustomOfLastInPath(currentStory,newPath);
           var aReturnParent = oReturnedParent.objectPos;
           var iParent = oReturnedParent.indexPos;
 
@@ -586,7 +622,7 @@ var storyStore = (function () {
             newPath2.splice(-1,1);
             newPath2.splice(-1,1);
 
-            var oReturnedGrandParent = this.searchClosestCustomOfLastInPath(currentStory, newPath2);
+            var oReturnedGrandParent = _searchClosestCustomOfLastInPath(currentStory, newPath2);
             var aReturnedGrandParent = oReturnedGrandParent.objectPos;
             var iGrandParent = oReturnedGrandParent.indexPos;
             if(aReturnedGrandParent[iGrandParent-1]){
@@ -624,42 +660,42 @@ var storyStore = (function () {
 
       /**if current node is not br*/
       /**And its rangeOffSet is '0'*/
-      else if (iRange.endOffset == 0) {
+      else if (iStartIndex == 0) {
         /**
          * if iIndex th node is not the start node.....then do normal processing
          * i.e. remove the previous node ......remove previous BR and append next content data
          * to previous content data.
          */
-        if (iIndex != 0) {
+        if (iReturnedObjectIndex != 0) {
 
           /** if previous node is br */
-          if (aParent[iIndex - 1].Br) {
-            aParent.splice(iIndex-1, 1);
+          if (aParent[iReturnedObjectIndex - 1].Br) {
+            aParent.splice(iReturnedObjectIndex-1, 1);
             _triggerChange();
             return null;
           }
 
           /** if prev node is XMLElement*/
-          else if (aParent[iIndex - 1].XMLElement){
-            handleXMLOfBackSpace(aParent, iIndex-1);
+          else if (aParent[iReturnedObjectIndex - 1].XMLElement){
+            handleXMLOfBackSpace(aParent, iReturnedObjectIndex-1);
           }
           /** if prev node is characterSrtleRange*/
-          else if(aParent[iIndex - 1].CharacterStyleRange){
-            handleCharaOfBackSpace(aParent, iIndex-1);
+          else if(aParent[iReturnedObjectIndex - 1].CharacterStyleRange){
+            handleCharaOfBackSpace(aParent, iReturnedObjectIndex-1);
           }
 
         }
-        else if (iIndex==0){
+        else if (iReturnedObjectIndex==0){
           /**
            * Paragraph Handling
            */
-          if (sel.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
+          if (oCurrentDom.parentNode.className.indexOf("characterContainer") > (-1)) {
             var pathForPara = targetPath.split("/");
             pathForPara.splice(0, 1);
             pathForPara.splice(-1,1);
             pathForPara.splice(-1,1);
 
-            var oReturned = this.searchClosestCustomOfLastInPath(currentStory, pathForPara);
+            var oReturned = _searchClosestCustomOfLastInPath(currentStory, pathForPara);
             var aCustomPara = oReturned.objectPos;
             var iIndexPara = oReturned.indexPos;
 
@@ -683,19 +719,19 @@ var storyStore = (function () {
        * then remove current node and check, if next and previous node is same or not. If same charaStyle then combine.
        * Check for chara and XML tag.
        */
-      else if (sel.focusOffset==1 && sel.focusNode.data.length == 1 ) {
+      else if (iStartIndex && oCurrentDom.firstChild && oCurrentDom.firstChild.data.length == 1 ) {
         if (aParent.length == 1) {
 
           var pathForChara=targetPath.split('/');
           pathForChara.splice(0,1);
           pathForChara.splice(-1,1);
-          var oUltimateParent = this.searchClosestCustomOfLastInPath(currentStory, pathForChara);
+          var oUltimateParent = _searchClosestCustomOfLastInPath(currentStory, pathForChara);
           var aUltimateCustom = oUltimateParent.objectPos;
           var jIndex = oUltimateParent.indexPos;
           /**
            * xml tag :either you can totally remove or normal processing. We can't combine xml tags.
            */
-          if (sel.focusNode.parentNode.parentNode.className == "xmlElementContainer") {
+          if (oCurrentDom.parentNode.className == "xmlElementContainer") {
 
 
             var restUltimate = aUltimateCustom.splice(jIndex + 1);
@@ -707,7 +743,7 @@ var storyStore = (function () {
           /**
            * characterStyleRange handling
            */
-          if (sel.focusNode.parentNode.parentNode.className.indexOf("characterContainer") > (-1)) {
+          if (oCurrentDom.parentNode.className.indexOf("characterContainer") > (-1)) {
             var aCustom = aUltimateCustom;
             var charIndex =  jIndex;
             /**
@@ -775,7 +811,7 @@ var storyStore = (function () {
               var pathForPara2=targetPath.split('/');
               pathForPara2.splice(0,1);
               pathForPara2.splice(-1,1);
-              var oUltimateParentForPara = this.searchClosestCustomOfLastInPath(currentStory, pathForPara2);
+              var oUltimateParentForPara = _searchClosestCustomOfLastInPath(currentStory, pathForPara2);
               var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
               var jIndexForPara = oUltimateParentForPara.indexPos;
               aUltimateCustomForPara.splice(jIndexForPara,1);
@@ -788,10 +824,16 @@ var storyStore = (function () {
           /**
            * delete only current node and append all other remaining to previous.
            */
-          if ((iIndex + 1) != aParent.length) {
-            var afterNodes = aParent.splice(iIndex + 1);
+          if ((iReturnedObjectIndex + 1) != aParent.length) {
+            var afterNodes = aParent.splice(iReturnedObjectIndex + 1);
           }
-          aParent.splice(iIndex, 1);
+
+          var aPath = targetPath.split('/');
+          aPath.splice(0,1);
+          _setCaretPosition(aParent, iReturnedObjectIndex, aPath, currentStory);
+
+          aParent.splice(iReturnedObjectIndex, 1);
+
           if (afterNodes) {
             _.assign(aParent, aParent.concat(afterNodes));
           }
@@ -801,9 +843,11 @@ var storyStore = (function () {
       /**
        * for normal backSpace.
        */
-      else if(iRange.endOffset >= 1){
-        var str = sel.focusNode.data;
-        aParent[iIndex].Content[0]["_"] = str.slice(0,sel.focusOffset-1) + str.slice(sel.focusOffset);
+      else if(iStartIndex >= 1){
+        var str = oCurrentDom.firstChild.data;
+        aParent[iReturnedObjectIndex].Content[0]["_"] = str.slice(0, iStartIndex - 1) + str.slice(iStartIndex);
+        oCaretPosition.focusId = aParent[iReturnedObjectIndex].Content[0]["$"]["data-uid"];
+        oCaretPosition.indexToFocus = iStartIndex - 1;
         _triggerChange();
         return null;
       }
@@ -819,15 +863,15 @@ var storyStore = (function () {
 
       if(sel.focusNode) {
         var sClassNames = sel.focusNode.className;
-        if(_.contains(sClassNames, "content") || _.contains(sel.focusNode.nodeName, "#text")) {
+        if(_.includes(sClassNames, "content") || _.includes(sel.focusNode.nodeName, "#text")) {
           var str = sel.focusNode.data;
-          if(_.contains(sClassNames, "content")) {
+          if(_.includes(sClassNames, "content")) {
             str = sel.focusNode.firstChild.data;
           }
           var offset = sel.focusOffset;
           var preText = str.substring(0, offset);
           var postText = str.substring(offset, str.length);
-          oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
+          oReturnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
           if(!_.isEmpty(oReturnedObject)) {
             oReturnedObject.objectPos[oReturnedObject.indexPos].Content[0]["_"] = preText + tenSpaces + postText;
             oCaretPosition.focusId = oReturnedObject.objectPos[oReturnedObject.indexPos].Content[0]["$"]["data-uid"];
@@ -836,7 +880,7 @@ var storyStore = (function () {
 
         } else {
 
-          oReturnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
+          oReturnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
           var newContentObj2 = createContentNode(tenSpaces);
           oCaretPosition.focusId = newContentObj2.Content[0]["$"]["data-uid"];
           oCaretPosition.indexToFocus = 10;
@@ -857,7 +901,7 @@ var storyStore = (function () {
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
       var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
-      var returnedObject = this.searchClosestCustomOfLastInPath(currentStory, path);
+      var returnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
 
@@ -893,7 +937,7 @@ var storyStore = (function () {
           var pathForChara = targetPath.split("/");
           pathForChara.splice(0,1);
           pathForChara.splice(-1,1);
-          var oParentOfCharacter = this.searchClosestCustomOfLastInPath(currentStory,pathForChara);
+          var oParentOfCharacter = _searchClosestCustomOfLastInPath(currentStory,pathForChara);
           var aCustom = oParentOfCharacter.objectPos;
           var charIndex = oParentOfCharacter.indexPos;
 
@@ -938,16 +982,22 @@ var storyStore = (function () {
 
         var oSel = window.getSelection();               //o-object, a-array, i-index, s-string.
         var oRange = oSel.getRangeAt(0);
+        var iStartRange = 0;
 
         var oCurrentDom;
-        if(oRange.startContainer.nodeName == "#text" || _.contains(oRange.startContainer.classList, "content")) {
-          if(_.contains(oRange.startContainer.classList, "content")) {
+        if(oRange.startContainer.nodeName == "#text" || _.includes(oRange.startContainer.classList, "content")) {
+          if(_.includes(oRange.startContainer.classList, "content")) {
             oCurrentDom = oRange.startContainer;
           } else {
             oCurrentDom = oRange.startContainer.parentNode;
           }
+          iStartRange = oRange.startOffset;
         } else {
           oCurrentDom = oRange.commonAncestorContainer.childNodes[oRange.startOffset];
+          iStartRange = 0;
+          if(!(_.includes(oCurrentDom.classList, "Br") || _.includes(oCurrentDom.classList, "Content"))) {
+            oCurrentDom = _getFirstDeepChildNodeFromDOM(oCurrentDom);
+          }
         }
 
 /*        if(oSel.focusNode.nodeName != "#text" ){
@@ -964,11 +1014,11 @@ var storyStore = (function () {
 
 
         if (oEvent.keyCode == 13) { //ENTER
-          this.handleEnterKeyPress(oSel, sPath);
+          this.handleEnterKeyPress(oCurrentDom, iStartRange, sPath);
         }
 
         else if (oEvent.keyCode == 8) { //backSpace
-          this.handleBackspacePressed(oEvent,oSel, sPath);
+          this.handleBackspacePressed(oEvent,oCurrentDom, iStartRange, sPath);
         }
 
         else if (oEvent.keyCode == 46) { // Delete
