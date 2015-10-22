@@ -358,7 +358,7 @@ var storyStore = (function () {
   var _ifTheOnlyChild = function(currentStory, path){
     path.splice(-1, 1);
 
-    var oGrandparent = this.searchClosestCustomOfLastInPath(currentStory, path);
+    var oGrandparent = _searchClosestCustomOfLastInPath(currentStory, path);
     var aGrandparent = oGrandparent.objectPos;
     var iGrandparent = oGrandparent.indexPos;
 
@@ -379,7 +379,7 @@ var storyStore = (function () {
 
   var _ifNoNextNOde = function(currentStory, pathForChara){
     pathForChara.splice(-1,1);
-    var oParentOfCharacter = this.searchClosestCustomOfLastInPath(currentStory,pathForChara);
+    var oParentOfCharacter = _searchClosestCustomOfLastInPath(currentStory,pathForChara);
     var aCustom = oParentOfCharacter.objectPos;
     var charIndex = oParentOfCharacter.indexPos;
 
@@ -1022,7 +1022,7 @@ var storyStore = (function () {
           if (aCustom[charIndex + 1]) {
 
             pathForChara.splice(-1,1);
-            var oParentOfXML = this.searchClosestCustomOfLastInPath(currentStory,pathForChara);
+            var oParentOfXML = _searchClosestCustomOfLastInPath(currentStory,pathForChara);
             var aCustomXML = oParentOfXML.objectPos;
             var charIndexXML = oParentOfXML.indexPos;
 
@@ -1040,7 +1040,7 @@ var storyStore = (function () {
             pathForPara.splice(0,1);
             pathForPara.splice(-1,1);
             pathForPara.splice(-1,1);
-            var oParentOfPara = this.searchClosestCustomOfLastInPath(currentStory,pathForPara);
+            var oParentOfPara = _searchClosestCustomOfLastInPath(currentStory,pathForPara);
             var aCustomPara = oParentOfPara.objectPos;
             var paraIndex = oParentOfPara.indexPos;
 
