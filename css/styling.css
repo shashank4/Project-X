@@ -17,6 +17,10 @@ body * {
     white-space:PRE;
 }
 
+body, .mainContent {
+    overflow: hidden;
+}
+
 span{
     white-space: pre-wrap;
 }
