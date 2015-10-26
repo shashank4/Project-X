@@ -144,12 +144,12 @@ p{
     color: white;
     font-weight: bold;
 }
-/*
-.compoenent-list-data{
-    margin: 5px 0 5px 0;
-}*/
 
 .component-list-element{
     padding: 2px 0 2px 0;
     border: 1px solid lightgrey;
+}
+
+.component-list-element.selected{
+    background-color: bisque;
 }
