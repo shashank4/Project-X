@@ -27,13 +27,13 @@ var AppController = React.createClass({
 
   componentWillMount: function () {
     this.storyStateChanged();
-    this.props.action.registerEvent();
+    this.props.storyAction.registerEvent();
   },
 
   //@UnBind: store with state
   componentWillUnmount: function () {
     this.props.storyStore.unbind('change', this.storyStateChanged);
-    this.props.action.deRegisterEvent();
+    this.props.storyAction.deRegisterEvent();
   },
 
   //@Bind: Store with state

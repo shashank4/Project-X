@@ -282,15 +282,20 @@ var stylesXML = fs.readFileSync(dirPath + 'Resources/' + 'Styles.xml');
 
 parser.parseString(stylesXML, function (err, result) {
 
-  var oCharacterStyle = {};
-  var oParagraphStyle = {};
+  var oCharacterStyle = [];
+  var oParagraphStyle = [];
   var oStyles = result['idPkg:Styles'];
   var aCharacterStyleDOM = oStyles['RootCharacterStyleGroup'][0]['CharacterStyle'];
   _.forEach(aCharacterStyleDOM, function(oCharacterStyleProps, iIndex){
     oCharacterStyleProps = oCharacterStyleProps['$'];
     var sName = oCharacterStyleProps.Name;
     var sId = oCharacterStyleProps.Self;
-    oCharacterStyle[sId] = sName;
+    oCharacterStyle.push({
+      id : sId,
+      name : sName,
+      isSelected : false
+    });
+    //oCharacterStyle[sId] = sName;
   });
 
   var aParagraphStyleDOM = oStyles['RootParagraphStyleGroup'][0]['ParagraphStyle'];
@@ -298,7 +303,12 @@ parser.parseString(stylesXML, function (err, result) {
     oParagraphStyleProps = oParagraphStyleProps['$'];
     var sName = oParagraphStyleProps.Name;
     var sId = oParagraphStyleProps.Self;
-    oParagraphStyle[sId] = sName;
+    oParagraphStyle.push({
+      id : sId,
+      name : sName,
+      isSelected : false
+    });
+    //oParagraphStyle[sId] = sName;
   });
 
   var stylesData = {
@@ -318,10 +328,18 @@ var metaXML = fs.readFileSync(dirPath + 'META-INF/' + 'metadata.xml');
 
 parser.parseString(metaXML, function (err, result) {
 
-  var sStylesCSS = result['x:xmpmeta']['rdf:RDF'][0]['rdf:Description'][0]['xmp:CSINDDMetaData'][0];
+  if(result['x:xmpmeta'] &&
+      result['x:xmpmeta']['rdf:RDF'] &&
+      result['x:xmpmeta']['rdf:RDF'][0]['rdf:Description'] &&
+      result['x:xmpmeta']['rdf:RDF'][0]['rdf:Description'][0]['xmp:CSINDDMetaData']){
 
+    var sStylesCSS = result['x:xmpmeta']['rdf:RDF'][0]['rdf:Description'][0]['xmp:CSINDDMetaData'][0];
+    fs.writeFileSync(__dirname + '/../data/INDDStyles.css', sStylesCSS, null);
+  }
+  else {
+    throw "Should be idml from InDesign CSDTP Extension"
+  }
 
-  fs.writeFileSync(__dirname + '/../data/INDDStyles.css', sStylesCSS, null);
 
 });
 
