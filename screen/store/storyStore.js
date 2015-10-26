@@ -15,6 +15,8 @@ var storyStore = (function () {
 
   var oStyleData = {};
 
+  var oImageData = {};
+
   var sPathToUpdate = "";
   var oCaretPosition = {
     focusId: '',
@@ -1224,6 +1226,15 @@ var storyStore = (function () {
 
     getStyleData: function () {
       return oStyleData;
+    },
+
+
+    setImageData: function(json){
+      oImageData = json;
+    },
+
+    getImageData : function(){
+      return oImageData;
     },
 
     handleListItemClicked: function(sStyleType, oEvent){

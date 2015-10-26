@@ -1,6 +1,6 @@
 var DataConfig = {
 
-    idmlPath :  "D:/DocumentTemplate1_newest.idml",
+    idmlPath :  "C:/Users/CS49/Desktop/IDML/shashanktry2.idml",
     extractedDirPath :  "D:/test/"
 
 }

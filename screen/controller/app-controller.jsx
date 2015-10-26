@@ -13,9 +13,9 @@ var AppController = React.createClass({
   propTypes: {
     layoutStore: React.PropTypes.object,
     storyStore: React.PropTypes.object,
-    styleStore: React.PropTypes.object,
+
     action: React.PropTypes.object
-  },
+  },//styleStore: React.PropTypes.object,
 
   getInitialState: function () {
     return {
@@ -46,7 +46,7 @@ var AppController = React.createClass({
       storyData: this.props.storyStore.getStoreData(),
       layoutData: this.props.layoutStore.getStoreData(),
       styleData: this.props.storyStore.getStyleData(),
-      imageData: this.props.imageStore.getStoreData()
+      imageData: this.props.storyStore.getImageData()
     });
   },
 

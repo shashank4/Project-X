@@ -5,7 +5,6 @@ var React = require('react');
 var AppController = require('./../screen/controller/app-controller.jsx').view;
 var StoryStore = require('./../screen/store/storyStore');
 var LayoutStore = require('./../screen/store/layoutStore');
-var ImageStore = require('./../screen/store/imageStore');
 var StoryAction = require('./../screen/actions/story-action');
 
 var LayoutData = require('./../data/layoutData.js');
@@ -19,12 +18,12 @@ StoryStore.setStoreData(StoryData);
 
 StoryStore.setStyleData(StyleData);
 
-ImageStore.setStoreData(ImageData);
+StoryStore.setImageData(ImageData);
 
 React.render(<AppController
       storyStore={StoryStore}
       layoutStore={LayoutStore}
       storyAction={StoryAction}
-      imageStore={ImageStore}
+
     />,
-    document.getElementById('MainContainerBody'));
+    document.getElementById('MainContainerBody')); ////      imageStore={ImageStore}
