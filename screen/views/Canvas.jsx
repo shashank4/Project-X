@@ -7,8 +7,9 @@ var Spread = require('./Spread.jsx');
 var Canvas = React.createClass({
 
   propTypes: {
-    layoutStore: React.PropTypes.object,
-    storyStore: React.PropTypes.object,
+    layoutStoreData: React.PropTypes.object,
+    storyStoreData: React.PropTypes.object,
+    imageStoreData: React.PropTypes.object,
     pathToUpdate: React.PropTypes.string,
     caretPosition: React.PropTypes.object
   },
@@ -37,6 +38,7 @@ var Canvas = React.createClass({
             <Spread
               layoutStoreData={toSpread}
               storyStoreData={this.props.storyStoreData}
+              imageStoreData={this.props.imageStoreData}
               pathToUpdate={this.props.pathToUpdate}
               caretPosition={this.props.caretPosition}/>
           </div>

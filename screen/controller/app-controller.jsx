@@ -13,7 +13,8 @@ var AppController = React.createClass({
   propTypes: {
     layoutStore: React.PropTypes.object,
     storyStore: React.PropTypes.object,
-    storyAction: React.PropTypes.object
+    styleStore: React.PropTypes.object,
+    action: React.PropTypes.object
   },
 
   getInitialState: function () {
@@ -44,7 +45,8 @@ var AppController = React.createClass({
     this.setState({
       storyData: this.props.storyStore.getStoreData(),
       layoutData: this.props.layoutStore.getStoreData(),
-      styleData: this.props.storyStore.getStyleData()
+      styleData: this.props.storyStore.getStyleData(),
+      imageData: this.props.imageStore.getStoreData()
     });
   },
 
@@ -67,6 +69,7 @@ var AppController = React.createClass({
             <Canvas
               layoutStoreData={this.state.layoutData}
               storyStoreData={this.state.storyData}
+              imageStoreData={this.state.imageData}
               pathToUpdate={sPathToUpdate}
               caretPosition={oCaretPosition}/>
           </div>

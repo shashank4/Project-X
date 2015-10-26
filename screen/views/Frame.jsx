@@ -77,7 +77,26 @@ var Frame = React.createClass({
           top: topLeftR[1] + 72 + "px",
           zIndex: 100
         };
-        aFr.push(<div className="frame" style={oStyle}></div>);
+        //aFr.push(<div className="frame" style={oStyle}></div>);
+
+
+        /**  image is present .Go for image rendering*/
+        if (obj2.Rectangle[y].Image) {
+          var linkSelf = obj2.Rectangle[y].Image[0].Link[0]['$'].Self;
+          var oImageData = this.props.imageStoreData;
+
+          var oStyleImage = {
+            height : "100%",
+            width : "auto"
+          };
+          var srcStr = "data:image/png;base64, "+ oImageData[linkSelf];
+          aFr.push(<div className="frame" style={oStyle} >
+                      <img style={oStyleImage} src = {srcStr}/>
+                   </div>);
+        } else if (!obj2.Rectangle[y].Image) {
+          aFr.push(<div className="frame" style={oStyle}></div>);
+        }
+
       }
     }
 
