@@ -923,14 +923,22 @@ var storyStore = (function () {
                * if its the only present charaStyle, then remove its parent also...i.e. remove that paraStyle
                */
               else if (aCustom.length == 1) {
-                var pathForPara2 = targetPath.split('/');
-                pathForPara2.splice(0, 1);
-                pathForPara2.splice(-1, 1);
-                var oUltimateParentForPara = _searchClosestCustomOfLastInPath(currentStory, pathForPara2);
-                var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
-                var jIndexForPara = oUltimateParentForPara.indexPos;
-                aUltimateCustomForPara.splice(jIndexForPara, 1);
-                _setCaretPosition(aUltimateCustomForPara, jIndexForPara, pathForPara2, currentStory);
+                var iCurrentContentLength = aCustom[charIndex].CharacterStyleRange[0].Custom[0].Content[0]["_"].length;
+                if(iCurrentContentLength == 1) {
+                  aCustom[charIndex].CharacterStyleRange[0].Custom[0].Content[0]["_"] = "";
+                  oCaretPosition.focusId = aCustom[charIndex].CharacterStyleRange[0].Custom[0].Content[0]["$"]["data-uid"];
+                  oCaretPosition.indexToFocus = 0;
+                } else {
+
+                  var pathForPara2 = targetPath.split('/');
+                  pathForPara2.splice(0, 1);
+                  pathForPara2.splice(-1, 1);
+                  var oUltimateParentForPara = _searchClosestCustomOfLastInPath(currentStory, pathForPara2);
+                  var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
+                  var jIndexForPara = oUltimateParentForPara.indexPos;
+                  aUltimateCustomForPara.splice(jIndexForPara, 1);
+                  _setCaretPosition(aUltimateCustomForPara, jIndexForPara, pathForPara2, currentStory);
+                }
                 _triggerChange();
               }
             }
