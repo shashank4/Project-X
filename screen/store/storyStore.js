@@ -164,28 +164,14 @@ var storyStore = (function () {
         /** if last Br is NOT the only child*/
         if (lastElementIndex != 1) {
           var oNode = _getLastChildNode(aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1]);
-          if(oNode) {
-            if(oNode.Content) {
-              oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
-              oCaretPosition.indexToFocus = oNode.Content[0]["_"].length;
-            } else {
-              oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
-            }
-          }
+          _setCaretPositionAccordingToObject(oNode);
           aCustom[charIndex].CharacterStyleRange[0].Custom.splice(lastElementIndex, 1);
         }
         /** if last Br is the ONLY child*/
         else if (lastElementIndex == 1) {
           /** if aCustom has more than 1 element , i.e. AaCustom has more than one charaStyles*/
           oNode = _getLastChildNode(aCustom[charIndex - 1]);
-          if(oNode) {
-            if(oNode.Content) {
-              oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
-              oCaretPosition.indexToFocus = oNode.Content[0]["_"].length;
-            } else {
-              oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
-            }
-          }
+          _setCaretPositionAccordingToObject(oNode);
           aCustom.splice(charIndex, 1);
         }
       }
@@ -199,7 +185,7 @@ var storyStore = (function () {
         if (tempStr.length > 1) {
           tempStr = tempStr.slice(0, tempStr.length - 1);
           aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].Content[0]["_"] = tempStr;
-          oCaretPosition.focusId = aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].Content[0]["_"]["$"];
+          oCaretPosition.focusId = aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].Content[0]["$"]["data-uid"];
           oCaretPosition.indexToFocus = tempStr.length;
         }
         /** if strLength is 1 then remove that node */
@@ -209,14 +195,7 @@ var storyStore = (function () {
           if (aCustom[charIndex].CharacterStyleRange[0].Custom.length == 0) {
 
             oNode = _getLastChildNode(aCustom[charIndex - 1]);
-            if(oNode) {
-              if(oNode.Content) {
-                oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
-                oCaretPosition.indexToFocus = oNode.Content[0]["_"].length;
-              } else {
-                oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
-              }
-            }
+            _setCaretPositionAccordingToObject(oNode);
 
             aCustom.splice(charIndex, 1);
           }
@@ -240,14 +219,7 @@ var storyStore = (function () {
       var oNode = aParent[i].XMLElement[0].Custom[lastIndex-2];
       if(oNode) {
         oNode = _getLastChildNode(oNode);
-        if(oNode) {
-          if(oNode.Content) {
-            oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
-            oCaretPosition.indexToFocus = oNode.Content[0]["_"].length;
-          } else {
-            oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
-          }
-        }
+        _setCaretPositionAccordingToObject(oNode);
       }
       aParent[i].XMLElement[0].Custom.splice(lastIndex-1, 1);
     }
@@ -263,14 +235,7 @@ var storyStore = (function () {
       } else {
         aParent[iIndex + 1].XMLElement[0].Custom.splice(0, 1);
         oNode = _getLastChildNode(aParent[iIndex + 1].XMLElement[0].Custom[0]);
-        if(oNode) {
-          if(oNode.Content) {
-            oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
-            oCaretPosition.indexToFocus = oNode.Content[0]["_"].length;
-          } else {
-            oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
-          }
-        }
+        _setCaretPositionAccordingToObject(oNode);
       }
     }
 
@@ -535,6 +500,10 @@ var storyStore = (function () {
       }
     }
 
+    _setCaretPositionAccordingToObject(oNodeToSetCaret);
+  };
+
+  var _setCaretPositionAccordingToObject = function (oNodeToSetCaret) {
     if(!_.isEmpty(oNodeToSetCaret)) {
       if(oNodeToSetCaret.Content) {
         oCaretPosition.focusId = oNodeToSetCaret.Content[0]["$"]["data-uid"];
@@ -542,11 +511,8 @@ var storyStore = (function () {
       } else if(oNodeToSetCaret.Br){
         oCaretPosition.focusId = oNodeToSetCaret.Br[0]["$"]["data-uid"];
       }
-      return null;
     }
   };
-
-
 
 
   var storyStore =  {
@@ -667,8 +633,7 @@ var storyStore = (function () {
             //var newUid3 = utils.generateUUID();
             var newContentStringAfter = aContentData.substring(iOffset, aContentData.length);
             var newContentObjAfter = createContentNode(newContentStringAfter);
-            oCaretPosition.focusId = newContentObjAfter.Content[0]["$"]["data-uid"];
-            oCaretPosition.indexToFocus = 0;
+            _setCaretPositionAccordingToObject(newContentObjAfter);
             aParent.push(newContentObjAfter);
           //}
 
@@ -716,6 +681,7 @@ var storyStore = (function () {
         if (returnedObject.flag == true) {
           if (aParent[iReturnedObjectIndex - 1]) {
             aParent.splice(iReturnedObjectIndex, 1);
+            _setCaretPositionAccordingToObject(aParent[iReturnedObjectIndex - 1]);
           }
           /**
            * go to check current nodes prev charaStyle.
@@ -729,10 +695,23 @@ var storyStore = (function () {
             var iParent = oReturnedParent.indexPos;
 
             if (aReturnParent[iParent - 1]) {
-              var lastOfChara = aReturnParent[iParent - 1].Custom.length;
+
+              if(aReturnParent[iParent - 1].CharacterStyleRange) {
+                handleCharaOfBackSpace(aReturnParent, iParent - 1);
+              } else if (aReturnParent[iParent - 1].XMLElement) {
+                handleXMLOfBackSpace(aReturnParent, iParent - 1);
+              } else if (aReturnParent[iParent - 1].Content) {
+                _setCaretPositionAccordingToObject(aReturnParent[iParent - 1]);
+                aReturnParent.splice(iParent, 1);
+              } else if(aReturnParent[iParent - 1].Br) {
+                _setCaretPositionAccordingToObject(aReturnParent[iParent - 1]);
+                aReturnParent.splice(iParent, 1);
+              }
+
+              /*var lastOfChara = aReturnParent[iParent - 1].Custom.length;
               if (aReturnParent[iParent - 1].Custom[lastOfChara - 1].Br) {
                 aReturnParent[iParent - 1].Custom.splice(-1, 1);
-              }
+              }*/
             }
             /**
              * go to check parent nodes of charastyle i.e. for para.
@@ -793,12 +772,7 @@ var storyStore = (function () {
               var oNode = aParent[iReturnedObjectIndex - 2];
               if(oNode) {
                 oNode = _getLastChildNode(oNode);
-                if(oNode.Content) {
-                  oCaretPosition.focusId = oNode.Content[0]["$"]["data-uid"];
-                  oCaretPosition.indexToFocus = oNode.Content[0]["$"]["_"].length;
-                } else if(oNode.Br){
-                  oCaretPosition.focusId = oNode.Br[0]["$"]["data-uid"];
-                }
+                _setCaretPositionAccordingToObject(oNode);
               }
 
               aParent.splice(iReturnedObjectIndex - 1, 1);
@@ -839,13 +813,7 @@ var storyStore = (function () {
                 var restPara = aCustomPara.splice(iIndexPara + 1);
 
                 var oLastNode = _getLastChildNode(aCustomPara[iIndexPara - 1]);
-                if(oLastNode.Content)
-                {
-                  oCaretPosition.focusId = oLastNode.Content[0]["$"]["data-uid"];
-                  oCaretPosition.indexToFocus = oLastNode.Content[0]["_"].length;
-                } else {
-                  oCaretPosition.focusId = oLastNode.Br[0]["$"]["data-uid"];
-                }
+                _setCaretPositionAccordingToObject(oLastNode);
 
                 aCustomPara.splice(iIndexPara, 1);
                 _.assign(aCustomPara, aCustomPara.concat(restPara));
@@ -944,6 +912,7 @@ var storyStore = (function () {
                   _triggerChange();
                 }
                 else if (charIndex == (aCustom.length - 1) || charIndex == 0) {
+                  _setCaretPosition(aCustom, charIndex, pathForChara, currentStory);
                   aCustom.splice(charIndex, 1);
                   _triggerChange();
                 }
@@ -959,6 +928,7 @@ var storyStore = (function () {
                 var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
                 var jIndexForPara = oUltimateParentForPara.indexPos;
                 aUltimateCustomForPara.splice(jIndexForPara, 1);
+                _setCaretPosition(aUltimateCustomForPara, jIndexForPara, pathForPara2, currentStory);
                 _triggerChange();
               }
             }
@@ -1198,9 +1168,17 @@ var storyStore = (function () {
           iStartRange = oRange.startOffset;
         } else {
           oCurrentDom = oRange.commonAncestorContainer.childNodes[oRange.startOffset];
-          iStartRange = 0;
-          if(!(_.includes(oCurrentDom.classList, "Br") || _.includes(oCurrentDom.classList, "Content"))) {
-            oCurrentDom = _getFirstDeepChildNodeFromDOM(oCurrentDom);
+
+          if(!oCurrentDom) {
+            oCurrentDom = oRange.commonAncestorContainer.lastChild;
+          }
+
+          oCurrentDom = _getFirstDeepChildNodeFromDOM(oCurrentDom);
+          var aDOMClassList = oCurrentDom.classList;
+          if(_.includes(aDOMClassList, "content")) {
+            iStartRange = oCurrentDom.firstChild.data.length;
+          } else if(_.includes(aDOMClassList, "br")){
+            iStartRange = _.indexOf(oCurrentDom.parentNode.childNodes, oCurrentDom);
           }
         }
 
