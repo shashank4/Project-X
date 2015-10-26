@@ -26,7 +26,6 @@ var utils= require('../screen/store/utils');
 var AppController = require('./../screen/controller/app-controller.jsx').view;
 var layoutStore = require('./../screen/store/layoutStore.js');
 var storyStore = require('./../screen/store/storyStore.js');
-var styleStore = require('./../screen/store/styleStore.js');
 var imageStore = require('./../screen/store/imageStore.js');
 
 var Config = require('./config');
@@ -35,7 +34,7 @@ var archiver = require('archiver');
 
 storyStore.setStoreData(oStoryData);
 layoutStore.setStoreData(spreadArray);
-styleStore.setStoreData(styleData);
+storyStore.setStyleData(styleData);
 imageStore.setStoreData(imageData);
 
 
@@ -45,9 +44,8 @@ var renderedComponent = React.renderToString(
     AppControllerFactory({
         layoutStore:layoutStore,
         storyStore: storyStore,
-        styleStore : styleStore,
         imageStore : imageStore,
-        action:storyAction
+        storyAction:storyAction
     })
 );
 

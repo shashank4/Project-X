@@ -45,7 +45,7 @@ var AppController = React.createClass({
     this.setState({
       storyData: this.props.storyStore.getStoreData(),
       layoutData: this.props.layoutStore.getStoreData(),
-      styleData: this.props.styleStore.getStoreData(),
+      styleData: this.props.storyStore.getStyleData(),
       imageData: this.props.imageStore.getStoreData()
     });
   },
