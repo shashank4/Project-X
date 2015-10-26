@@ -7,16 +7,16 @@ var ListComponent = require('./List.jsx');
 var StylesPane = React.createClass({
 
   propTypes: {
-    stylesData : React.PropTypes.array
+    stylesData : React.PropTypes.object
   },
 
   render: function () {
 
     var aLists = [];
-    _.forEach(this.props.stylesData, function(aStyles,sStyleType){
+    _.forEach(this.props.stylesData, function(oStyles,sStyleType){
       aLists.push(
           <ListComponent
-          data={aStyles}
+          data={oStyles}
           header={sStyleType}/>);
     });
 

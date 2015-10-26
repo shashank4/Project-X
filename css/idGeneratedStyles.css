@@ -1,11 +1,4 @@
-body, div, dl, dt, dd, h1, h2, h3, h4, h5, h6, p, pre, code, blockquote {
-    margin:0;
-    padding:0;
-    border-width:0;
-}
-body {
-    -epub-hyphens:auto;
-}
+
 div.Basic-Text-Frame {
     border-style:solid;
 }

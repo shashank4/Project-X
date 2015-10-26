@@ -1,6 +1,7 @@
 var React = require('react');
 var Handlebars = require('handlebars');
 //var miniData=require('../data/MiniData');
+var _ = require('lodash');
 
 var fs = require("fs");
 var zip3 = require('adm-zip');
@@ -235,6 +236,53 @@ parser.parseString(data, function (err, result) {
 
     })();
   }
+
+});
+
+var stylesXML = fs.readFileSync(dirPath + 'Resources/' + 'Styles.xml');
+
+parser.parseString(stylesXML, function (err, result) {
+
+  var oCharacterStyle = {};
+  var oParagraphStyle = {};
+  var oStyles = result['idPkg:Styles'];
+  var aCharacterStyleDOM = oStyles['RootCharacterStyleGroup'][0]['CharacterStyle'];
+  _.forEach(aCharacterStyleDOM, function(oCharacterStyleProps, iIndex){
+    oCharacterStyleProps = oCharacterStyleProps['$'];
+    var sName = oCharacterStyleProps.Name;
+    var sId = oCharacterStyleProps.Self;
+    oCharacterStyle[sId] = sName;
+  });
+
+  var aParagraphStyleDOM = oStyles['RootParagraphStyleGroup'][0]['ParagraphStyle'];
+  _.forEach(aParagraphStyleDOM, function(oParagraphStyleProps , iIndex){
+    oParagraphStyleProps = oParagraphStyleProps['$'];
+    var sName = oParagraphStyleProps.Name;
+    var sId = oParagraphStyleProps.Self;
+    oParagraphStyle[sId] = sName;
+  });
+
+  var stylesData = {
+    "Character Styles" : oCharacterStyle,
+    "Paragraph Styles" : oParagraphStyle
+  };
+  var styleHandlebar = fs.readFileSync(__dirname + '/../client/style-data.handlebars').toString();
+  var styleDataTemplate = Handlebars.compile(styleHandlebar);
+  var styleData = styleDataTemplate({
+    data: JSON.stringify(stylesData)
+  });
+  fs.writeFileSync(__dirname + '/../data/styleData.js', styleData, null);
+
+});
+
+var metaXML = fs.readFileSync(dirPath + 'META-INF/' + 'metadata.xml');
+
+parser.parseString(metaXML, function (err, result) {
+
+  var sStylesCSS = result['x:xmpmeta']['rdf:RDF'][0]['rdf:Description'][0]['xmp:CSINDDMetaData'][0];
+
+
+  fs.writeFileSync(__dirname + '/../data/INDDStyles.css', sStylesCSS, null);
 
 });
 

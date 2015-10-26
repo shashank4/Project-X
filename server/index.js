@@ -17,6 +17,7 @@ var app = express();
 
 var oStoryData = require('./../data/storyData');
 var spreadArray = require('./../data/layoutData');
+var styleData = require('./../data/styleData');
 var storyAction= require('../screen/actions/story-action');
 var utils= require('../screen/store/utils');
 
@@ -24,6 +25,7 @@ var utils= require('../screen/store/utils');
 var AppController = require('./../screen/controller/app-controller.jsx').view;
 var layoutStore = require('./../screen/store/layoutStore.js');
 var storyStore = require('./../screen/store/storyStore.js');
+var styleStore = require('./../screen/store/styleStore.js');
 
 var Config = require('./config');
 
@@ -33,6 +35,7 @@ var archiver = require('archiver');
 
 storyStore.setStoreData(oStoryData);
 layoutStore.setStoreData(spreadArray);
+styleStore.setStoreData(styleData);
 
 var AppControllerFactory = React.createFactory(AppController);
 
@@ -40,6 +43,7 @@ var renderedComponent = React.renderToString(
     AppControllerFactory({
         layoutStore:layoutStore,
         storyStore: storyStore,
+      styleStore : styleStore,
         action:storyAction
     })
 );

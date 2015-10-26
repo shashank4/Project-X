@@ -13,13 +13,15 @@ var AppController = React.createClass({
   propTypes: {
     layoutStore: React.PropTypes.object,
     storyStore: React.PropTypes.object,
+    styleStore: React.PropTypes.object,
     action: React.PropTypes.object
   },
 
   getInitialState: function () {
     return {
       storyData: {},
-      layoutData: []
+      layoutData: [],
+      styleData: {}
     }
   },
 
@@ -42,7 +44,8 @@ var AppController = React.createClass({
   storyStateChanged: function () {
     this.setState({
       storyData: this.props.storyStore.getStoreData(),
-      layoutData: this.props.layoutStore.getStoreData()
+      layoutData: this.props.layoutStore.getStoreData(),
+      styleData: this.props.styleStore.getStoreData()
     });
   },
 
@@ -54,7 +57,6 @@ var AppController = React.createClass({
   render: function () {
     var sPathToUpdate = this.props.storyStore.getPathToUpdate();
     var oCaretPosition = this.props.storyStore.getCaretPosition();
-    var oStyles = {"CaracterStyles": ["ABCd", "DEFG"], "ParagraphStyles": ["bsfbfb", "eradf"]};
     return (
         <div className="appController">
           <div className="toolBarWrapper">
@@ -62,7 +64,7 @@ var AppController = React.createClass({
           </div>
           <div className="mainContent">
             <StylesPane
-              stylesData={oStyles}/>
+              stylesData={this.state.styleData}/>
             <Canvas
               layoutStoreData={this.state.layoutData}
               storyStoreData={this.state.storyData}
