@@ -4,7 +4,13 @@ var _ = require('lodash');
 var Pages = require('./pages.jsx');
 var Frame = require('./frame.jsx');
 var utils = require('../store/utils');
+var EventDispatcher = require("../../libraries/eventDispacher/EventDispatcher");
 
+var Events = {
+
+  SPREAD_CLICKED : "spread_clicked"
+
+};
 
 var Spread = React.createClass({
 
@@ -70,14 +76,22 @@ var Spread = React.createClass({
 
     return (aSp);
   },
+
+  handleOnClickSpread : function(evt){
+    EventDispatcher.dispatch(Events.SPREAD_CLICKED, this, evt);
+  },
+
   render: function () {
     var aSpreads = this.getSpreadView();
     return (
-        <div className="spreadClass" >
+        <div className="spreadClass" onClick={this.handleOnClickSpread} >
                 {aSpreads}
         </div>
     );
   }
 });
 
-module.exports = Spread;
+module.exports = {
+  view : Spread,
+  events : Events
+};

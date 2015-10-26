@@ -27,7 +27,6 @@ var AppController = React.createClass({
 
   componentWillMount: function () {
     this.storyStateChanged();
-    this.props.storyAction.registerEvent();
   },
 
   //@UnBind: store with state
@@ -39,6 +38,8 @@ var AppController = React.createClass({
   //@Bind: Store with state
   componentDidMount: function () {
     this.props.storyStore.bind('change', this.storyStateChanged);
+    this.props.storyAction.registerEvent();
+
   },
 
   storyStateChanged: function () {

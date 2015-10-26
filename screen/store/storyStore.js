@@ -1228,6 +1228,8 @@ var storyStore = (function () {
       //document.querySelector('[data-abc]')
     },
 
+    /*    Styles related methods   */
+
     setStyleData: function (json) {
       oStyleData = json;
     },
@@ -1246,8 +1248,9 @@ var storyStore = (function () {
     },
 
     handleListItemClicked: function(sStyleType, oEvent){
-      console.log(sStyleType);
-      console.log(oEvent);
+
+      var oSelection = window.getSelection();
+
       var sStyleId = oEvent.target.getAttribute('data-element-id');
       _.forEach(oStyleData[sStyleType], function(oStyle, iIndex){
         if(oStyle.id == sStyleId){
@@ -1257,6 +1260,10 @@ var storyStore = (function () {
         }
       });
       _triggerChange();
+    },
+
+    handleSpreadClicked: function(oEvent){
+      console.log(window.selection);
     }
   };
 

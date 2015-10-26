@@ -3,12 +3,9 @@ var EventBusClass = require("../../libraries/eventDispacher/EventDispatcher");
 var storyStore = require("../store/storyStore");
 var StoryEvent = require('../views/Story.jsx').events;
 var ListEvent = require('../views/List.jsx').events;
+var SpreadEvent = require('../views/Spread.jsx').events;
 
 var storyAction = (function () {
-
-  var handleListItemClicked = function(oContext, sStyleType, oEvent){
-    storyStore.handleListItemClicked(sStyleType, oEvent);
-  };
 
   var handleSaveButonClick = function () {
     storyStore.handleSaveClick();
@@ -38,8 +35,17 @@ var storyAction = (function () {
     storyStore.handleOnKeyDown(oEvent);
   };
 
+  var handleListItemClicked = function(oContext, sStyleType, oEvent){
+    storyStore.handleListItemClicked(sStyleType, oEvent);
+  };
+
+  var handleSpreadClicked = function(oContext, oEvent){
+    storyStore.handleSpreadClicked(oEvent);
+  };
+
   return {
     registerEvent: function () {
+      console.log(SpreadEvent);
       EventBusClass.addEventListener("save_button_clicked", handleSaveButonClick);
       EventBusClass.addEventListener(StoryEvent.CONTENT_CHANGE_EVENT, handleContentTextChanged);
       EventBusClass.addEventListener(StoryEvent.ENTER_KEY_PRESSSED, handleEnterKeyPressed);
@@ -48,6 +54,7 @@ var storyAction = (function () {
       EventBusClass.addEventListener(StoryEvent.TAB_KEY_PRESSED, handleTab);
       EventBusClass.addEventListener(StoryEvent.ON_KEY_DOWN, handleOnKeyDown);
       EventBusClass.addEventListener(ListEvent.LIST_ITEM_CLICKED, handleListItemClicked);
+      EventBusClass.addEventListener(SpreadEvent.SPREAD_CLICKED, handleSpreadClicked);
     },
 
     deRegisterEvent: function () {
@@ -59,6 +66,7 @@ var storyAction = (function () {
       EventBusClass.removeEventListener(StoryEvent.TAB_KEY_PRESSED, handleTab);
       EventBusClass.removeEventListener(StoryEvent.ON_KEY_DOWN, handleOnKeyDown);
       EventBusClass.removeEventListener(ListEvent.LIST_ITEM_CLICKED, handleListItemClicked);
+      EventBusClass.removeEventListener(SpreadEvent.SPREAD_CLICKED, handleSpreadClicked);
     }
   }
 
