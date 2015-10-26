@@ -127,6 +127,25 @@ function writeClientData (oStoryData, spreadArray) {
   //fs.writeFileSync('D:/DesktopData/storyData.js', JSON.stringify(oStoryData), null);
 }
 
+
+function writeImageClientData(oImage){
+  var imageHandlebar = fs.readFileSync(__dirname + '/../client/image-data.handlebars').toString();
+  var imageTemplate = Handlebars.compile(imageHandlebar);
+
+  var imageData = imageTemplate({
+    data: JSON.stringify(oImage)
+  });
+  fs.writeFileSync(__dirname + '/../data/imageData.js', imageData, null);
+}
+
+function base64_encode(fileName) {
+
+  var bitmap = fs.readFileSync(decodeURI(fileName));
+  console.log(bitmap);
+  return new Buffer(bitmap).toString('base64');
+}
+
+
 /*function removeCustomTag () {
 
  var builder = new xml2js.Builder();
@@ -193,6 +212,7 @@ parser.parseString(data, function (err, result) {
   var remaining = spreadCount;
   var sequenceMap = {};
 
+  var oImage={};
   for (var i = 0; i < spreadCount; i++) {
     (function () {
       var spreadXMLName = result3.Document['idPkg:Spread'][i].$.src;
@@ -229,6 +249,23 @@ parser.parseString(data, function (err, result) {
                 oStoryData[storyName] = jsonStory;
               }
             }
+
+            if((spreadArray[j]["idPkg:Spread"].Spread[0]).hasOwnProperty("Rectangle")){
+              //obj2.Rectangle[y].Image[0].Link[0]['$'].LinkResourceURI
+              var aRect = spreadArray[j]["idPkg:Spread"].Spread[0].Rectangle;
+              var rectangleCount = aRect.length;
+              for (var rectIterator = 0; rectIterator < rectangleCount; rectIterator++) {
+                //var linkObject = {};
+                if(aRect[rectIterator].Image){
+                  var selfID = aRect[rectIterator].Image[0].Link[0]['$'].Self;
+                  var linkName = aRect[rectIterator].Image[0].Link[0]['$'].LinkResourceURI;
+                  linkName = linkName.slice(5,linkName.length);
+                  //linkName = "file:///" + linkName;
+                  oImage[selfID] = base64_encode(linkName);
+                //obj2.Rectangle[0].Image[0].Link[0]['$'].Self
+                }
+              }
+            }
           }
           writeClientData(oStoryData, spreadArray);
         }
@@ -236,6 +273,8 @@ parser.parseString(data, function (err, result) {
 
     })();
   }
+  writeImageClientData(oImage);
+
 
 });
 

@@ -11,6 +11,7 @@ var Spread = React.createClass({
   propTypes: {
     layoutStoreData: React.PropTypes.array,
     storyStoreData: React.PropTypes.object,
+    imageStoreData: React.PropTypes.object,
     pathToUpdate: React.PropTypes.string,
     caretPosition: React.PropTypes.object
   },
@@ -61,7 +62,8 @@ var Spread = React.createClass({
                     pathToUpdate={this.props.pathToUpdate}
                     pageDimObj={oPageDimObj}
                     bindingLocation={oBindingLocation}
-                    storyStoreData={this.props.storyStoreData} />
+                    storyStoreData={this.props.storyStoreData}
+                    imageStoreData={this.props.imageStoreData}/>
           </div>
       );
     }.bind(this));

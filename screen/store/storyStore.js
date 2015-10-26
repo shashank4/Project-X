@@ -452,7 +452,6 @@ var storyStore = (function () {
     }
   };
 
-
   var _getLastChildNode = function (oNode) {
     var oCustomLength = 0;
     if(oNode.ParagraphStyleRange) {
@@ -513,8 +512,6 @@ var storyStore = (function () {
       return oClosestCustom;
     }
   };
-
-
 
   var _setCaretPosition = function (aParent, iReturnedObjectIndex, sPath, currentStory) {
     //Set cursor logic
