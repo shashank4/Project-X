@@ -2,8 +2,13 @@ var React = require("react");
 var EventBusClass = require("../../libraries/eventDispacher/EventDispatcher");
 var storyStore = require("../store/storyStore");
 var StoryEvent = require('../views/Story.jsx').events;
+var ListEvent = require('../views/List.jsx').events;
 
 var storyAction = (function () {
+
+  var handleListItemClicked = function(oContext, sStyleType, oEvent){
+    storyStore.handleListItemClicked(sStyleType, oEvent);
+  };
 
   var handleSaveButonClick = function () {
     storyStore.handleSaveClick();
@@ -42,6 +47,7 @@ var storyAction = (function () {
       EventBusClass.addEventListener(StoryEvent.DELETE_KEY_PRESSED, handleDelete);
       EventBusClass.addEventListener(StoryEvent.TAB_KEY_PRESSED, handleTab);
       EventBusClass.addEventListener(StoryEvent.ON_KEY_DOWN, handleOnKeyDown);
+      EventBusClass.addEventListener(ListEvent.LIST_ITEM_CLICKED, handleListItemClicked);
     },
 
     deRegisterEvent: function () {
@@ -52,6 +58,7 @@ var storyAction = (function () {
       EventBusClass.removeEventListener(StoryEvent.DELETE_KEY_PRESSED, handleDelete);
       EventBusClass.removeEventListener(StoryEvent.TAB_KEY_PRESSED, handleTab);
       EventBusClass.removeEventListener(StoryEvent.ON_KEY_DOWN, handleOnKeyDown);
+      EventBusClass.removeEventListener(ListEvent.LIST_ITEM_CLICKED, handleListItemClicked);
     }
   }
 

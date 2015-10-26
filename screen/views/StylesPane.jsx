@@ -2,7 +2,7 @@ var _ = require('lodash');
 var React = require('react');
 var utils = require('../store/utils');
 
-var ListComponent = require('./List.jsx');
+var ListComponent = require('./List.jsx').view;
 
 var StylesPane = React.createClass({
 
@@ -13,11 +13,13 @@ var StylesPane = React.createClass({
   render: function () {
 
     var aLists = [];
+    var iCounter = 1;
     _.forEach(this.props.stylesData, function(oStyles,sStyleType){
       aLists.push(
           <ListComponent
           data={oStyles}
-          header={sStyleType}/>);
+          header={sStyleType}
+          key={iCounter++} />);
     });
 
     return (

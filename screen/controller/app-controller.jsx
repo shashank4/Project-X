@@ -13,8 +13,7 @@ var AppController = React.createClass({
   propTypes: {
     layoutStore: React.PropTypes.object,
     storyStore: React.PropTypes.object,
-    styleStore: React.PropTypes.object,
-    action: React.PropTypes.object
+    storyAction: React.PropTypes.object
   },
 
   getInitialState: function () {
@@ -27,13 +26,13 @@ var AppController = React.createClass({
 
   componentWillMount: function () {
     this.storyStateChanged();
-    this.props.action.registerEvent();
+    this.props.storyAction.registerEvent();
   },
 
   //@UnBind: store with state
   componentWillUnmount: function () {
     this.props.storyStore.unbind('change', this.storyStateChanged);
-    this.props.action.deRegisterEvent();
+    this.props.storyAction.deRegisterEvent();
   },
 
   //@Bind: Store with state
@@ -45,7 +44,7 @@ var AppController = React.createClass({
     this.setState({
       storyData: this.props.storyStore.getStoreData(),
       layoutData: this.props.layoutStore.getStoreData(),
-      styleData: this.props.styleStore.getStoreData()
+      styleData: this.props.storyStore.getStyleData()
     });
   },
 

@@ -11,7 +11,10 @@ var UID_KEY = 'data-uid';
 
 var storyStore = (function () {
 
-  var data = {};
+  var oStoryData = {};
+
+  var oStyleData = {};
+
   var sPathToUpdate = "";
   var oCaretPosition = {
     focusId: '',
@@ -287,7 +290,7 @@ var storyStore = (function () {
   var handleContentTextChangedForCaretSelection = function (targetPath, oCurrentDom, pressedChar, oSelection) {
     var path = targetPath.split("/");
     var currentStoryId = path.splice(0, 1);
-    var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+    var currentStory = oStoryData[currentStoryId]["idPkg:Story"]["Story"][0];
 
     var oParentCustom = _searchClosestCustomOfLastInPath(currentStory, path);
     var aCustom = oParentCustom.objectPos;
@@ -355,7 +358,7 @@ var storyStore = (function () {
       var iSelectionSize = iSelectionEndPosition - iSelectionStartPosition;
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
-      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+      var currentStory = oStoryData[currentStoryId]["idPkg:Story"]["Story"][0];
       /**
        * Handling for text content
        */
@@ -552,11 +555,11 @@ var storyStore = (function () {
   var storyStore =  {
 
     setStoreData: function (data1) {
-      data = data1;
+      oStoryData = data1;
     },
 
     getStoreData: function () {
-      return data;
+      return oStoryData;
     },
 
     getPathToUpdate: function () {
@@ -576,7 +579,7 @@ var storyStore = (function () {
         type: 'POST',
         url: 'onClickSave',
         dataType: 'JSON',
-        data: data/*JSON.stringify(data)*/,
+        data: oStoryData/*JSON.stringify(data)*/,
         success: function (resultData) {
           alert("Save Complete");
         }
@@ -609,7 +612,7 @@ var storyStore = (function () {
     handleEnterKeyPress: function (oCurrentDOM, iStartRange, targetPath) {
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
-      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+      var currentStory = oStoryData[currentStoryId]["idPkg:Story"]["Story"][0];
       var returnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
       var aContentData = oCurrentDOM.firstChild ? oCurrentDOM.firstChild.data : null;
       var aParent = returnedObject.objectPos;
@@ -707,7 +710,7 @@ var storyStore = (function () {
       if(sType == "Caret") {
         var path = targetPath.split("/");
         var currentStoryId = path.splice(0, 1);
-        var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+        var currentStory = oStoryData[currentStoryId]["idPkg:Story"]["Story"][0];
         var returnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
         var aParent = returnedObject.objectPos;
         var iReturnedObjectIndex = returnedObject.indexPos;
@@ -1007,7 +1010,7 @@ var storyStore = (function () {
       var tenSpaces = "          ";
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
-      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+      var currentStory = oStoryData[currentStoryId]["idPkg:Story"]["Story"][0];
       var oReturnedObject = {};
 
       if(sel.focusNode) {
@@ -1051,7 +1054,7 @@ var storyStore = (function () {
 
       var path = targetPath.split("/");
       var currentStoryId = path.splice(0, 1);
-      var currentStory = data[currentStoryId]["idPkg:Story"]["Story"][0];
+      var currentStory = oStoryData[currentStoryId]["idPkg:Story"]["Story"][0];
       var returnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
@@ -1238,6 +1241,28 @@ var storyStore = (function () {
         _triggerChange();
       }
       //document.querySelector('[data-abc]')
+    },
+
+    setStyleData: function (json) {
+      oStyleData = json;
+    },
+
+    getStyleData: function () {
+      return oStyleData;
+    },
+
+    handleListItemClicked: function(sStyleType, oEvent){
+      console.log(sStyleType);
+      console.log(oEvent);
+      var sStyleId = oEvent.target.getAttribute('data-element-id');
+      _.forEach(oStyleData[sStyleType], function(oStyle, iIndex){
+        if(oStyle.id == sStyleId){
+          oStyle.isSelected = true;
+        } else {
+          oStyle.isSelected = false;
+        }
+      });
+      _triggerChange();
     }
   };
 
