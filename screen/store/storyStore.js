@@ -417,7 +417,7 @@ var storyStore = (function () {
     var aGrandparent = oGrandparent.objectPos;
     var iGrandparent = oGrandparent.indexPos;
 
-    if(aGrandparent[iGrandparent].ParagraphStyleRange && aGrandparent.length==1){
+    if(aGrandparent[iGrandparent].ParagraphStyleRange && aGrandparent.length == 1){
       return ;
     }
 
@@ -564,16 +564,14 @@ var storyStore = (function () {
 
   var _getFocusObject = function(oNode){
     var retObject = {};
-    if(oNode.Custom[0].Content){
-      retObject["focusID"] = oNode.Custom[0].Content[0]['$']['data-uid'];
+    if(oNode.Content){
+      retObject["focusID"] = oNode.Content[0]['$']['data-uid'];
       retObject["focusOffset"] = 0;
       return retObject;
-      //_setCaretPositionAccordingToObjectDelete(focusID, focusOffset);
     }
-    else if(oNode.Custom[0].Br){
-      retObject["focusID"] = oNode.Custom[0].Br[0]['$']['data-uid'];
+    else if(oNode.Br){
+      retObject["focusID"] = oNode.Br[0]['$']['data-uid'];
       return retObject;
-      //_setCaretPositionAccordingToObjectDelete(focusID);
     }
     else {
       _getFocusObject(oNode.Custom[0]);
@@ -1281,11 +1279,10 @@ var storyStore = (function () {
 
         /** if Br is the only node in that charaStyle then remove that CharaStyle */
         if(aParent.length == 0){
-          _ifOnlyChild(currentStory, aParent, pathCharaBr);
+          _ifOnlyChild(currentStory, pathCharaBr);
         }
         else {
           var oFocus = _getFocusObject(aParent[iIndex]);
-          //var focusID4 = aParent[iIndex]
           _setCaretPositionAccordingToObjectDelete()
         }
 
@@ -1391,18 +1388,6 @@ var storyStore = (function () {
         var iGrandparent = oGrandparent.indexPos;
 
         handleCharaOfDelete(aParent, iIndex, aGrandparent, iGrandparent, iRange);
-
-
-       /* var strContent = aParent[iIndex].Content[0]["_"];
-        if (strContent.length > 1 || (strContent.length == 1 && aParent[iIndex-1] && aParent[iIndex-1].Br)) {
-          aParent[iIndex].Content[0]["_"] = strContent.slice(0, iRange.endOffset) + strContent.slice(iRange.endOffset+1, strContent.length);
-          var focusID3 = aParent[iIndex].Content[0]['$']['data-uid'];
-          var focusOffset3 = iRange.endOffset;
-          _setCaretPositionAccordingToObjectDelete(focusID3, focusOffset3);
-        } else {
-          aParent.splice(iIndex, 1);
-          _setCaretPositionDelete()
-        }*/
       }
       _triggerChange();
     },
