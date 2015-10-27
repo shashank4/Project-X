@@ -734,18 +734,40 @@ var storyStore = (function () {
 
                 aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom[lastChara - 1].CharacterStyleRange[0].Custom.splice(-1, 1);
                 if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom[lastChara - 1].CharacterStyleRange[0].Custom.length == 0) {
+                  var oPreviousSiblingAcrossGrandParents;
                   aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.splice(-1, 1);
                   if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.length == 0) {
                     if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.length == 0) {
+
+                      _setCaretPosition(aReturnedGrandParent, iGrandParent - 1, newPath2, currentStory);
+
                       aReturnedGrandParent.splice(iGrandParent - 1, 1);
                     }
                     else if (aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom) {
-                      _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
+                      oPreviousSiblingAcrossGrandParents = _getLastChildNode(aReturnedGrandParent[iGrandParent - 1]);
+                      _setCaretPositionAccordingToObject(oPreviousSiblingAcrossGrandParents);
+
+                      /*************Merging Two ParagraphStyleRange **************/
+                      _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom,
+                          aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(
+                              aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom
+                          )
+                      );
+
                       aReturnedGrandParent.splice(iGrandParent, 1);
                     }
                   }
                 } else {
-                  _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
+                  oPreviousSiblingAcrossGrandParents = _getLastChildNode(aReturnedGrandParent[iGrandParent - 1]);
+                  _setCaretPositionAccordingToObject(oPreviousSiblingAcrossGrandParents);
+
+                  /*************Merging Two ParagraphStyleRange **************/
+                  _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom,
+                      aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(
+                          aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom
+                      )
+                  );
+
                   aReturnedGrandParent.splice(iGrandParent, 1);
                 }
 
