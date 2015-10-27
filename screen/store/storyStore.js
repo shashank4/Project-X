@@ -501,11 +501,15 @@ var storyStore = (function () {
     }
   };
 
-  var _setCaretPositionAccordingToObject = function (oNodeToSetCaret) {
+  var _setCaretPositionAccordingToObject = function (oNodeToSetCaret, iCaretPosition) {
     if(!_.isEmpty(oNodeToSetCaret)) {
       if(oNodeToSetCaret.Content) {
         oCaretPosition.focusId = oNodeToSetCaret.Content[0]["$"]["data-uid"];
-        oCaretPosition.indexToFocus = oNodeToSetCaret.Content[0]["_"].length;
+        if(iCaretPosition == undefined) {
+          oCaretPosition.indexToFocus = oNodeToSetCaret.Content[0]["_"].length;
+        } else {
+          oCaretPosition.indexToFocus = iCaretPosition;
+        }
       } else if(oNodeToSetCaret.Br){
         oCaretPosition.focusId = oNodeToSetCaret.Br[0]["$"]["data-uid"];
       }
@@ -630,7 +634,7 @@ var storyStore = (function () {
           if (aContentData == "" || aContentData == null ||
               (aContentData.length == 1 && (aContentData.charCodeAt(0) >= 0 && aContentData.charCodeAt(0) <= 32))) {
             aParent.push(newBrObj);
-            aParent.push(rest);
+            aParent.push(rest);0
             _setCaretPositionAccordingToObject(newBrObj);
             _triggerChange();
             return;
@@ -649,10 +653,10 @@ var storyStore = (function () {
            */
           //if (iOffset < aContentData.length) {
             //var newUid3 = utils.generateUUID();
-            var newContentStringAfter = aContentData.substring(iStartRange, aContentData.length);
-            var newContentObjAfter = createContentNode(newContentStringAfter);
-            _setCaretPositionAccordingToObject(newContentObjAfter);
-            aParent.push(newContentObjAfter);
+          var newContentStringAfter = aContentData.substring(iStartRange, aContentData.length);
+          var newContentObjAfter = createContentNode(newContentStringAfter);
+          _setCaretPositionAccordingToObject(newContentObjAfter, 0);
+          aParent.push(newContentObjAfter);
           //}
 
 
