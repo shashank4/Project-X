@@ -221,10 +221,12 @@ var Story = React.createClass({
   },
 
   render: function () {
+    var sStoryId = this.props.data['idPkg:Story'].Story[0]['$']['Self'];
     var wrapperArray = this.renderStoryData(this.props.data);
     return (
         <div className="storyContainer"
              ref="storyContainer"
+             data-storyid={sStoryId}
              contentEditable={true}
              onKeyDown={this.handleKeyDown}>
           {wrapperArray}

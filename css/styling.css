@@ -115,7 +115,7 @@ p{
 }
 
 .style-pane{
-    background: white;
+    background: #ffffff;
     float: left;
     border: 1px solid black;
     height: 100%;
@@ -123,6 +123,9 @@ p{
     z-index: 2;
     display: inline-block;
     width: 20%;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 
 .toolBarWrapper{

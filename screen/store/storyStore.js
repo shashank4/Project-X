@@ -529,27 +529,90 @@ var storyStore = (function () {
 
   };
 
-  var _commonAncestorForSelection = function () {
+  var _getDomDataInformation = function (oDOM, bDeepDOMSearch) {
+    var oEvaluatedDOM = oDOM;
+    if(oDOM.nodeName == "#text") {
+      oEvaluatedDOM = oDOM.parentNode;
+    } else if(!(_.includes(oDOM.classList, "content") && _.includes(oDOM.classList, "br")) && bDeepDOMSearch) {
+      oEvaluatedDOM = _getFirstDeepChildNodeFromDOM(oDOM);
+    }
+    return oEvaluatedDOM.dataset;
+  };
+
+  var _getSelectionInformationFromRange = function (oRange) {
+    var oStartDOMDataSet = _getDomDataInformation(oRange.startContainer, true);
+    var oEndDOMDataSet = _getDomDataInformation(oRange.endContainer, true);
+    var oCommonAncestorDataSet = _getDomDataInformation(oRange.commonAncestorContainer, false);
+
+    return {
+      startDataSet: oStartDOMDataSet,
+      endDataSet: oEndDOMDataSet,
+      ancestorDataset: oCommonAncestorDataSet
+    }
 
   };
 
-  var _applyCharacterStyleToSelectedNode = function (sStyleId) {
+  var _applyCharacterStyleToSelectedNode = function (sStyleId, oParentObject, aStartDOMPath, aEndDOMPath) {
 
   };
 
-  var _applyParagraphStyleToSelectedNode = function (sStyleId) {
+  var _setParagraphStyle = function (oObj, sStyleId) {
 
   };
 
-  var _applySelectedStyleToSelectedNode = function (oRange, sStyleType, sStyleId) {
-    if(sStyleType == "Character Style") {
-      _applyCharacterStyleToSelectedNode(sStyleId);
-    } else if (sStyleType == "Paragraph Style") {
-      _applyParagraphStyleToSelectedNode(sStyleId);
+  var _applyParagraphStyleToSelectedNode = function (sStyleId, oParentObject, aStartDOMPath, aEndDOMPath) {
+    var oObjectPos = oParentObject.objectPos;
+    var iIndexPos = oParentObject.indexPos;
+
+    //If iIndexPos is undefined then iterate over story itself
+    if(iIndexPos == undefined) {
+      _.forEach(oObjectPos, function (oObj) {
+        if(oObj.ParagraphStyleRange) {
+          oObj.ParagraphStyleRange[0]["$"]["AppliedParagraphStyle"] = sStyleId;
+        }
+      });
+    } else {
+      var oAncestor = oObjectPos[iIndexPos];
     }
   };
 
-  var _getStartDOM = function (oRange) {
+  var _applySelectedStyleToSelectedNode = function (oRange, sStyleType, sStyleId) {
+
+    var oDataSet = _getSelectionInformationFromRange(oRange);
+
+    var sAncestorUID = oDataSet.ancestorDataset.uid || oDataSet.ancestorDataset.storyid;
+    var aStartDOMPath = oDataSet.startDataSet.path.split('/');
+    var aEndDOMPath = oDataSet.endDataSet.path.split('/');
+
+    var aAncestorPath = aStartDOMPath.slice(0, _.indexOf(aStartDOMPath, sAncestorUID) + 1);
+
+    if(oDataSet.ancestorDataset.path) {
+      aAncestorPath = oDataSet.ancestorDataset.path.split('/');
+      aAncestorPath.push(oDataSet.ancestorDataset.uid);
+    }
+
+    aStartDOMPath.splice(0, _.indexOf(aStartDOMPath, sAncestorUID));
+    aEndDOMPath.splice(0, _.indexOf(aEndDOMPath, sAncestorUID));
+
+    var oCurrentStory = oStoryData[aAncestorPath[0]]["idPkg:Story"]["Story"][0];
+    var oParentObject = {};
+    oParentObject.objectPos = oCurrentStory.Custom;
+
+    if(aAncestorPath.length > 1) {
+      aAncestorPath.splice(0,1);
+      oParentObject = _searchClosestCustomOfLastInPath(oCurrentStory, aAncestorPath);
+    }
+
+    _setPathTOUpdate(aAncestorPath[0]);
+
+    if(sStyleType == "Character Styles") {
+      _applyCharacterStyleToSelectedNode(sStyleId, oParentObject, aStartDOMPath, aEndDOMPath);
+    } else if (sStyleType == "Paragraph Styles") {
+      _applyParagraphStyleToSelectedNode(sStyleId, oParentObject, aStartDOMPath, aEndDOMPath);
+    }
+  };
+
+  var _getDeepestDOM = function (oRange) {
     var oCurrentDOM = oRange.startContainer;
     var iStartRange = 0;
     if(oRange.startContainer.nodeName == "#text" || _.includes(oRange.startContainer.classList, "content")) {
@@ -1278,7 +1341,7 @@ var storyStore = (function () {
         }
         var oRange = oSelection.getRangeAt(0);
 
-        var oRangeObject = _getStartDOM(oRange);
+        var oRangeObject = _getDeepestDOM(oRange);
         var oCurrentDom = oRangeObject.currentDOM;
         var iStartRange = oRangeObject.startRange;
 
