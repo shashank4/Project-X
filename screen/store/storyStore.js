@@ -643,7 +643,7 @@ var storyStore = (function () {
 
   };
 
-  var _applyCharacterStyleToSelectedNode = function (sStyleId, oParentObject, aStartDOMPath, aEndDOMPath) {
+  var _applyCharacterStyleToSelectedNode = function (sStyleId, oCurrentStory, aStartDOMPath, aEndDOMPath) {
 
   };
 
@@ -651,20 +651,31 @@ var storyStore = (function () {
 
   };
 
-  var _applyParagraphStyleToSelectedNode = function (sStyleId, oParentObject, aStartDOMPath, aEndDOMPath) {
-    var oObjectPos = oParentObject.objectPos;
-    var iIndexPos = oParentObject.indexPos;
+  var _applyParagraphStyleToSelectedNode = function (sStyleId, oCurrentStoryCustom, aStartDOMPath, aEndDOMPath, bStartEditing) {
 
-    //If iIndexPos is undefined then iterate over story itself
-    if(iIndexPos == undefined) {
-      _.forEach(oObjectPos, function (oObj) {
-        if(oObj.ParagraphStyleRange) {
-          oObj.ParagraphStyleRange[0]["$"]["AppliedParagraphStyle"] = sStyleId;
+    var aStartPath = _.clone(aStartDOMPath);
+    var aEndPath = _.clone(aEndDOMPath);
+
+    var sCurrentStartPath = aStartPath.splice(0, 1);
+    var sCurrentEndPath = aEndPath.splice(0,1);
+
+    _.forEach(oCurrentStoryCustom, function (oObject) {
+
+      if(oObject.ParagraphStyleRange) {
+        if(oObject.ParagraphStyleRange[0]["$"]["data-uid"] == sCurrentStartPath || bStartEditing) {
+          oObject.ParagraphStyleRange[0]["$"]["AppliedParagraphStyle"] = sStyleId;
+          bStartEditing = true;
+          _applyParagraphStyleToSelectedNode(sStyleId, oObject.ParagraphStyleRange[0].Custom, aStartPath, aEndPath, bStartEditing);
         }
-      });
-    } else {
-      var oAncestor = oObjectPos[iIndexPos];
-    }
+
+        if(oObject.ParagraphStyleRange[0]["$"]["data-uid"] == sCurrentEndPath) {
+          return false;
+        }
+      } else if(oObject.XMLElement) {
+        _applyParagraphStyleToSelectedNode(sStyleId, oObject.ParagraphStyleRange[0].Custom, aStartPath, aEndPath, bStartEditing);
+      }
+    });
+
   };
 
   var _applySelectedStyleToSelectedNode = function (oRange, sStyleType, sStyleId) {
@@ -682,24 +693,24 @@ var storyStore = (function () {
       aAncestorPath.push(oDataSet.ancestorDataset.uid);
     }
 
-    aStartDOMPath.splice(0, _.indexOf(aStartDOMPath, sAncestorUID));
-    aEndDOMPath.splice(0, _.indexOf(aEndDOMPath, sAncestorUID));
+    aStartDOMPath.splice(0, 1);
+    aEndDOMPath.splice(0, 1);
 
-    var oCurrentStory = oStoryData[aAncestorPath[0]]["idPkg:Story"]["Story"][0];
-    var oParentObject = {};
+    var oCurrentStoryCustom = oStoryData[aAncestorPath[0]]["idPkg:Story"]["Story"][0].Custom;
+    /*var oParentObject = {};
     oParentObject.objectPos = oCurrentStory.Custom;
 
     if(aAncestorPath.length > 1) {
       aAncestorPath.splice(0,1);
       oParentObject = _searchClosestCustomOfLastInPath(oCurrentStory, aAncestorPath);
-    }
+    }*/
 
     _setPathTOUpdate(aAncestorPath[0]);
 
     if(sStyleType == "Character Styles") {
-      _applyCharacterStyleToSelectedNode(sStyleId, oParentObject, aStartDOMPath, aEndDOMPath);
+      _applyCharacterStyleToSelectedNode(sStyleId, oCurrentStoryCustom, aStartDOMPath, aEndDOMPath);
     } else if (sStyleType == "Paragraph Styles") {
-      _applyParagraphStyleToSelectedNode(sStyleId, oParentObject, aStartDOMPath, aEndDOMPath);
+      _applyParagraphStyleToSelectedNode(sStyleId, oCurrentStoryCustom, aStartDOMPath, aEndDOMPath, false);
     }
   };
 
