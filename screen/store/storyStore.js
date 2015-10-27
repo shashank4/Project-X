@@ -478,26 +478,27 @@ var storyStore = (function () {
     }
   };
 
-  var _setCaretPosition = function (aParent, iReturnedObjectIndex, sPath, currentStory) {
+  var _setCaretPosition = function (aParent, iReturnedObjectIndex, aPath, currentStory) {
     //Set cursor logic
     var oNodeToSetCaret = {};
     var oPreviousNode = aParent[iReturnedObjectIndex - 1];
     if (!_.isEmpty(oPreviousNode)) {
       oNodeToSetCaret = _getLastChildNode(oPreviousNode);
+      _setCaretPositionAccordingToObject(oNodeToSetCaret);
 
     } else {
-      sPath.splice(-1, 1);
-      var oSearchedObject = _searchClosestCustomOfLastInPath(currentStory, sPath);
+      aPath.splice(-1, 1);
+      var oSearchedObject = _searchClosestCustomOfLastInPath(currentStory, aPath);
       var oGrandParent = oSearchedObject.objectPos;
       var iIndex = oSearchedObject.indexPos;
       if (iIndex > 0) {
         oNodeToSetCaret = _getLastChildNode(oGrandParent[iIndex - 1]);
+        _setCaretPositionAccordingToObject(oNodeToSetCaret);
+
       } else {
-        _setCaretPosition(oGrandParent, iIndex + 1, sPath, currentStory);
+        _setCaretPosition(oGrandParent, iIndex + 1, aPath, currentStory);
       }
     }
-
-    _setCaretPositionAccordingToObject(oNodeToSetCaret);
   };
 
   var _setCaretPositionAccordingToObject = function (oNodeToSetCaret) {
@@ -741,18 +742,40 @@ var storyStore = (function () {
 
                 aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom[lastChara - 1].CharacterStyleRange[0].Custom.splice(-1, 1);
                 if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom[lastChara - 1].CharacterStyleRange[0].Custom.length == 0) {
+                  var oPreviousSiblingAcrossGrandParents;
                   aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.splice(-1, 1);
                   if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.length == 0) {
                     if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.length == 0) {
+
+                      _setCaretPosition(aReturnedGrandParent, iGrandParent - 1, newPath2, currentStory);
+
                       aReturnedGrandParent.splice(iGrandParent - 1, 1);
                     }
                     else if (aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom) {
-                      _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
+                      oPreviousSiblingAcrossGrandParents = _getLastChildNode(aReturnedGrandParent[iGrandParent - 1]);
+                      _setCaretPositionAccordingToObject(oPreviousSiblingAcrossGrandParents);
+
+                      /*************Merging Two ParagraphStyleRange **************/
+                      _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom,
+                          aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(
+                              aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom
+                          )
+                      );
+
                       aReturnedGrandParent.splice(iGrandParent, 1);
                     }
                   }
                 } else {
-                  _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom, aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom));
+                  oPreviousSiblingAcrossGrandParents = _getLastChildNode(aReturnedGrandParent[iGrandParent - 1]);
+                  _setCaretPositionAccordingToObject(oPreviousSiblingAcrossGrandParents);
+
+                  /*************Merging Two ParagraphStyleRange **************/
+                  _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom,
+                      aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(
+                          aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom
+                      )
+                  );
+
                   aReturnedGrandParent.splice(iGrandParent, 1);
                 }
 
@@ -895,7 +918,7 @@ var storyStore = (function () {
                       && aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content) {
                     var iContentLength = aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"].length;
                     aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] +=
-                        + aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+                         aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
 
                     aCustom[charIndex + 1].CharacterStyleRange[0].Custom.splice(0, 1);
 
@@ -985,8 +1008,13 @@ var storyStore = (function () {
         else if (iStartIndex >= 1) {
           var str = oCurrentDom.firstChild.data;
           aParent[iReturnedObjectIndex].Content[0]["_"] = str.slice(0, iStartIndex - 1) + str.slice(iStartIndex);
-          oCaretPosition.focusId = aParent[iReturnedObjectIndex].Content[0]["$"]["data-uid"];
-          oCaretPosition.indexToFocus = iStartIndex - 1;
+
+          if(iStartIndex > 1) {
+            oCaretPosition.focusId = aParent[iReturnedObjectIndex].Content[0]["$"]["data-uid"];
+            oCaretPosition.indexToFocus = iStartIndex - 1;
+          } else {
+            _setCaretPosition(aParent, iReturnedObjectIndex, path, currentStory);
+          }
           _triggerChange();
           return null;
         }
@@ -1246,6 +1274,8 @@ var storyStore = (function () {
       //document.querySelector('[data-abc]')
     },
 
+    /*    Styles related methods   */
+
     setStyleData: function (json) {
       oStyleData = json;
     },
@@ -1263,8 +1293,9 @@ var storyStore = (function () {
     },
 
     handleListItemClicked: function(sStyleType, oEvent){
-      console.log(sStyleType);
-      console.log(oEvent);
+
+      var oSelection = window.getSelection();
+
       var sStyleId = oEvent.target.getAttribute('data-element-id');
       _.forEach(oStyleData[sStyleType], function(oStyle, iIndex){
         if(oStyle.id == sStyleId){
@@ -1274,6 +1305,10 @@ var storyStore = (function () {
         }
       });
       _triggerChange();
+    },
+
+    handleSpreadClicked: function(oEvent){
+      console.log(window.selection);
     }
 
   };

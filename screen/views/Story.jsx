@@ -5,7 +5,6 @@ var utils = require("../store/utils");
 var XMLElement = require("./XMLElement.jsx");
 var ParagraphStyleRange = require("./paragraphStyleRange.jsx");
 var EventDispatcher = require("../../libraries/eventDispacher/EventDispatcher");
-var storyAction = require("../actions/story-action");
 
 var Events = {
   CONTENT_CHANGE_EVENT: "content_change_event",

@@ -1,7 +1,7 @@
 var React = require('react');
 var utils = require('../store/utils');
 
-var Spread = require('./Spread.jsx');
+var Spread = require('./Spread.jsx').view;
 
 
 var Canvas = React.createClass({
