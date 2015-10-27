@@ -592,7 +592,6 @@ var storyStore = (function () {
       var aParent = returnedObject.objectPos;
       var iIndex = returnedObject.indexPos;
       var bFlag = returnedObject.flag;
-      var iOffset = iStartRange;
 
       /**
        * true = 'BR' node....if key is down on Br node
@@ -612,7 +611,7 @@ var storyStore = (function () {
         /**
          * if offset is 0 and first node of character style or xmlElement
          */
-        if (iIndex == 0 && iOffset == 0 ) {
+        if (iIndex == 0 && iStartRange == 0 ) {
           var newBrObj6 = createBrNode();
           aParent.splice(iIndex, 0, newBrObj6);
           oCaretPosition.focusId = newBrObj6.Br[0]["$"]["data-uid"];
@@ -625,14 +624,22 @@ var storyStore = (function () {
         else {
           var rest = aParent.splice(iIndex + 1);
           aParent.splice(iIndex, 1);
+          var newBrObj = createBrNode();
 
-          if(iOffset != 0){
-            var newContentStringBefore = aContentData.substring(0, iOffset);
+
+          if (aContentData == "" || aContentData == null ||
+              (aContentData.length == 1 && (aContentData.charCodeAt(0) >= 0 && aContentData.charCodeAt(0) <= 32))) {
+            aParent.push(newBrObj);
+            aParent.push(rest);
+            _setCaretPositionAccordingToObject(newBrObj);
+            _triggerChange();
+            return;
+          } else if (iStartRange != 0) {
+            var newContentStringBefore = aContentData.substring(0, iStartRange);
             var newContentObjBefore = createContentNode(newContentStringBefore);
             aParent.push(newContentObjBefore);
           }
 
-          var newBrObj = createBrNode();
           aParent.push(newBrObj);
 
 
@@ -642,7 +649,7 @@ var storyStore = (function () {
            */
           //if (iOffset < aContentData.length) {
             //var newUid3 = utils.generateUUID();
-            var newContentStringAfter = aContentData.substring(iOffset, aContentData.length);
+            var newContentStringAfter = aContentData.substring(iStartRange, aContentData.length);
             var newContentObjAfter = createContentNode(newContentStringAfter);
             _setCaretPositionAccordingToObject(newContentObjAfter);
             aParent.push(newContentObjAfter);
