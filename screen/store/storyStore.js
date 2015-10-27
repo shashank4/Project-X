@@ -529,6 +529,57 @@ var storyStore = (function () {
 
   };
 
+  var _commonAncestorForSelection = function () {
+
+  };
+
+  var _applyCharacterStyleToSelectedNode = function (sStyleId) {
+
+  };
+
+  var _applyParagraphStyleToSelectedNode = function (sStyleId) {
+
+  };
+
+  var _applySelectedStyleToSelectedNode = function (oRange, sStyleType, sStyleId) {
+    if(sStyleType == "Character Style") {
+      _applyCharacterStyleToSelectedNode(sStyleId);
+    } else if (sStyleType == "Paragraph Style") {
+      _applyParagraphStyleToSelectedNode(sStyleId);
+    }
+  };
+
+  var _getStartDOM = function (oRange) {
+    var oCurrentDOM = oRange.startContainer;
+    var iStartRange = 0;
+    if(oRange.startContainer.nodeName == "#text" || _.includes(oRange.startContainer.classList, "content")) {
+      if(_.includes(oRange.startContainer.classList, "content")) {
+        oCurrentDOM = oRange.startContainer;
+      } else {
+        oCurrentDOM = oRange.startContainer.parentNode;
+      }
+      iStartRange = oRange.startOffset;
+    } else {
+      oCurrentDOM = oRange.commonAncestorContainer.childNodes[oRange.startOffset];
+
+      if(!oCurrentDOM) {
+        oCurrentDOM = oRange.commonAncestorContainer.lastChild;
+      }
+
+      oCurrentDOM = _getFirstDeepChildNodeFromDOM(oCurrentDOM);
+      var aDOMClassList = oCurrentDOM.classList;
+      if(_.includes(aDOMClassList, "content")) {
+        iStartRange = oCurrentDOM.firstChild.data.length;
+      } else if(_.includes(aDOMClassList, "br")){
+        iStartRange = _.indexOf(oCurrentDOM.parentNode.childNodes, oCurrentDOM);
+      }
+    }
+
+    return {
+      currentDOM: oCurrentDOM,
+      startRange: iStartRange
+    }
+  };
 
   var storyStore =  {
 
@@ -1226,31 +1277,10 @@ var storyStore = (function () {
           return;
         }
         var oRange = oSelection.getRangeAt(0);
-        var iStartRange = 0;
 
-        var oCurrentDom;
-        if(oRange.startContainer.nodeName == "#text" || _.includes(oRange.startContainer.classList, "content")) {
-          if(_.includes(oRange.startContainer.classList, "content")) {
-            oCurrentDom = oRange.startContainer;
-          } else {
-            oCurrentDom = oRange.startContainer.parentNode;
-          }
-          iStartRange = oRange.startOffset;
-        } else {
-          oCurrentDom = oRange.commonAncestorContainer.childNodes[oRange.startOffset];
-
-          if(!oCurrentDom) {
-            oCurrentDom = oRange.commonAncestorContainer.lastChild;
-          }
-
-          oCurrentDom = _getFirstDeepChildNodeFromDOM(oCurrentDom);
-          var aDOMClassList = oCurrentDom.classList;
-          if(_.includes(aDOMClassList, "content")) {
-            iStartRange = oCurrentDom.firstChild.data.length;
-          } else if(_.includes(aDOMClassList, "br")){
-            iStartRange = _.indexOf(oCurrentDom.parentNode.childNodes, oCurrentDom);
-          }
-        }
+        var oRangeObject = _getStartDOM(oRange);
+        var oCurrentDom = oRangeObject.currentDOM;
+        var iStartRange = oRangeObject.startRange;
 
 /*        if(oSel.focusNode.nodeName != "#text" ){
           oCurrentDom = oRange.commonAncestorContainer.childNodes[oRange.startOffset];
@@ -1309,14 +1339,19 @@ var storyStore = (function () {
     handleListItemClicked: function(sStyleType, oEvent){
 
       var oSelection = window.getSelection();
-
       var sStyleId = oEvent.target.getAttribute('data-element-id');
-      _.forEach(oStyleData[sStyleType], function(oStyle, iIndex){
-        if(oStyle.id == sStyleId){
-          oStyle.isSelected = true;
-        } else {
-          oStyle.isSelected = false;
+
+      if(oSelection.rangeCount) {
+        //Check if the selection in editable story only
+        var oRange = oSelection.getRangeAt(0);
+        var oStartNode = oRange.startContainer.parentNode.getAttribute("data-uid");
+        if(oStartNode) {
+          _applySelectedStyleToSelectedNode(oRange, sStyleType, sStyleId);
         }
+      }
+
+      _.forEach(oStyleData[sStyleType], function(oStyle, iIndex){
+        oStyle.isSelected = oStyle.id == sStyleId;
       });
       _triggerChange();
     },
