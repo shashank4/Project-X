@@ -145,11 +145,7 @@ var storyStore = (function () {
       else if(aParent[iIndex].XMLElement[0].Custom[0].CharacterStyleRange){
         handleCharaOfDelete(aParent[iIndex].XMLElement[0].Custom[0].CharacterStyleRange[0].Custom, 0, aParent[iIndex].XMLElement[0].Custom, 0);
       }
-
     }
-
-    _triggerChange();
-    return null;
   };
 
 
@@ -211,9 +207,6 @@ var storyStore = (function () {
       else if (aCustom[charIndex].CharacterStyleRange[0].Custom[lastElementIndex - 1].XMLElement) {
         handleXMLOfBackSpace(aCustom[charIndex].CharacterStyleRange[0].Custom, lastElementIndex - 1);
       }
-
-      _triggerChange();
-      return null;
     }
   };
 
@@ -379,7 +372,8 @@ var storyStore = (function () {
 
 
 
-  var _ifTheOnlyChild = function(currentStory, path){
+  var _ifOnlyChild = function(currentStory, path){
+
     path.splice(-1, 1);
 
     var oGrandparent = _searchClosestCustomOfLastInPath(currentStory, path);
@@ -395,8 +389,9 @@ var storyStore = (function () {
     }
 
     aGrandparent.splice(iGrandparent, 1);
+
     if (aGrandparent.length == 0) {
-      _ifTheOnlyChild(currentStory, aGrandparent, path);
+      _ifOnlyChild(currentStory, aGrandparent, path);
     }
 
   };
@@ -518,6 +513,19 @@ var storyStore = (function () {
   };
 
 
+  var _setCaretPositionAccordingToObjectDelete = function (focusId, indexToFocus) {
+    oCaretPosition.focusId = focusId;
+    if (indexToFocus >= 0) {
+      oCaretPosition.indexToFocus = indexToFocus;
+    }
+  };
+
+
+  var _setCaretPositionDelete = function(){
+
+  };
+
+
   var storyStore =  {
 
     setStoreData: function (data1) {
@@ -532,9 +540,9 @@ var storyStore = (function () {
       return sPathToUpdate;
     },
 
-    setPathToUpdate: function (sPath) {
+    /*setPathToUpdate: function (sPath) {
       _setPathTOUpdate(sPath);
-    },
+    },*/
 
     getCaretPosition: function () {
       return oCaretPosition;
@@ -785,11 +793,14 @@ var storyStore = (function () {
         /**if current node is not br*/
         /**And its rangeOffSet is '0'*/
         else if (iStartIndex == 0) {
+
+
           /**
            * if iIndex th node is not the start node.....then do normal processing
            * i.e. remove the previous node ......remove previous BR and append next content data
            * to previous content data.
            */
+
           if (iReturnedObjectIndex != 0) {
 
             /** if previous node is br */
@@ -815,11 +826,13 @@ var storyStore = (function () {
             }
 
           }
-          else if (iReturnedObjectIndex == 0) {
+          else if (iReturnedObjectIndex == 0 ) {
+
             /**
              * Paragraph Handling
              */
-            if (oCurrentDom.parentNode.className.indexOf("characterContainer") > (-1)) {
+
+            if (oCurrentDom.parentNode.className.indexOf("characterContainer") > (-1) ) {
               var pathForPara = targetPath.split("/");
               pathForPara.splice(0, 1);
               pathForPara.splice(-1, 1);
@@ -1076,14 +1089,13 @@ var storyStore = (function () {
 
         /** if Br is the only node in that charaStyle then remove that CharaStyle */
         if(aParent.length == 0){
-          _ifTheOnlyChild(currentStory, aParent, pathCharaBr);
+          _ifOnlyChild(currentStory, aParent, pathCharaBr);
+        }
+        else {
+          
         }
 
-        _triggerChange();
-        return null;
       }
-
-
 
       /** if key is pressed on the last position of the current node */
       else if (iRange.endOffset == aParent[iIndex].Content[0]["_"].length)
@@ -1091,10 +1103,11 @@ var storyStore = (function () {
 
         /** if current node has next node. (Current node will always be CONTENT and next will always be either XMLTag or Br)  */
         if (aParent[iIndex + 1]){
-
-            handleCharaOfDelete(aParent, iIndex+1);
-
-
+          //var oNode = aParent[iIndex].Content;
+          var focusID = aParent[iIndex].Content[0]["$"]["data-uid"];
+          var indexToFocus = aParent[iIndex].Content[0]["_"].length;
+          _setCaretPositionAccordingToObjectDelete(focusID, indexToFocus);
+          handleCharaOfDelete(aParent, iIndex+1);
         }
 
 
@@ -1117,6 +1130,9 @@ var storyStore = (function () {
             var charIndexXML = oParentOfXML.indexPos;
 
             if(aCustom[charIndex + 1].CharacterStyleRange){
+              var focusID2 = aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["$"]["data-uid"];
+              var indexToFocus2 = 0;
+              _setCaretPositionAccordingToObjectDelete(focusID2, indexToFocus2);
               handleCharaOfDelete(aCustom[charIndex + 1].CharacterStyleRange[0].Custom, 0, aCustom, charIndex + 1);
             }else /*if(aCustom[charIndex + 1].XMLElement)*/{
               handleCharaOfDelete(aCustom, charIndex + 1, aCustomXML, charIndexXML);
@@ -1166,16 +1182,18 @@ var storyStore = (function () {
       }
       else if (iRange.endOffset < aParent[iIndex].Content[0]["_"].length){
         var strContent = aParent[iIndex].Content[0]["_"];
-        if (strContent.length != 1) {
+        if (strContent.length > 1 || (strContent.length == 1 && aParent[iIndex-1] && aParent[iIndex-1].Br)) {
           aParent[iIndex].Content[0]["_"] = strContent.slice(0, iRange.endOffset) + strContent.slice(iRange.endOffset+1, strContent.length);
+          var focusID3 = aParent[iIndex].Content[0]['$']['data-uid'];
+          var focusOffset3 = iRange.endOffset;
+          _setCaretPositionAccordingToObjectDelete(focusID3, focusOffset3);
         } else {
-          aParent[iIndex].splice(0, 1);
+          aParent.splice(iIndex, 1);
+          _setCaretPositionDelete()
         }
       }
       _triggerChange();
     },
-
-
 
     handleOnKeyDown: function (oEvent) {
 
@@ -1295,6 +1313,7 @@ var storyStore = (function () {
     handleSpreadClicked: function(oEvent){
       console.log(window.selection);
     }
+
   };
 
   return storyStore;
