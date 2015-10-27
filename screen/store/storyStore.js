@@ -883,7 +883,7 @@ var storyStore = (function () {
                       && aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content) {
                     var iContentLength = aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"].length;
                     aCustom[charIndex - 1].CharacterStyleRange[0].Custom[last].Content[0]["_"] +=
-                        + aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+                         aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["_"];
 
                     aCustom[charIndex + 1].CharacterStyleRange[0].Custom.splice(0, 1);
 
