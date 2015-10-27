@@ -1192,8 +1192,11 @@ var storyStore = (function () {
 
         oEvent.preventDefault();
 
-        var oSel = window.getSelection();
-        var oRange = oSel.getRangeAt(0);
+        var oSelection = window.getSelection();
+        if(oSelection.rangeCount == 0 ) {
+          return;
+        }
+        var oRange = oSelection.getRangeAt(0);
         var iStartRange = 0;
 
         var oCurrentDom;
@@ -1238,18 +1241,18 @@ var storyStore = (function () {
         }
 
         else if (oEvent.keyCode == 8) { //backSpace
-          this.handleBackspacePressed(oEvent,oCurrentDom, iStartRange, sPath, oSel);
+          this.handleBackspacePressed(oEvent,oCurrentDom, iStartRange, sPath, oSelection);
         }
 
         else if (oEvent.keyCode == 46) { // Delete
-          this.handleDeletePressed(oEvent, oSel, sPath);
+          this.handleDeletePressed(oEvent, oSelection, sPath);
         }
 
         else if (oEvent.keyCode == 9) {  //Tab
-          this.handleTabPressed(oEvent, oSel, sPath);
+          this.handleTabPressed(oEvent, oSelection, sPath);
         }
         else{
-          this.handleContentTextChanged(oEvent,oSel,sPath,oCurrentDom);
+          this.handleContentTextChanged(oEvent,oSelection,sPath,oCurrentDom);
         }
         _triggerChange();
       }
