@@ -1311,7 +1311,7 @@ var storyStore = (function () {
     },
 
     handleSpreadClicked: function(oEvent){
-      console.log(window.selection);
+      console.log(window.getSelection());
     }
 
   };
