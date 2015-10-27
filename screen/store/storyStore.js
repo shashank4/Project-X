@@ -119,7 +119,7 @@ var storyStore = (function () {
         if(!iRange){
           aParent[iIndex].Content[0]["_"] = strContent.slice(1, strContent.length);
         }
-        else{
+        else if(iRange && iRange.startContainer.nodeName == "#text"){
           var focusID3 = aParent[iIndex].Content[0]['$']['data-uid'];
           var focusOffset3 = iRange.endOffset;
           _setCaretPositionAccordingToObjectDelete(focusID3, focusOffset3);
