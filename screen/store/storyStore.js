@@ -483,26 +483,27 @@ var storyStore = (function () {
     }
   };
 
-  var _setCaretPosition = function (aParent, iReturnedObjectIndex, sPath, currentStory) {
+  var _setCaretPosition = function (aParent, iReturnedObjectIndex, aPath, currentStory) {
     //Set cursor logic
     var oNodeToSetCaret = {};
     var oPreviousNode = aParent[iReturnedObjectIndex - 1];
     if (!_.isEmpty(oPreviousNode)) {
       oNodeToSetCaret = _getLastChildNode(oPreviousNode);
+      _setCaretPositionAccordingToObject(oNodeToSetCaret);
 
     } else {
-      sPath.splice(-1, 1);
-      var oSearchedObject = _searchClosestCustomOfLastInPath(currentStory, sPath);
+      aPath.splice(-1, 1);
+      var oSearchedObject = _searchClosestCustomOfLastInPath(currentStory, aPath);
       var oGrandParent = oSearchedObject.objectPos;
       var iIndex = oSearchedObject.indexPos;
       if (iIndex > 0) {
         oNodeToSetCaret = _getLastChildNode(oGrandParent[iIndex - 1]);
+        _setCaretPositionAccordingToObject(oNodeToSetCaret);
+
       } else {
-        _setCaretPosition(oGrandParent, iIndex + 1, sPath, currentStory);
+        _setCaretPosition(oGrandParent, iIndex + 1, aPath, currentStory);
       }
     }
-
-    _setCaretPositionAccordingToObject(oNodeToSetCaret);
   };
 
   var _setCaretPositionAccordingToObject = function (oNodeToSetCaret) {
@@ -972,8 +973,13 @@ var storyStore = (function () {
         else if (iStartIndex >= 1) {
           var str = oCurrentDom.firstChild.data;
           aParent[iReturnedObjectIndex].Content[0]["_"] = str.slice(0, iStartIndex - 1) + str.slice(iStartIndex);
-          oCaretPosition.focusId = aParent[iReturnedObjectIndex].Content[0]["$"]["data-uid"];
-          oCaretPosition.indexToFocus = iStartIndex - 1;
+
+          if(iStartIndex > 1) {
+            oCaretPosition.focusId = aParent[iReturnedObjectIndex].Content[0]["$"]["data-uid"];
+            oCaretPosition.indexToFocus = iStartIndex - 1;
+          } else {
+            _setCaretPosition(aParent, iReturnedObjectIndex, path, currentStory);
+          }
           _triggerChange();
           return null;
         }
@@ -1237,7 +1243,6 @@ var storyStore = (function () {
     getStyleData: function () {
       return oStyleData;
     },
-
 
     setImageData: function(json){
       oImageData = json;
