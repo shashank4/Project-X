@@ -132,8 +132,8 @@ var storyStore = (function () {
         if(aParent.length == 0 && aGrandParent){
           aGrandParent.splice(iGrandIndex,1);
           /** if prev and next charaStyle are same then append both*/
-          if(aGrandParent[iGrandIndex-1] && aGrandParent[iGrandIndex-1].CharacterStyleRange[0]['$'].AppliedCharacterStyle
-             && aGrandParent[iGrandIndex] && aGrandParent[iGrandIndex].CharacterStyleRange[0]['$'].AppliedCharacterStyle){  //NOw iGrandIndex is reduced
+          if(aGrandParent[iGrandIndex-1] && aGrandParent[iGrandIndex-1].CharacterStyleRange && aGrandParent[iGrandIndex-1].CharacterStyleRange[0]['$'].AppliedCharacterStyle
+             && aGrandParent[iGrandIndex] && aGrandParent[iGrandIndex].CharacterStyleRange && aGrandParent[iGrandIndex].CharacterStyleRange[0]['$'].AppliedCharacterStyle){  //NOw iGrandIndex is reduced
 
 
             var lastOfCustom = aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom.length;
@@ -162,7 +162,7 @@ var storyStore = (function () {
           }
         }
         else if(aParent.length != 0 && aParent[iIndex]){
-          _handleCaretIfNotOnlyChildDelete(aParent, iIndex);
+          _handleCaretIfNotOnlyChildDelete(aParent, iIndex );
         }
       }
     }
@@ -170,24 +170,41 @@ var storyStore = (function () {
     /**if next node is XMLElement.  */
     else if (aParent[iIndex].XMLElement)
     {
-      /** if first node of XMLElement is CONTENT.   */
-      if(aParent[iIndex].XMLElement[0].Custom[0].Content){
-        var str = aParent[iIndex].XMLElement[0].Custom[0].Content[0]["_"];
-        if (str.length != 1) {
-          aParent[iIndex].XMLElement[0].Custom[0].Content[0]["_"] = str.slice(1, str.length);
-        } else {
+
+      if(aParent[iIndex].XMLElement[0].Custom.length!=0){
+        /** if first node of XMLElement is CONTENT.   */
+        if(aParent[iIndex].XMLElement[0].Custom[0].Content){
+          var str = aParent[iIndex].XMLElement[0].Custom[0].Content[0]["_"];
+          if (str.length != 1) {
+            aParent[iIndex].XMLElement[0].Custom[0].Content[0]["_"] = str.slice(1, str.length);
+          } else {
+            aParent[iIndex].XMLElement[0].Custom.splice(0, 1);
+          }
+        }
+        /** if first node of XMLElement is BR.   */
+        else if (aParent[iIndex].XMLElement[0].Custom[0].Br){
           aParent[iIndex].XMLElement[0].Custom.splice(0, 1);
         }
+        /** if first node of XMLElement is CharaStyle */
+        else if(aParent[iIndex].XMLElement[0].Custom[0].CharacterStyleRange){
+          handleCharaOfDelete(aParent[iIndex].XMLElement[0].Custom[0].CharacterStyleRange[0].Custom, 0, aParent[iIndex].XMLElement[0].Custom, 0);
+        }
+      }else {
+        if(aParent[iIndex+1]){
+          handleCharaOfDelete(aParent, iIndex+1, aGrandParent, iGrandIndex );
+        }else if(! aParent[iIndex + 1] && aGrandParent[iGrandIndex+1] ){
+          handleCharaOfDelete( aGrandParent, iGrandIndex+1 );
+        }
+
       }
-      /** if first node of XMLElement is BR.   */
-      else if (aParent[iIndex].XMLElement[0].Custom[0].Br){
-        aParent[iIndex].XMLElement[0].Custom.splice(0, 1);
-      }
-      /** if first node of XMLElement is CharaStyle */
-      else if(aParent[iIndex].XMLElement[0].Custom[0].CharacterStyleRange){
-        handleCharaOfDelete(aParent[iIndex].XMLElement[0].Custom[0].CharacterStyleRange[0].Custom, 0, aParent[iIndex].XMLElement[0].Custom, 0);
-      }
+
     }
+
+    /** if next node is characterStyleRange */
+    else if(aParent[iIndex].CharacterStyleRange){
+      handleCharaOfDelete(aParent[iIndex].CharacterStyleRange[0].Custom, 0, aParent, iIndex);
+    }
+
   };
 
 
