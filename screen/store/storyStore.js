@@ -161,6 +161,9 @@ var storyStore = (function () {
             aGrandParent.splice(iGrandIndex, 1);
           }
         }
+        else if(aParent.length != 0 && aParent[iIndex]){
+          _handleCaretIfNotOnlyChildDelete(aParent, iIndex);
+        }
       }
     }
 
@@ -409,7 +412,38 @@ var storyStore = (function () {
     }
   };
 
-  var _ifOnlyChild = function(currentStory, path){
+  var _handleCaretIfNotOnlyChildDelete = function(aGrandparent, iGrandparent){
+
+    if(aGrandparent[iGrandparent].Content){
+      var focusIdContent = aGrandparent[iGrandparent].Content[0]['$']['data-uid'];
+      var focusOffset = 0;
+      _setCaretPositionAccordingToObjectDelete(focusIdContent, focusOffset);
+    }
+    else if(aGrandparent[iGrandparent].Br){
+      var focusIdBr = aGrandparent[iGrandparent].Br[0]['$']['data-uid'];
+      _setCaretPositionAccordingToObjectDelete(focusIdBr);
+    }
+    else {
+      if(aGrandparent[iGrandparent].ParagraphStyleRange){
+        var aParent1 = aGrandparent[iGrandparent].ParagraphStyleRange[0].Custom;
+        var iIndex1 = 0;
+        _handleCaretIfNotOnlyChildDelete(aParent1, iIndex1);
+      }
+      else if(aGrandparent[iGrandparent].CharacterStyleRange){
+        var aParent2 = aGrandparent[iGrandparent].CharacterStyleRange[0].Custom;
+        var iIndex2 = 0;
+        _handleCaretIfNotOnlyChildDelete(aParent2, iIndex2);
+      }
+      else if(aGrandparent[iGrandparent].XMLElement){
+        var aParent3 = aGrandparent[iGrandparent].XMLElement[0].Custom;
+        var iIndex3 = 0;
+        _handleCaretIfNotOnlyChildDelete(aParent3, iIndex3);
+      }
+    }
+
+  };
+
+  var _ifOnlyChildDelete = function(currentStory, path){
 
     path.splice(-1, 1);
 
@@ -428,9 +462,12 @@ var storyStore = (function () {
     aGrandparent.splice(iGrandparent, 1);
 
     if (aGrandparent.length == 0) {
-      _ifOnlyChild(currentStory, aGrandparent, path);
+      _ifOnlyChildDelete(currentStory, aGrandparent, path);
+    }else{
+      if(aGrandparent[iGrandparent]){
+        _handleCaretIfNotOnlyChildDelete(aGrandparent, iGrandparent);
+      }
     }
-
   };
 
   var _ifNoNextNOde = function(currentStory, pathForChara){
@@ -1345,11 +1382,37 @@ var storyStore = (function () {
 
         /** if Br is the only node in that charaStyle then remove that CharaStyle */
         if(aParent.length == 0){
-          _ifOnlyChild(currentStory, pathCharaBr);
+          _ifOnlyChildDelete(currentStory, pathCharaBr);
         }
         else {
-          var oFocus = _getFocusObject(aParent[iIndex]);
-          _setCaretPositionAccordingToObjectDelete()
+          if(aParent[iIndex]){
+            _handleCaretIfNotOnlyChildDelete(aParent, iIndex);
+          }
+          /** go one level up*/
+          else if(!aParent[iIndex]){
+            pathCharaBr.splice(-1,1);
+
+            var oRetBr = _searchClosestCustomOfLastInPath(currentStory, pathCharaBr);
+            var aRetBr = oRetBr.objectPos;
+            var iRetBr = oRetBr.indexPos;
+
+            if(aRetBr[iRetBr+1]){
+              _handleCaretIfNotOnlyChildDelete(aRetBr, iRetBr+1);
+            }
+            /** again go one level up*/
+            else{
+              pathCharaBr.splice(-1,1);
+
+              var oRetBr2 = _searchClosestCustomOfLastInPath(currentStory, pathCharaBr);
+              var aRetBr2 = oRetBr2.objectPos;
+              var iRetBr2 = oRetBr2.indexPos;
+
+              if(aRetBr2[iRetBr2+1]){
+                _handleCaretIfNotOnlyChildDelete(aRetBr2, iRetBr2+1);
+              }
+            }
+
+          }
         }
 
       }
