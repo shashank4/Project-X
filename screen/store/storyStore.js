@@ -481,6 +481,14 @@ var storyStore = (function () {
     return oDOMNode;
   };
 
+  var _getLastDeepChildNodeFromDOM = function (oDOMNode) {
+    if(oDOMNode.lastChild && oDOMNode.lastChild.nodeName != "#text"){
+      return _getLastDeepChildNodeFromDOM(oDOMNode.lastChild);
+    }
+
+    return oDOMNode;
+  };
+
   var _searchClosestCustomOfLastInPath = function (obj, remainingPath, sParentId) {
     remainingPath = _.clone(remainingPath);
     if (obj["Custom"]) {
@@ -583,13 +591,19 @@ var storyStore = (function () {
 
   };
 
-  var _getDomDataInformation = function (oDOM, bDeepDOMSearch) {
+  var _getActualDomNode = function (oDOM, bDeepDOMSearch) {
     var oEvaluatedDOM = oDOM;
     if(oDOM.nodeName == "#text") {
       oEvaluatedDOM = oDOM.parentNode;
     } else if(!(_.includes(oDOM.classList, "content") && _.includes(oDOM.classList, "br")) && bDeepDOMSearch) {
       oEvaluatedDOM = _getFirstDeepChildNodeFromDOM(oDOM);
     }
+
+    return oEvaluatedDOM;
+  };
+
+  var _getDomDataInformation = function (oDOM, bDeepDOMSearch) {
+    var oEvaluatedDOM = _getActualDomNode(oDOM, bDeepDOMSearch);
     return oEvaluatedDOM.dataset;
   };
 
@@ -610,12 +624,71 @@ var storyStore = (function () {
 
   };
 
-  var _setParagraphStyle = function (oObj, sStyleId) {
+  var _getPreviousBrNode = function (oDOMNode) {
+
+    //If Br Node return the current Node
+    if (oDOMNode.nodeName.toLowerCase() == "br" || oDOMNode.dataset.storyid) {
+      return oDOMNode;
+    }
+
+    //If Node have a previous sibling then find br in previous sibling dom
+    if(oDOMNode.previousSibling) {
+      return _getPreviousBrNode(oDOMNode.previousSibling);
+
+    } else {
+
+      //If no previous sibling found then move to parent start searching from parents previous last child node
+      var oParentNode = oDOMNode.parentNode;
+      if(oParentNode.previousSibling) {
+        return _getPreviousBrNode(_getLastDeepChildNodeFromDOM(oParentNode.previousSibling));
+      }
+
+      //If parent also dont have previous then pass it find its parent previous node
+      return _getPreviousBrNode(oParentNode);
+    }
 
   };
 
-  var _applyParagraphStyleToSelectedNode = function (sStyleId, oCurrentStoryCustom, aStartDOMPath, aEndDOMPath, bStartEditing) {
+  var _getNextBrNode = function (oDOMNode) {
+    //If Br Node return the current Node
+    if (oDOMNode.nodeName.toLowerCase() == "br" || oDOMNode.dataset.storyid) {
+      return oDOMNode;
+    }
 
+    //If Node have a next sibling then find br in next sibling dom
+    if(oDOMNode.nextSibling) {
+      return _getNextBrNode(oDOMNode.nextSibling);
+
+    } else {
+
+      //If no next sibling found then move to parent start searching from parents first last child node
+      var oParentNode = oDOMNode.parentNode;
+      if(oParentNode.nextSibling) {
+        return _getNextBrNode(_getFirstDeepChildNodeFromDOM(oParentNode.nextSibling));
+      }
+
+      //If parent also dont have next then pass it find its parent next node
+      return _getNextBrNode(oParentNode);
+    }
+  };
+
+
+  var _processParagraphStyle = function (oRange, oCurrentStory) {
+    var oStartDOM = _getDeepestDOM(oRange.startContainer, oRange.startOffset, oRange.commonAncestorContainer).currentDOM;
+    var oEndDOM = _getDeepestDOM(oRange.endContainer, oRange.endOffset, oRange.commonAncestorContainer).currentDOM;
+
+    var oPreviousBrNode = _getPreviousBrNode(oStartDOM);
+    var oNextBrNode = _getNextBrNode(oEndDOM);
+    console.log(oPreviousBrNode.dataset);
+    console.log(oNextBrNode.dataset);
+
+    //_applyParagraphStyleToSelectedNode(sStyleId, oCurrentStory, aStartDOMPath, aEndDOMPath, false);
+
+  };
+
+  var _applyParagraphStyleToSelectedNode = function (sStyleId, oCurrentStory, aStartDOMPath, aEndDOMPath, bStartEditing) {
+
+    var oCurrentStoryCustom = oCurrentStory.Custom;
     var aStartPath = _.clone(aStartDOMPath);
     var aEndPath = _.clone(aEndDOMPath);
 
@@ -659,39 +732,32 @@ var storyStore = (function () {
     aStartDOMPath.splice(0, 1);
     aEndDOMPath.splice(0, 1);
 
-    var oCurrentStoryCustom = oStoryData[aAncestorPath[0]]["idPkg:Story"]["Story"][0].Custom;
-    /*var oParentObject = {};
-    oParentObject.objectPos = oCurrentStory.Custom;
-
-    if(aAncestorPath.length > 1) {
-      aAncestorPath.splice(0,1);
-      oParentObject = _searchClosestCustomOfLastInPath(oCurrentStory, aAncestorPath);
-    }*/
+    var oCurrentStory = oStoryData[aAncestorPath[0]]["idPkg:Story"]["Story"][0];
 
     _setPathTOUpdate(aAncestorPath[0]);
 
     if(sStyleType == "Character Styles") {
-      _applyCharacterStyleToSelectedNode(sStyleId, oCurrentStoryCustom, aStartDOMPath, aEndDOMPath);
+      _applyCharacterStyleToSelectedNode(sStyleId, oCurrentStory, aStartDOMPath, aEndDOMPath);
     } else if (sStyleType == "Paragraph Styles") {
-      _applyParagraphStyleToSelectedNode(sStyleId, oCurrentStoryCustom, aStartDOMPath, aEndDOMPath, false);
+      _processParagraphStyle(oRange, oCurrentStory);
     }
   };
 
-  var _getDeepestDOM = function (oRange) {
-    var oCurrentDOM = oRange.startContainer;
+  var _getDeepestDOM = function (oDOM, iStartOffset, oAncestor) {
+    var oCurrentDOM = oDOM;
     var iStartRange = 0;
-    if(oRange.startContainer.nodeName == "#text" || _.includes(oRange.startContainer.classList, "content")) {
-      if(_.includes(oRange.startContainer.classList, "content")) {
-        oCurrentDOM = oRange.startContainer;
+    if(oDOM.nodeName == "#text" || _.includes(oDOM.classList, "content")) {
+      if(_.includes(oDOM.classList, "content")) {
+        oCurrentDOM = oDOM;
       } else {
-        oCurrentDOM = oRange.startContainer.parentNode;
+        oCurrentDOM = oDOM.parentNode;
       }
-      iStartRange = oRange.startOffset;
+      iStartRange = iStartOffset;
     } else {
-      oCurrentDOM = oRange.commonAncestorContainer.childNodes[oRange.startOffset];
+      oCurrentDOM = oAncestor.childNodes[iStartOffset];
 
       if(!oCurrentDOM) {
-        oCurrentDOM = oRange.commonAncestorContainer.lastChild;
+        oCurrentDOM = oAncestor.lastChild;
       }
 
       oCurrentDOM = _getFirstDeepChildNodeFromDOM(oCurrentDOM);
@@ -1413,7 +1479,7 @@ var storyStore = (function () {
         }
         var oRange = oSelection.getRangeAt(0);
 
-        var oRangeObject = _getDeepestDOM(oRange);
+        var oRangeObject = _getDeepestDOM(oRange.startContainer, oRange.startOffset, oRange.commonAncestorContainer);
         var oCurrentDom = oRangeObject.currentDOM;
         var iStartRange = oRangeObject.startRange;
 
