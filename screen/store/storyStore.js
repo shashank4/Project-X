@@ -765,47 +765,74 @@ var storyStore = (function () {
 
   };
 
-  var _applyParagraphStyle = function (oCurrentStory, aRemainingPath) {
-    aRemainingPath = _.clone(aRemainingPath);
+  var _createPathObject = function (aPath) {
+    var oPath = {};
+    var oTempPath = {};
+    _.forEach(aPath, function (aSinglePath) {
+      _.forEach(aSinglePath, function (sPath, iIndex) {
+        var oValue = aSinglePath[iIndex + 1] ? _.set({}, aSinglePath[iIndex + 1], {}): {}
+        var oObject = oTempPath;
+
+        if(iIndex == 0) {
+          oObject = oPath;
+        }
+
+        if(!oObject[sPath]) {
+          _.set(oObject, sPath, oValue);
+        }
+
+        oTempPath = oObject[sPath];
+      });
+    });
+    return oPath;
+  };
+
+  var _applyParagraphStyle = function (oCurrentStory, oPath) {
+
+    var aPaths = _.keys(oPath);
+
     if (oCurrentStory["Custom"]) {
       var aCustom = oCurrentStory["Custom"];
-      var oClosestCustom;
+      var aClosestCustom = [];
       _.forEach(aCustom, function (oCustom, iCustomIndex) {
         _.forEach(oCustom, function (oTagObject, sTagKey) {
           if (oTagObject[0]['$']) {
-            oTag = oTagObject[0];
+            var oTag = oTagObject[0];
             var sCustomTagUID = oTag['$'][UID_KEY];
-            if (sCustomTagUID == aRemainingPath[0]) {
-              if (aRemainingPath.length == 1) {
 
-                oClosestCustom = oCustom;
+            if (_.includes(aPaths, sCustomTagUID)) {
+
+              if(_.isEmpty(oPath[sCustomTagUID])) {
+                aClosestCustom.push(oCustom);
+
               } else {
-                aRemainingPath.splice(0, 1);
-                var oReturnedObject = _applyParagraphStyle(oTag, aRemainingPath, oTag['$'][UID_KEY]);
+                var aReturnedObject = _applyParagraphStyle(oTag, oPath[sCustomTagUID]);
 
-                if(oReturnedObject) {
+                if (aReturnedObject) {
                   if (sTagKey == "XMLElement") {
-                    oClosestCustom = _createXMLElement(oTagObject[0]['$']["Self"], oTagObject[0]['$']["MarkupTag"], oTagObject[0]['$']["XMLContent"], [oReturnedObject]);
+
+                    var oXMLElement = _createXMLElement(oTagObject[0]['$']["Self"], oTagObject[0]['$']["MarkupTag"], oTagObject[0]['$']["XMLContent"]);
+                    oXMLElement.XMLElement[0].Custom = aReturnedObject;
+                    aClosestCustom.push(oXMLElement);
+
                   } else if (sTagKey == "CharacterStyleRange") {
-                    oClosestCustom = _createCharacterStyleRange(oTagObject[0]['$']['AppliedCharacterStyle'], [oReturnedObject]);
-                  } else if("ParagraphStyleRange") {
-                    oClosestCustom = oReturnedObject;
+
+                    var oCharStyle = _createCharacterStyleRange(oTagObject[0]['$']['AppliedCharacterStyle']);
+                    oCharStyle.CharacterStyleRange[0].Custom = aReturnedObject;
+                    aClosestCustom.push(oCharStyle);
+
+                  } else if ("ParagraphStyleRange") {
+                    var oParaStyle = _createParagraphStyleRange("myStyle");
+                    oParaStyle.ParagraphStyleRange[0].Custom = aReturnedObject;
+                    aClosestCustom.push(oParaStyle);
                   }
-                } else {
-                  oClosestCustom = oReturnedObject;
                 }
-
-
               }
-              return false;
             }
           }
         });
-        if (oClosestCustom) {
-          return false;
-        }
       });
-      return oClosestCustom;
+      return aClosestCustom;
     }
   };
 
@@ -891,8 +918,10 @@ var storyStore = (function () {
 
     var oExtraInfoContainer = {};
     oExtraInfoContainer.startExtraction = false;
-    _applyParagraphStyle(oCurrentStory, aStartPath);
-    _applyParagraphStyleToSelectedNode(oCurrentStory, aStartPath, oEndDataset.uid, oExtraInfoContainer);
+
+    var oPath = _createPathObject([aStartPath, aEndPath]);
+    console.log(_applyParagraphStyle(oCurrentStory, oPath));
+    //_applyParagraphStyleToSelectedNode(oCurrentStory, aStartPath, oEndDataset.uid, oExtraInfoContainer);
 
   };
 
