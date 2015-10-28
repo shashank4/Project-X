@@ -57,7 +57,52 @@ var storyStore = (function () {
     }
   };
 
-  var createContentNode = function (sContent){
+
+  var _createXMLElement = function (sSelf, sMarkupTag, sXMLContent, aCustom) {
+    return {
+      "XMLElement": [
+        {
+          "Custom": aCustom ? aCustom : [],
+          "$": {
+            "data-uid": utils.generateUUID(),
+            "Self": sSelf,
+            "MarkupTag": sMarkupTag,
+            "XMLContent": sXMLContent
+          }
+        }
+      ]
+    };
+  };
+
+  var _createParagraphStyleRange = function (sStyleId, aCustom) {
+    return {
+      "ParagraphStyleRange": [
+        {
+          "Custom": aCustom ? aCustom : [],
+          "$": {
+            "data-uid": utils.generateUUID(),
+            "AppliedParagraphStyle": sStyleId
+          }
+        }
+      ]
+    };
+  };
+
+  var _createCharacterStyleRange = function (sStyleId, aCustom) {
+    return {
+      "CharacterStyleRange": [
+        {
+          "Custom": aCustom ? aCustom : [],
+          "$": {
+            "data-uid": utils.generateUUID(),
+            "AppliedCharacterStyle": sStyleId
+          }
+        }
+      ]
+    };
+  };
+
+  var _createContentNode = function (sContent){
     return {
       "Content": [
         {
@@ -68,7 +113,7 @@ var storyStore = (function () {
     };
   };
 
-  var createBrNode = function (){
+  var _createBrNode = function (){
     return {
       "Br": [
         {
@@ -399,7 +444,7 @@ var storyStore = (function () {
      */
     if (oCurrentDom.className.indexOf('br') > (-1)) {
       //var newUid21 = utils.generateUUID();
-      var newContentObj21 = createContentNode(pressedChar);
+      var newContentObj21 = _createContentNode(pressedChar);
       aCustom.splice(index, 0, newContentObj21);
       oCaretPosition.focusId = newContentObj21.Content[0]["$"]["data-uid"];
       oCaretPosition.indexToFocus = 1;
@@ -416,7 +461,7 @@ var storyStore = (function () {
       var newContentStringBefore = oSelection.focusNode.data.substring(0, oSelection.focusOffset) + pressedChar
           + oSelection.focusNode.data.substring(oSelection.focusOffset, oSelection.length);
       var newUid = utils.generateUUID();
-      var newContentObj = createContentNode(newContentStringBefore, newUid);
+      var newContentObj = _createContentNode(newContentStringBefore, newUid);
       oCaretPosition.focusId = newContentObj.Content[0]["$"]["data-uid"];
       oCaretPosition.indexToFocus = 1;
 
@@ -486,7 +531,7 @@ var storyStore = (function () {
         else {
           var oNewContent;
           if(pressedChar != ''){
-            oNewContent = createContentNode(pressedChar);
+            oNewContent = _createContentNode(pressedChar);
             oCaretPosition.focusId = oNewContent.Content[0]["$"]["data-uid"];
             oCustomDetails.objectPos.splice(iSelectionStartPosition, iSelectionSize, oNewContent);
           } else {
@@ -757,6 +802,71 @@ var storyStore = (function () {
 
   };
 
+
+  var _getNextSiblingAcrossParents = function (oDOM) {
+    if(_.includes(oDOM.classList, "storyContainer")) {
+      return oDOM;
+    }
+    if(oDOM.nextSibling) {
+      return oDOM.nextSibling;
+    } else {
+      var oParentNode = oDOM.parentNode;
+      if(oParentNode.nextSibling) {
+        return _getNextSiblingAcrossParents(_getFirstDeepChildNodeFromDOM(oParentNode.nextSibling));
+      }
+
+      return _getNextSiblingAcrossParents(oParentNode);
+    }
+  };
+
+  var _getPreviousSiblingAcrossParents = function (oDOM) {
+
+  };
+
+  var _applyParagraphStyle = function (oCurrentStory, aRemainingPath) {
+    aRemainingPath = _.clone(aRemainingPath);
+    if (oCurrentStory["Custom"]) {
+      var aCustom = oCurrentStory["Custom"];
+      var oClosestCustom;
+      _.forEach(aCustom, function (oCustom, iCustomIndex) {
+        _.forEach(oCustom, function (oTagObject, sTagKey) {
+          if (oTagObject[0]['$']) {
+            oTag = oTagObject[0];
+            var sCustomTagUID = oTag['$'][UID_KEY];
+            if (sCustomTagUID == aRemainingPath[0]) {
+              if (aRemainingPath.length == 1) {
+
+                oClosestCustom = oCustom;
+              } else {
+                aRemainingPath.splice(0, 1);
+                var oReturnedObject = _applyParagraphStyle(oTag, aRemainingPath, oTag['$'][UID_KEY]);
+
+                if(oReturnedObject) {
+                  if (sTagKey == "XMLElement") {
+                    oClosestCustom = _createXMLElement(oTagObject[0]['$']["Self"], oTagObject[0]['$']["MarkupTag"], oTagObject[0]['$']["XMLContent"], [oReturnedObject]);
+                  } else if (sTagKey == "CharacterStyleRange") {
+                    oClosestCustom = _createCharacterStyleRange(oTagObject[0]['$']['AppliedCharacterStyle'], [oReturnedObject]);
+                  } else if("ParagraphStyleRange") {
+                    oClosestCustom = oReturnedObject;
+                  }
+                } else {
+                  oClosestCustom = oReturnedObject;
+                }
+
+
+              }
+              return false;
+            }
+          }
+        });
+        if (oClosestCustom) {
+          return false;
+        }
+      });
+      return oClosestCustom;
+    }
+  };
+
   var _getPreviousBrNode = function (oDOMNode) {
 
     //If Br Node return the current Node
@@ -805,23 +915,99 @@ var storyStore = (function () {
     }
   };
 
-
-  var _processParagraphStyle = function (oRange, oCurrentStory) {
+  var _processApplyingParagraphStyle = function (oRange, oCurrentStory) {
     var oStartDOM = _getDeepestDOM(oRange.startContainer, oRange.startOffset, oRange.commonAncestorContainer).currentDOM;
     var oEndDOM = _getDeepestDOM(oRange.endContainer, oRange.endOffset, oRange.commonAncestorContainer).currentDOM;
 
     var oPreviousBrNode = _getPreviousBrNode(oStartDOM);
-    var oNextBrNode = _getNextBrNode(oEndDOM);
-    console.log(oPreviousBrNode.dataset);
-    console.log(oNextBrNode.dataset);
+    var oStartNode = _getNextSiblingAcrossParents(oPreviousBrNode);
+    var oEndNode = _getNextBrNode(oEndDOM);
 
-    //_applyParagraphStyleToSelectedNode(sStyleId, oCurrentStory, aStartDOMPath, aEndDOMPath, false);
+    var oStartDataset = oStartNode.dataset;
+    var oEndDataset = oEndNode.dataset;
+
+    if(oStartDataset.storyid) {
+      //Get First Paragraph
+      oStartNode = _getFirstDeepChildNodeFromDOM(oStartNode);
+      oStartDataset = oStartNode.dataset;
+    }
+
+    if(oEndDataset.storyid) {
+      //Get Last Paragraph
+      oEndNode = _getLastDeepChildNodeFromDOM(oEndNode);
+      oEndDataset = oEndNode.dataset;
+    }
+
+    var aStartPath = oStartDataset.path.split('/');
+    var aEndPath = oEndDataset.path.split('/');
+
+    aStartPath.splice(0, 1);
+    aEndPath.splice(0, 1);
+
+    aStartPath.push(oStartDataset.uid);
+    aEndPath.push(oEndDataset.uid);
+
+    var oExtraInfoContainer = {};
+    oExtraInfoContainer.startExtraction = false;
+    _applyParagraphStyle(oCurrentStory, aStartPath);
+    _applyParagraphStyleToSelectedNode(oCurrentStory, aStartPath, oEndDataset.uid, oExtraInfoContainer);
 
   };
 
-  var _applyParagraphStyleToSelectedNode = function (sStyleId, oCurrentStory, aStartDOMPath, aEndDOMPath, bStartEditing) {
+  var _applyParagraphStyleToSelectedNode = function (obj, aStartPath, sEndNode, oExtraInfoContainer) {
 
-    var oCurrentStoryCustom = oCurrentStory.Custom;
+    var aRemainingStartPath = _.clone(aStartPath);
+
+    if (obj["Custom"]) {
+      var aCustom = obj["Custom"];
+      var oClosestCustom;
+      _.forEach(aCustom, function (oCustom, iCustomIndex) {
+        _.forEach(oCustom, function (oTag, sTagKey) {
+          if (oTag[0]['$']) {
+            oTag = oTag[0];
+            var sCustomTagUID = oTag['$'][UID_KEY];
+
+            if (oExtraInfoContainer.startExtraction) {
+              //EXTRACT
+              if(!oTag.Custom) {
+                console.log(obj["$"]);
+                console.log(oTag);
+              }
+
+              //Check if leading to end path
+              if (sCustomTagUID == sEndNode) {
+                oExtraInfoContainer.startExtraction = false;
+
+                //  STOP EXTRACTION
+                return false;
+              } else {
+                _applyParagraphStyleToSelectedNode(oTag, aRemainingStartPath, sEndNode, oExtraInfoContainer);
+              }
+            }
+
+            //Check if leading to start path
+            if (sCustomTagUID == aRemainingStartPath[0]) {
+              if (aRemainingStartPath.length == 1) {
+                aRemainingStartPath.splice(0, 1);
+                console.log(obj["$"]);
+                console.log(oTag);
+                oExtraInfoContainer.startExtraction = true;
+
+                //  START EXTRACTION
+
+              } else {
+                aRemainingStartPath.splice(0, 1);
+                _applyParagraphStyleToSelectedNode(oTag, aRemainingStartPath, sEndNode, oExtraInfoContainer);
+              }
+            }
+          }
+        });
+
+      });
+    }
+
+
+    /*var oCurrentStoryCustom = oCurrentStory.Custom;
     var aStartPath = _.clone(aStartDOMPath);
     var aEndPath = _.clone(aEndDOMPath);
 
@@ -843,7 +1029,7 @@ var storyStore = (function () {
       } else if(oObject.XMLElement) {
         _applyParagraphStyleToSelectedNode(sStyleId, oObject.ParagraphStyleRange[0].Custom, aStartPath, aEndPath, bStartEditing);
       }
-    });
+    });*/
 
   };
 
@@ -872,7 +1058,7 @@ var storyStore = (function () {
     if(sStyleType == "Character Styles") {
       _applyCharacterStyleToSelectedNode(sStyleId, oCurrentStory, aStartDOMPath, aEndDOMPath);
     } else if (sStyleType == "Paragraph Styles") {
-      _processParagraphStyle(oRange, oCurrentStory);
+      _processApplyingParagraphStyle(oRange, oCurrentStory);
     }
   };
 
@@ -980,7 +1166,7 @@ var storyStore = (function () {
        * append directly
        */
       if (bFlag == true) {
-        var newBrObj5 = createBrNode();
+        var newBrObj5 = _createBrNode();
         aParent.splice(iIndex,0,newBrObj5);
         oCaretPosition.focusId = newBrObj5.Br[0]["$"]["data-uid"];
         _triggerChange();
@@ -994,7 +1180,7 @@ var storyStore = (function () {
          * if offset is 0 and first node of character style or xmlElement
          */
         if (iIndex == 0 && iStartRange == 0 ) {
-          var newBrObj6 = createBrNode();
+          var newBrObj6 = _createBrNode();
           aParent.splice(iIndex, 0, newBrObj6);
           oCaretPosition.focusId = newBrObj6.Br[0]["$"]["data-uid"];
           _triggerChange();
@@ -1006,7 +1192,7 @@ var storyStore = (function () {
         else {
           var rest = aParent.splice(iIndex + 1);
           aParent.splice(iIndex, 1);
-          var newBrObj = createBrNode();
+          var newBrObj = _createBrNode();
 
 
           if (aContentData == "" || aContentData == null ||
@@ -1018,7 +1204,7 @@ var storyStore = (function () {
             return;
           } else if (iStartRange != 0) {
             var newContentStringBefore = aContentData.substring(0, iStartRange);
-            var newContentObjBefore = createContentNode(newContentStringBefore);
+            var newContentObjBefore = _createContentNode(newContentStringBefore);
             aParent.push(newContentObjBefore);
           }
 
@@ -1032,7 +1218,7 @@ var storyStore = (function () {
           //if (iOffset < aContentData.length) {
             //var newUid3 = utils.generateUUID();
           var newContentStringAfter = aContentData.substring(iStartRange, aContentData.length);
-          var newContentObjAfter = createContentNode(newContentStringAfter);
+          var newContentObjAfter = _createContentNode(newContentStringAfter);
           _setCaretPositionAccordingToObject(newContentObjAfter, 0);
           aParent.push(newContentObjAfter);
           //}
@@ -1440,7 +1626,7 @@ var storyStore = (function () {
         } else {
 
           oReturnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
-          var newContentObj2 = createContentNode(tenSpaces);
+          var newContentObj2 = _createContentNode(tenSpaces);
           oCaretPosition.focusId = newContentObj2.Content[0]["$"]["data-uid"];
           oCaretPosition.indexToFocus = 10;
           if(!_.isEmpty(oReturnedObject)) {
