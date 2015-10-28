@@ -169,6 +169,11 @@ var storyStore = (function () {
               _setCaretPositionAccordingToObjectDelete(focusID4, focusOffset4);
               aGrandParent.splice(iGrandIndex, 1);
             }
+            else{
+              if(aGrandParent[iGrandIndex]){
+                _handleCaretIfNotOnlyChildDelete(aGrandParent, iGrandIndex);
+              }
+            }
           }else if(aGrandParent[iGrandIndex].XMLElement){
 
             if(aGrandParent[iGrandIndex+1]){
