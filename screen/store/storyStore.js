@@ -95,6 +95,14 @@ var storyStore = (function () {
       if (aParent[iIndex-1] && aParent[iIndex + 1] && aParent[iIndex + 1].Content){
         var tempStr = "";
 
+        /** handle caret for Br* ....special case*/
+        if(aParent[iIndex-1].Content){
+          var focusID5 = aParent[iIndex-1].Content[0]['$']['data-uid'];
+          var focusOffset5 = aParent[iIndex-1].Content[0]['_'].length;
+          _setCaretPositionAccordingToObjectDelete(focusID5, focusOffset5);
+          //return ;
+        }
+
         /** to handle empty ContentNode*/
         if(aParent[iIndex + 1].Content[0]["_"].length == 0){
           if(aParent[iIndex + 2] && aParent[iIndex + 2].Content){
@@ -127,39 +135,47 @@ var storyStore = (function () {
         }
 
       } else {
+
         aParent.splice(iIndex, 1);
 
         if(aParent.length == 0 && aGrandParent){
-          aGrandParent.splice(iGrandIndex,1);
-          /** if prev and next charaStyle are same then append both*/
-          if(aGrandParent[iGrandIndex-1] && aGrandParent[iGrandIndex-1].CharacterStyleRange && aGrandParent[iGrandIndex-1].CharacterStyleRange[0]['$'].AppliedCharacterStyle
-             && aGrandParent[iGrandIndex] && aGrandParent[iGrandIndex].CharacterStyleRange && aGrandParent[iGrandIndex].CharacterStyleRange[0]['$'].AppliedCharacterStyle){  //NOw iGrandIndex is reduced
+
+          if(!aGrandParent[iGrandIndex].XMLElement){
+            aGrandParent.splice(iGrandIndex,1);
+            /** if prev and next charaStyle are same then append both*/
+            if(aGrandParent[iGrandIndex-1] && aGrandParent[iGrandIndex-1].CharacterStyleRange && aGrandParent[iGrandIndex-1].CharacterStyleRange[0]['$'].AppliedCharacterStyle
+                && aGrandParent[iGrandIndex] && aGrandParent[iGrandIndex].CharacterStyleRange && aGrandParent[iGrandIndex].CharacterStyleRange[0]['$'].AppliedCharacterStyle){  //NOw iGrandIndex is reduced
 
 
-            var lastOfCustom = aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom.length;
-            var preContentStr = aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom[lastOfCustom-1].Content[0]['_'];
+              var lastOfCustom = aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom.length;
+              var preContentStr = aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom[lastOfCustom-1].Content[0]['_'];
 
-            var focusID4 = aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom[lastOfCustom-1].Content[0]['$']['data-uid'];
-            var focusOffset4 = preContentStr.length;
-
-
+              var focusID4 = aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom[lastOfCustom-1].Content[0]['$']['data-uid'];
+              var focusOffset4 = preContentStr.length;
 
 
-            if(aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom[lastOfCustom-1].Content
-              && aGrandParent[iGrandIndex].CharacterStyleRange[0].Custom[0].Content){
-              var postContentStr = aGrandParent[iGrandIndex].CharacterStyleRange[0].Custom[0].Content[0]['_'];
-              aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom[lastOfCustom-1].Content[0]['_'] = preContentStr + postContentStr;
+              if(aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom[lastOfCustom-1].Content
+                  && aGrandParent[iGrandIndex].CharacterStyleRange[0].Custom[0].Content){
+                var postContentStr = aGrandParent[iGrandIndex].CharacterStyleRange[0].Custom[0].Content[0]['_'];
+                aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom[lastOfCustom-1].Content[0]['_'] = preContentStr + postContentStr;
 
-              aGrandParent[iGrandIndex].CharacterStyleRange[0].Custom.splice(0,1);
-              _.assign(aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom, aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom.concat(aGrandParent[iGrandIndex].CharacterStyleRange[0].Custom));
+                aGrandParent[iGrandIndex].CharacterStyleRange[0].Custom.splice(0,1);
+                _.assign(aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom, aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom.concat(aGrandParent[iGrandIndex].CharacterStyleRange[0].Custom));
+              }
+              else{
+                _.assign(aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom, aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom.concat(aGrandParent[iGrandIndex].CharacterStyleRange[0].Custom));
+              }
+
+              _setCaretPositionAccordingToObjectDelete(focusID4, focusOffset4);
+              aGrandParent.splice(iGrandIndex, 1);
             }
-            else{
-              _.assign(aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom, aGrandParent[iGrandIndex-1].CharacterStyleRange[0].Custom.concat(aGrandParent[iGrandIndex].CharacterStyleRange[0].Custom));
-            }
+          }else if(aGrandParent[iGrandIndex].XMLElement){
 
-            _setCaretPositionAccordingToObjectDelete(focusID4, focusOffset4);
-            aGrandParent.splice(iGrandIndex, 1);
+            if(aGrandParent[iGrandIndex+1]){
+              _handleCaretIfNotOnlyChildDelete(aGrandParent, iGrandIndex+1);
+            }
           }
+
         }
         else if(aParent.length != 0 && aParent[iIndex]){
           _handleCaretIfNotOnlyChildDelete(aParent, iIndex );
