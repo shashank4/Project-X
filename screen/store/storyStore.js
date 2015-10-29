@@ -1023,6 +1023,14 @@ var storyStore = (function () {
     var oStartNode = _getNextSiblingAcrossParents(oPreviousBrNode);
     var oEndNode = _getNextBrNode(oEndDOM);
 
+    if(oStartDOM.nodeName.toLowerCase() == "br") {
+      oStartNode = oStartDOM;
+    }
+
+    if(oEndDOM.nodeName.toLowerCase() == "br") {
+      oEndNode = oEndDOM;
+    }
+
     var oStartDataset = oStartNode.dataset;
     var oEndDataset = oEndNode.dataset;
 
