@@ -847,7 +847,8 @@ var storyStore = (function () {
     if (oCurrentStory["Custom"]) {
       var aCustom = oCurrentStory["Custom"];
       var aClosestCustom = [];
-      _.forEach(aCustom, function (oCustom, iCustomIndex) {
+      for(var iCustomIndex = 0; iCustomIndex < aCustom.length; iCustomIndex++) {
+        var oCustom = aCustom[iCustomIndex];
         _.forEach(oCustom, function (oTagObject, sTagKey) {
           if (oTagObject[0]['$']) {
             var oTag = oTagObject[0];
@@ -855,7 +856,7 @@ var storyStore = (function () {
 
             if (_.includes(aPaths, sCustomTagUID)) {
 
-              if(_.isEmpty(oPath[sCustomTagUID])) {
+              if (_.isEmpty(oPath[sCustomTagUID])) {
                 aClosestCustom.push(oCustom);
 
               } else {
@@ -877,6 +878,25 @@ var storyStore = (function () {
                   } else if ("ParagraphStyleRange") {
                     var oParaStyle = _createParagraphStyleRange(sStyleId);
                     oParaStyle.ParagraphStyleRange[0].Custom = aReturnedObject;
+
+                    var aNextChildCustom = aCustom[iCustomIndex].ParagraphStyleRange[0]["Custom"];
+                    var oFirstObject = {};
+                    if(aNextChildCustom[0].CharacterStyleRange) {
+                      oFirstObject = aNextChildCustom[0].CharacterStyleRange[0];
+                    } else if(aNextChildCustom[0].XMLElement) {
+                      oFirstObject = aNextChildCustom[0].XMLElement[0];
+                    }
+
+                    var aPost = [];
+                    //If first element is there in path then put new para before it
+                    if(_.includes(_.keys(oPath[sCustomTagUID]), oFirstObject["$"]["data-uid"])) {
+                      aPost = aCustom.splice(iCustomIndex);
+                    } else {
+                      aPost = aCustom.splice(iCustomIndex + 1);
+                    }
+                    aCustom.push(oParaStyle);
+                    _.assign(aCustom, aCustom.concat(aPost));
+                    iCustomIndex++;
                     aClosestCustom.push(oParaStyle);
                   }
                 }
@@ -884,7 +904,7 @@ var storyStore = (function () {
             }
           }
         });
-      });
+      }
       return aClosestCustom;
     }
   };
@@ -966,31 +986,28 @@ var storyStore = (function () {
     if (oCurrentStory["Custom"]) {
       var aCustom = oCurrentStory["Custom"];
       var aClosestCustom = [];
-      _.forEach(aCustom, function (oCustom, iCustomIndex) {
+      for (var iCustomIndex = 0; iCustomIndex < aCustom.length; iCustomIndex++) {
+        var oCustom = aCustom[iCustomIndex];
         _.forEach(oCustom, function (oTagObject, sTagKey) {
           if (oTagObject[0]['$']) {
             var oTag = oTagObject[0];
             var sCustomTagUID = oTag['$'][UID_KEY];
-
             if (_.includes(aPaths, sCustomTagUID)) {
-              if(_.isEmpty(oPath[sCustomTagUID])) {
+              if (_.isEmpty(oPath[sCustomTagUID])) {
                 aCustom.splice(iCustomIndex, 1);
-                if(aCustom.length == 0) {
-                  bIsContainerEmpty = false;
-                  return false;
-                }
+                iCustomIndex--;
               } else {
-                var bContainerEmpty =_deleteNodesAccordingToPath(oTag, oPath[sCustomTagUID]);
-                if(bContainerEmpty) {
+                _deleteNodesAccordingToPath(oTag, oPath[sCustomTagUID]);
+                if(_.isEmpty(oTag.Custom)) {
                   aCustom.splice(iCustomIndex, 1);
+                  iCustomIndex--;
                 }
               }
             }
           }
         });
-      });
+      }
     }
-    return bIsContainerEmpty;
   };
 
   var _processApplyingParagraphStyle = function (oRange, oCurrentStory, sStyleId) {
@@ -1000,6 +1017,14 @@ var storyStore = (function () {
     var oPreviousBrNode = _getPreviousBrNode(oStartDOM);
     var oStartNode = _getNextSiblingAcrossParents(oPreviousBrNode);
     var oEndNode = _getNextBrNode(oEndDOM);
+
+    if(oStartDOM.nodeName.toLowerCase() == "br") {
+      oStartNode = oStartDOM;
+    }
+
+    if(oEndDOM.nodeName.toLowerCase() == "br") {
+      oEndNode = oEndDOM;
+    }
 
     var oStartDataset = oStartNode.dataset;
     var oEndDataset = oEndNode.dataset;
@@ -1018,23 +1043,37 @@ var storyStore = (function () {
     var aPaths = _createPathForRange(oStartNode, oEndNode);
     var oPath = _createPathObject(aPaths);
 
-    var sStartingParagraph = _.keys(oPath)[0];
+    var sStartingParagraph = _.keys(oPath);
     var iIndexToInsert = 0;
     _.forEach(oCurrentStory.Custom, function (oObject, iIndex) {
       if(oObject.ParagraphStyleRange) {
-        if(oObject.ParagraphStyleRange[0]["$"]["data-uid"] == sStartingParagraph) {
+        if(_.includes(oObject.ParagraphStyleRange[0]["$"]["data-uid"], sStartingParagraph)) {
           iIndexToInsert = iIndex;
           return false;
         }
       }
     });
 
-    var aParagraphStyles = _.cloneDeep(_applyParagraphStyle(oCurrentStory, oPath, sStyleId));
+    _applyParagraphStyle(oCurrentStory, oPath, sStyleId);
     _deleteNodesAccordingToPath(oCurrentStory, oPath);
 
-    var aPostParagraphs = oCurrentStory.Custom.splice(iIndexToInsert + 1);
+    /*var bStillExist = false;
+    _.forEach(oCurrentStory.Custom, function (oObject, iIndex) {
+      if(oObject.ParagraphStyleRange) {
+        if(_.includes(oObject.ParagraphStyleRange[0]["$"]["data-uid"], sStartingParagraph)) {
+          bStillExist = true;
+          return false;
+        }
+      }
+    });
+
+    *//*if(bStillExist) {
+      iIndexToInsert += 1;
+    }*//*
+
+    var aPostParagraphs = oCurrentStory.Custom.splice(iIndexToInsert);
     oCurrentStory.Custom = oCurrentStory.Custom.concat(aParagraphStyles);
-    oCurrentStory.Custom = oCurrentStory.Custom.concat(aPostParagraphs);
+    oCurrentStory.Custom = oCurrentStory.Custom.concat(aPostParagraphs);*/
 
   };
 
