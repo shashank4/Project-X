@@ -812,7 +812,7 @@ var storyStore = (function () {
     } else {
       var oParentNode = oDOM.parentNode;
       if(oParentNode.nextSibling) {
-        return _getNextSiblingAcrossParents(_getFirstDeepChildNodeFromDOM(oParentNode.nextSibling));
+        return _getFirstDeepChildNodeFromDOM(oParentNode.nextSibling);
       }
 
       return _getNextSiblingAcrossParents(oParentNode);
@@ -942,6 +942,54 @@ var storyStore = (function () {
     }
   };
 
+  var _getPathOfFirstChildSibling = function (oStartNode, aClonedStartPath) {
+    if(oStartNode.dataset.path) {
+    }
+  };
+
+  var _createPathForRange = function (oStartNode, oEndNode) {
+    var aPaths = [];
+
+    while (oStartNode != oEndNode) {
+      aPaths.push(oStartNode.dataset.path + "/" + oStartNode.dataset.uid);
+      oStartNode = _getNextSiblingAcrossParents(oStartNode);
+    }
+    aPaths.push(oEndNode.dataset.path + "/" + oEndNode.dataset.uid);
+
+    _.forEach(aPaths, function (sPath, iIndex) {
+      var aPathWithoutStory = sPath.split('/');
+      aPathWithoutStory.splice(0, 1);
+      aPaths[iIndex] = aPathWithoutStory;
+    });
+
+    return aPaths;
+  };
+
+  var _deleteNodesAccordingToPath = function (oCurrentStory, oPath) {
+    var aPaths = _.keys(oPath);
+
+    if (oCurrentStory["Custom"]) {
+      var aCustom = oCurrentStory["Custom"];
+      var aClosestCustom = [];
+      _.forEach(aCustom, function (oCustom, iCustomIndex) {
+        _.forEach(oCustom, function (oTagObject, sTagKey) {
+          if (oTagObject[0]['$']) {
+            var oTag = oTagObject[0];
+            var sCustomTagUID = oTag['$'][UID_KEY];
+
+            if (_.includes(aPaths, sCustomTagUID)) {
+              if(_.isEmpty(oPath[sCustomTagUID])) {
+                aCustom.splice(iCustomIndex, 1);
+              } else {
+                _deleteNodesAccordingToPath(oTag, oPath[sCustomTagUID]);
+              }
+            }
+          }
+        });
+      });
+    }
+  };
+
   var _processApplyingParagraphStyle = function (oRange, oCurrentStory) {
     var oStartDOM = _getDeepestDOM(oRange.startContainer, oRange.startOffset, oRange.commonAncestorContainer).currentDOM;
     var oEndDOM = _getDeepestDOM(oRange.endContainer, oRange.endOffset, oRange.commonAncestorContainer).currentDOM;
@@ -965,20 +1013,11 @@ var storyStore = (function () {
       oEndDataset = oEndNode.dataset;
     }
 
-    var aStartPath = oStartDataset.path.split('/');
-    var aEndPath = oEndDataset.path.split('/');
-
-    aStartPath.splice(0, 1);
-    aEndPath.splice(0, 1);
-
-    aStartPath.push(oStartDataset.uid);
-    aEndPath.push(oEndDataset.uid);
-
-    var oExtraInfoContainer = {};
-    oExtraInfoContainer.startExtraction = false;
-
-    var oPath = _createPathObject([aStartPath, aEndPath]);
-    console.log(_applyParagraphStyle(oCurrentStory, oPath));
+    var aPaths = _createPathForRange(oStartNode, oEndNode);
+    var oPath = _createPathObject(aPaths);
+    var aParagraphStyles = _applyParagraphStyle(oCurrentStory, oPath);
+    _deleteNodesAccordingToPath(oCurrentStory, oPath);
+    console.log(oCurrentStory);
     //_applyParagraphStyleToSelectedNode(oCurrentStory, aStartPath, oEndDataset.uid, oExtraInfoContainer);
 
   };
