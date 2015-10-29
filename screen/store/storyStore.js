@@ -987,10 +987,8 @@ var storyStore = (function () {
 
   var _deleteNodesAccordingToPath = function (oCurrentStory, oPath) {
     var aPaths = _.keys(oPath);
-    var bIsContainerEmpty = false;
     if (oCurrentStory["Custom"]) {
       var aCustom = oCurrentStory["Custom"];
-      var aClosestCustom = [];
       for (var iCustomIndex = 0; iCustomIndex < aCustom.length; iCustomIndex++) {
         var oCustom = aCustom[iCustomIndex];
         _.forEach(oCustom, function (oTagObject, sTagKey) {
