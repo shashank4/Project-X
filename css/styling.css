@@ -68,7 +68,7 @@ span{
     border: solid;
     border-width: 1px;
     border-color: rgba(79, 153, 255, 1);
-
+    overflow: auto;
 }
 
 .innerpage {
