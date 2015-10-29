@@ -845,7 +845,7 @@ var storyStore = (function () {
     return oPath;
   };
 
-  var _applyParagraphStyle = function (oCurrentStory, oPath) {
+  var _applyParagraphStyle = function (oCurrentStory, oPath, sStyleId) {
 
     var aPaths = _.keys(oPath);
 
@@ -864,7 +864,7 @@ var storyStore = (function () {
                 aClosestCustom.push(oCustom);
 
               } else {
-                var aReturnedObject = _applyParagraphStyle(oTag, oPath[sCustomTagUID]);
+                var aReturnedObject = _applyParagraphStyle(oTag, oPath[sCustomTagUID], sStyleId);
 
                 if (aReturnedObject) {
                   if (sTagKey == "XMLElement") {
@@ -880,7 +880,7 @@ var storyStore = (function () {
                     aClosestCustom.push(oCharStyle);
 
                   } else if ("ParagraphStyleRange") {
-                    var oParaStyle = _createParagraphStyleRange("myStyle");
+                    var oParaStyle = _createParagraphStyleRange(sStyleId);
                     oParaStyle.ParagraphStyleRange[0].Custom = aReturnedObject;
                     aClosestCustom.push(oParaStyle);
                   }
@@ -967,7 +967,7 @@ var storyStore = (function () {
 
   var _deleteNodesAccordingToPath = function (oCurrentStory, oPath) {
     var aPaths = _.keys(oPath);
-
+    var bIsContainerEmpty = false;
     if (oCurrentStory["Custom"]) {
       var aCustom = oCurrentStory["Custom"];
       var aClosestCustom = [];
@@ -980,17 +980,25 @@ var storyStore = (function () {
             if (_.includes(aPaths, sCustomTagUID)) {
               if(_.isEmpty(oPath[sCustomTagUID])) {
                 aCustom.splice(iCustomIndex, 1);
+                if(aCustom.length == 0) {
+                  bIsContainerEmpty = false;
+                  return false;
+                }
               } else {
-                _deleteNodesAccordingToPath(oTag, oPath[sCustomTagUID]);
+                var bContainerEmpty =_deleteNodesAccordingToPath(oTag, oPath[sCustomTagUID]);
+                if(bContainerEmpty) {
+                  aCustom.splice(iCustomIndex, 1);
+                }
               }
             }
           }
         });
       });
     }
+    return bIsContainerEmpty;
   };
 
-  var _processApplyingParagraphStyle = function (oRange, oCurrentStory) {
+  var _processApplyingParagraphStyle = function (oRange, oCurrentStory, sStyleId) {
     var oStartDOM = _getDeepestDOM(oRange.startContainer, oRange.startOffset, oRange.commonAncestorContainer).currentDOM;
     var oEndDOM = _getDeepestDOM(oRange.endContainer, oRange.endOffset, oRange.commonAncestorContainer).currentDOM;
 
@@ -1012,12 +1020,27 @@ var storyStore = (function () {
       oEndNode = _getLastDeepChildNodeFromDOM(oEndNode);
       oEndDataset = oEndNode.dataset;
     }
-
     var aPaths = _createPathForRange(oStartNode, oEndNode);
     var oPath = _createPathObject(aPaths);
-    var aParagraphStyles = _applyParagraphStyle(oCurrentStory, oPath);
+
+    var sStartingParagraph = _.keys(oPath)[0];
+    var iIndexToInsert = 0;
+    _.forEach(oCurrentStory.Custom, function (oObject, iIndex) {
+      if(oObject.ParagraphStyleRange) {
+        if(oObject.ParagraphStyleRange[0]["$"]["data-uid"] == sStartingParagraph) {
+          iIndexToInsert = iIndex;
+          return false;
+        }
+      }
+    });
+
+    var aParagraphStyles = _.cloneDeep(_applyParagraphStyle(oCurrentStory, oPath, sStyleId));
     _deleteNodesAccordingToPath(oCurrentStory, oPath);
-    console.log(oCurrentStory);
+
+    var aPostParagraphs = oCurrentStory.Custom.splice(iIndexToInsert + 1);
+    oCurrentStory.Custom = oCurrentStory.Custom.concat(aParagraphStyles);
+    oCurrentStory.Custom = oCurrentStory.Custom.concat(aPostParagraphs);
+
     //_applyParagraphStyleToSelectedNode(oCurrentStory, aStartPath, oEndDataset.uid, oExtraInfoContainer);
 
   };
@@ -1126,7 +1149,7 @@ var storyStore = (function () {
     if(sStyleType == "Character Styles") {
       _applyCharacterStyleToSelectedNode(sStyleId, oCurrentStory, aStartDOMPath, aEndDOMPath);
     } else if (sStyleType == "Paragraph Styles") {
-      _processApplyingParagraphStyle(oRange, oCurrentStory);
+      _processApplyingParagraphStyle(oRange, oCurrentStory, sStyleId);
     }
   };
 
