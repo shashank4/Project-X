@@ -12,7 +12,8 @@ var Events = {
   BACKSPACE_KEY_PRESSED: "backspace_key_pressed",
   DELETE_KEY_PRESSED: "delete_key_pressed",
   TAB_KEY_PRESSED: "tab_key_pressed",
-  ON_KEY_DOWN: "on_key_down"
+  ON_KEY_DOWN: "on_key_down",
+  SHOW_STYLE: "show_style"
 };
 
 
@@ -147,6 +148,10 @@ var Story = React.createClass({
     }
   },
 
+  handleKeyUp: function (oEvent) {
+    EventDispatcher.dispatch(Events.SHOW_STYLE);
+  },
+
   handleKeyDown: function (oEvent) {
     /*if (oEvent.keyCode == 13) {
      this.handleEnterKeyPress(oEvent);
@@ -212,7 +217,6 @@ var Story = React.createClass({
 
     var DOM = this.refs.storyContainer.getDOMNode();
     DOM.focus();
-
   },
 
   shouldComponentUpdate: function (nextProps, nextState) {
@@ -228,7 +232,8 @@ var Story = React.createClass({
              ref="storyContainer"
              data-storyid={sStoryId}
              contentEditable={true}
-             onKeyDown={this.handleKeyDown}>
+             onKeyDown={this.handleKeyDown}
+             onKeyUp={this.handleKeyUp}>
           {wrapperArray}
         </div>
     );

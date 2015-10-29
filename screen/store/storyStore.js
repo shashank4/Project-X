@@ -18,6 +18,9 @@ var storyStore = (function () {
   var oImageData = {};
 
   var sPathToUpdate = "";
+
+  var oActiveStyle = {};
+
   var oCaretPosition = {
     focusId: '',
     indexToFocus: 0
@@ -1136,6 +1139,80 @@ var storyStore = (function () {
     }
   };
 
+  var _getClosestParentNodeWithClass = function (oDomNode, sClassName) {
+    if(_.includes(oDomNode.classList, sClassName)) {
+      return oDomNode;
+    } else {
+      if(oDomNode.nodeName == "body") {
+        return null;
+      }
+      return _getClosestParentNodeWithClass(oDomNode.parentNode, sClassName);
+    }
+  };
+
+  var _highlightStylesInList = function () {
+
+    var sCharacterStyle = oActiveStyle.characterStyle;
+    var sParagraphStyle = oActiveStyle.paragraphStyle;
+
+    if(sCharacterStyle.trim() == "") {
+      sCharacterStyle = "CharacterStyle/$ID/[No character style]";
+    } else {
+      sCharacterStyle = "CharacterStyle/" + sCharacterStyle.split("-").join(" ");
+    }
+
+    if(sParagraphStyle.trim() == "") {
+      sParagraphStyle = "ParagraphStyle/$ID/[No paragraph style]";
+    } else if(sParagraphStyle == "Basic-Paragraph") {
+      sParagraphStyle = "ParagraphStyle/$ID/NormalParagraphStyle";
+    } else {
+      sParagraphStyle = "ParagraphStyle/" + sParagraphStyle.split("-").join(" ");
+    }
+
+    _.forEach(oStyleData["Character Styles"], function (oStyle, iIndex) {
+      oStyle.isSelected = oStyle.id == sCharacterStyle;
+    });
+
+    _.forEach(oStyleData["Paragraph Styles"], function (oStyle, iIndex) {
+      oStyle.isSelected = oStyle.id == sParagraphStyle;
+    });
+  };
+
+  var _highlightActiveStyles = function () {
+    var oSelection = window.getSelection();
+    _setPathTOUpdate("");
+
+    if(oSelection.rangeCount) {
+      //Check if the selection in editable story only
+      var oRange = oSelection.getRangeAt(0);
+      var sDataUID = oRange.startContainer.parentNode.getAttribute("data-uid");
+
+      if(sDataUID) {
+        var aClassList = "";
+
+        var oCharNode = _getClosestParentNodeWithClass(oRange.startContainer, "characterContainer");
+        var sCharacterStyle = "";
+        if(oCharNode) {
+          aClassList = oCharNode.className.split(' ');
+          sCharacterStyle = aClassList[aClassList.length - 1];
+          oActiveStyle.characterStyle = sCharacterStyle;
+        }
+
+        var oParagraphNode = _getClosestParentNodeWithClass(oRange.startContainer, "paragraphContainer");
+        var sParagraphStyle = "";
+        if(oParagraphNode) {
+          aClassList = oParagraphNode.className.split(' ');
+          sParagraphStyle = aClassList[aClassList.length - 1];
+          oActiveStyle.paragraphStyle = sParagraphStyle;
+        }
+        _highlightStylesInList();
+      }
+    }
+
+    _triggerChange();
+
+  };
+
   var storyStore =  {
 
     setStoreData: function (data1) {
@@ -1939,8 +2016,8 @@ var storyStore = (function () {
       _triggerChange();
     },
 
-    handleSpreadClicked: function(oEvent){
-      console.log(window.getSelection());
+    handleSpreadClicked: function(){
+      _highlightActiveStyles();
     }
 
   };
