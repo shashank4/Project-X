@@ -642,7 +642,7 @@ var storyStore = (function () {
     }
   };
 
-  var _getLastChildNode = function (oNode) {
+  var _getLastChildNode = function (oNode, flag) {
     var oCustomLength = 0;
     if(oNode.ParagraphStyleRange) {
       oCustomLength = oNode.ParagraphStyleRange[0].Custom.length;
@@ -656,7 +656,9 @@ var storyStore = (function () {
       oCustomLength = oNode.XMLElement[0].Custom.length;
       return _getLastChildNode(oNode.XMLElement[0].Custom[oCustomLength-1]);
 
-    } else if (oNode.Content || oNode.Br) {
+    } else if ((oNode.Content || oNode.Br) && !flag) {
+      return oNode;
+    } else if (oNode.Br && flag) {
       return oNode;
     }
   };
@@ -745,7 +747,12 @@ var storyStore = (function () {
         }
       } else if(oNodeToSetCaret.Br){
         oCaretPosition.focusId = oNodeToSetCaret.Br[0]["$"]["data-uid"];
+      }else {
+        var flag = 1;
+        var oLastNode = _getLastChildNode(oNodeToSetCaret, flag);
+        _setCaretPositionAccordingToObject(oLastNode);
       }
+
     }
   };
 
@@ -1238,6 +1245,44 @@ var storyStore = (function () {
     }
   };
 
+  var _getLastChildNodeParent = function(oNode){
+    var oCustomLength = 0;
+    var oTemp;
+    if(oNode.ParagraphStyleRange) {
+      oCustomLength = oNode.ParagraphStyleRange[0].Custom.length;
+      return _getLastChildNodeParent(oNode.ParagraphStyleRange[0].Custom[oCustomLength-1]);
+
+    } else if(oNode.CharacterStyleRange) {
+      oCustomLength = oNode.CharacterStyleRange[0].Custom.length;
+      oTemp = oNode.CharacterStyleRange[0].Custom[oCustomLength-1];
+      if(oTemp.Content || oTemp.Br){
+        return {
+          array: oNode.CharacterStyleRange[0].Custom,
+          index: oCustomLength-1
+        }
+      }
+      else{
+        return _getLastChildNodeParent(oNode.CharacterStyleRange[0].Custom[oCustomLength-1]);
+      }
+
+
+    } else if(oNode.XMLElement) {
+      oCustomLength = oNode.XMLElement[0].Custom.length;
+      oTemp = oNode.XMLElement[0].Custom[oCustomLength-1];
+
+      if(oTemp.Content || oTemp.Br){
+        return {
+          array: oNode.XMLElement[0].Custom,
+          index: oCustomLength-1
+        }
+      }
+      else{
+        return _getLastChildNodeParent(oNode.XMLElement[0].Custom[oCustomLength-1]);
+      }
+    }
+  };
+
+
   var storyStore =  {
 
     setStoreData: function (data1) {
@@ -1405,9 +1450,34 @@ var storyStore = (function () {
 
         /**if current node is Br.*/
         if (aParent[iParent].Br) {
-          if (aParent[iParent - 1]) {
-            aParent.splice(iParent, 1);
-            _setCaretPositionAccordingToObject(aParent[iParent - 1]);
+          if (aParent[iParent - 1] ) {
+
+            if(aParent[iParent - 1].Br){
+              aParent.splice(iParent, 1);
+
+              if(aParent[iParent-2] && aParent[iParent-2].Content){
+                oCaretPosition.focusId = aParent[iParent-2].Content[0]['$']['data-uid'];
+                oCaretPosition.indexToFocus = aParent[iParent-2].Content[0]['_'].length;
+                //_setCaretPositionAccordingToObject(aParent[iParent - 2]);
+              }else {
+                _setCaretPositionAccordingToObject(aParent[iParent - 1]);
+              }
+
+            }else if(aParent[iParent - 1].XMLElement){
+
+              var oLastOfXML = _getLastChildNodeParent(aParent[iParent - 1]);
+              var aLastOfXML = oLastOfXML.array;
+              var iLastofXML = oLastOfXML.index;
+
+              if(aLastOfXML[iLastofXML-1].Content){
+                _setCaretPositionAccordingToObject(aLastOfXML[iLastofXML-1]);
+                aLastOfXML.splice(aLastOfXML, 1);
+              }else{
+                console.log("Agar tune yeh bug solve kiya tohi manunga tuze");
+              }
+
+            }
+
           }
 
           /** go to check current nodes prev charaStyle. */
@@ -1647,7 +1717,6 @@ var storyStore = (function () {
                   else if (iGrandIndex == (aGrandParent.length - 1) || iGrandIndex == 0) {
                     _setCaretPosition(aGrandParent, iGrandIndex, pathForChara, currentStory);
                     aGrandParent.splice(iGrandIndex, 1);
-                    //_triggerChange();
                   }
                 }
                 /**
@@ -1711,9 +1780,9 @@ var storyStore = (function () {
             oCaretPosition.indexToFocus = iStartIndex - 1;
 
           }
-          _triggerChange();
-
         }
+
+        _triggerChange();
 
       } else {
         handleContentTextChangedForRangeSelection(oSelection, targetPath, "");
