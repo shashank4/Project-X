@@ -39,8 +39,8 @@ var storyAction = (function () {
     storyStore.handleListItemClicked(sStyleType, oEvent);
   };
 
-  var handleSpreadClicked = function(oContext, oEvent){
-    storyStore.handleSpreadClicked(oEvent);
+  var handleSpreadClicked = function(oContext){
+    storyStore.handleSpreadClicked();
   };
 
   return {
@@ -54,7 +54,7 @@ var storyAction = (function () {
       EventBusClass.addEventListener(StoryEvent.TAB_KEY_PRESSED, handleTab);
       EventBusClass.addEventListener(StoryEvent.ON_KEY_DOWN, handleOnKeyDown);
       EventBusClass.addEventListener(ListEvent.LIST_ITEM_CLICKED, handleListItemClicked);
-      EventBusClass.addEventListener(SpreadEvent.SPREAD_CLICKED, handleSpreadClicked);
+      EventBusClass.addEventListener(SpreadEvent.SHOW_STYLE, handleSpreadClicked);
     },
 
     deRegisterEvent: function () {
@@ -66,7 +66,7 @@ var storyAction = (function () {
       EventBusClass.removeEventListener(StoryEvent.TAB_KEY_PRESSED, handleTab);
       EventBusClass.removeEventListener(StoryEvent.ON_KEY_DOWN, handleOnKeyDown);
       EventBusClass.removeEventListener(ListEvent.LIST_ITEM_CLICKED, handleListItemClicked);
-      EventBusClass.removeEventListener(SpreadEvent.SPREAD_CLICKED, handleSpreadClicked);
+      EventBusClass.removeEventListener(SpreadEvent.SHOW_STYLE, handleSpreadClicked);
     }
   }
 

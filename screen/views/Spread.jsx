@@ -8,7 +8,7 @@ var EventDispatcher = require("../../libraries/eventDispacher/EventDispatcher");
 
 var Events = {
 
-  SPREAD_CLICKED : "spread_clicked"
+  SHOW_STYLE : "show_style"
 
 };
 
@@ -78,7 +78,7 @@ var Spread = React.createClass({
   },
 
   handleOnClickSpread : function(evt){
-    EventDispatcher.dispatch(Events.SPREAD_CLICKED, this, evt);
+    EventDispatcher.dispatch(Events.SHOW_STYLE, this, evt);
   },
 
   render: function () {
