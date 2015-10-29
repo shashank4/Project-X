@@ -894,7 +894,7 @@ var storyStore = (function () {
 
                     var aPost = [];
                     //If first element is there in path then put new para before it
-                    if(_.includes(oPath[oPath[sCustomTagUID]], oFirstObject["$"]["data-uid"])) {
+                    if(_.includes(_.keys(oPath[sCustomTagUID]), oFirstObject["$"]["data-uid"])) {
                       aPost = aCustom.splice(iCustomIndex);
                     } else {
                       aPost = aCustom.splice(iCustomIndex + 1);
@@ -997,22 +997,15 @@ var storyStore = (function () {
           if (oTagObject[0]['$']) {
             var oTag = oTagObject[0];
             var sCustomTagUID = oTag['$'][UID_KEY];
-
             if (_.includes(aPaths, sCustomTagUID)) {
               if (_.isEmpty(oPath[sCustomTagUID])) {
                 aCustom.splice(iCustomIndex, 1);
                 iCustomIndex--;
-                /*if(aCustom.length == 0) {
-                 bIsContainerEmpty = true;
-                 }*/
               } else {
-                var bContainerEmpty = _deleteNodesAccordingToPath(oTag, oPath[sCustomTagUID]);
-                if (bContainerEmpty) {
+                _deleteNodesAccordingToPath(oTag, oPath[sCustomTagUID]);
+                if(_.isEmpty(oTag.Custom)) {
                   aCustom.splice(iCustomIndex, 1);
                   iCustomIndex--;
-                  /*if(aCustom.length == 0) {
-                   bIsContainerEmpty = true;
-                   }*/
                 }
               }
             }
@@ -1020,7 +1013,6 @@ var storyStore = (function () {
         });
       }
     }
-    return bIsContainerEmpty;
   };
 
   var _processApplyingParagraphStyle = function (oRange, oCurrentStory, sStyleId) {
@@ -1059,7 +1051,7 @@ var storyStore = (function () {
       }
     });
 
-    var aParagraphStyles = _.cloneDeep(_applyParagraphStyle(oCurrentStory, oPath, sStyleId));
+    _applyParagraphStyle(oCurrentStory, oPath, sStyleId);
     _deleteNodesAccordingToPath(oCurrentStory, oPath);
 
     /*var bStillExist = false;
