@@ -435,7 +435,7 @@ var storyStore = (function () {
     /** if last node is another characterStyle. Then pass the last node of this character style to CharaHandling Function. */
     else if(aParent[i].XMLElement[0].Custom[lastIndex-1].CharacterStyleRange){
       var lastOfChara = aParent[i].XMLElement[0].Custom[lastIndex-1].CharacterStyleRange[0].Custom.length;
-      handleCharaOfBackSpace(aParent[i].XMLElement[0].Custom[lastIndex-1].CharacterStyleRange[0].Custom, lastOfChara-1)
+      handleCharaOfBackSpace(aParent[i].XMLElement[0].Custom/*[lastIndex-1].CharacterStyleRange[0].Custom*/, lastIndex-1/*lastOfChara-1*/);
     }
 
   };
@@ -1283,6 +1283,52 @@ var storyStore = (function () {
   };
 
 
+  var _getFirstChildNode = function(oNode){
+    if(oNode.Content || oNode.Br){
+      return oNode;
+    }else if(oNode.ParagraphStyleRange) {
+      return _getFirstChildNode(oNode.ParagraphStyleRange[0].Custom[0]);
+
+    } else if(oNode.CharacterStyleRange) {
+      return _getFirstChildNode(oNode.CharacterStyleRange[0].Custom[0]);
+
+    } else if(oNode.XMLElement) {
+      return _getFirstChildNode(oNode.XMLElement[0].Custom[0]);
+    }
+  };
+
+  var handleParagraphBackSpace = function(path, currentStory ){
+    path.splice(-1,1);
+    var oGrandParentHere = _searchClosestCustomOfLastInPath(currentStory, path);
+    var aGrandParentHere = oGrandParentHere.objectPos;
+    var iGrandparentHere = oGrandParentHere.indexPos;
+
+    if (iGrandparentHere != 0) {
+
+      if(aGrandParentHere[iGrandparentHere-1].ParagraphStyleRange){
+        var last1 = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom.length;
+        var last2 = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange.length;
+        var last3 = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.length;
+        aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.splice(last3 - 1, 1);
+        aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom.concat(aGrandParentHere[iGrandparentHere].ParagraphStyleRange[0].Custom);
+        var restPara = aGrandParentHere.splice(iGrandparentHere + 1);
+
+        var oLastNode = _getLastChildNode(aGrandParentHere[iGrandparentHere - 1]);
+        _setCaretPositionAccordingToObject(oLastNode);
+
+        aGrandParentHere.splice(iGrandparentHere, 1);
+        _.assign(aGrandParentHere, aGrandParentHere.concat(restPara));
+        //_triggerChange();
+
+      }else if(aGrandParentHere[iGrandparentHere-1].XMLElement){
+        handleXMLOfBackSpace(aGrandParentHere, iGrandparentHere-1);
+      }
+
+    }else if(iGrandparentHere == 0){
+      handleParagraphBackSpace(path, currentStory);
+    }
+  };
+
   var storyStore =  {
 
     setStoreData: function (data1) {
@@ -1467,11 +1513,11 @@ var storyStore = (function () {
 
               var oLastOfXML = _getLastChildNodeParent(aParent[iParent - 1]);
               var aLastOfXML = oLastOfXML.array;
-              var iLastofXML = oLastOfXML.index;
+              var iLastOfXML = oLastOfXML.index;
 
-              if(aLastOfXML[iLastofXML-1].Content){
-                _setCaretPositionAccordingToObject(aLastOfXML[iLastofXML-1]);
-                aLastOfXML.splice(aLastOfXML, 1);
+              if(aLastOfXML[iLastOfXML-1].Content){
+                _setCaretPositionAccordingToObject(aLastOfXML[iLastOfXML-1]);
+                aLastOfXML.splice(iLastOfXML, 1);
               }else{
                 console.log("Agar tune yeh bug solve kiya tohi manunga tuze");
               }
@@ -1578,7 +1624,6 @@ var storyStore = (function () {
              */
 
             if (iParent != 0) {
-
               /** if previous node is br */
               if (aParent[iParent - 1].Br) {
                 var oNode = aParent[iParent - 2];
@@ -1610,30 +1655,41 @@ var storyStore = (function () {
               /**  Paragraph Handling*/
 
               if (oCurrentDom.parentNode.className.indexOf("characterContainer") > (-1)) {
+
+                handleParagraphBackSpace(path, currentStory );
+
                 var pathForPara = targetPath.split("/");
-                pathForPara.splice(0, 1);
+                /*pathForPara.splice(0, 1);
                 pathForPara.splice(-1, 1);
-                pathForPara.splice(-1, 1);
+                pathForPara.splice(-1, 1);*/
 
-                var oReturned = _searchClosestCustomOfLastInPath(currentStory, pathForPara);
-                var aCustomPara = oReturned.objectPos;
-                var iIndexPara = oReturned.indexPos;
+                /*path.splice(-1,1);
+                var oGrandParentHere = _searchClosestCustomOfLastInPath(currentStory, path);
+                var aGrandParentHere = oGrandParentHere.objectPos;
+                var iGrandparentHere = oGrandParentHere.indexPos;
 
-                if (iIndexPara != 0) {
-                  var last1 = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom.length;
-                  var last2 = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange.length;
-                  var last3 = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.length;
-                  aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.splice(last3 - 1, 1);
-                  aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom = aCustomPara[iIndexPara - 1].ParagraphStyleRange[0].Custom.concat(aCustomPara[iIndexPara].ParagraphStyleRange[0].Custom);
-                  var restPara = aCustomPara.splice(iIndexPara + 1);
+                if (iGrandparentHere != 0) {
 
-                  var oLastNode = _getLastChildNode(aCustomPara[iIndexPara - 1]);
-                  _setCaretPositionAccordingToObject(oLastNode);
+                  if(aGrandParentHere[iGrandparentHere-1].ParagraphStyleRange){
+                    var last1 = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom.length;
+                    var last2 = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange.length;
+                    var last3 = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.length;
+                    aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.splice(last3 - 1, 1);
+                    aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom.concat(aGrandParentHere[iGrandparentHere].ParagraphStyleRange[0].Custom);
+                    var restPara = aGrandParentHere.splice(iGrandparentHere + 1);
 
-                  aCustomPara.splice(iIndexPara, 1);
-                  _.assign(aCustomPara, aCustomPara.concat(restPara));
-                  //_triggerChange();
-                }
+                    var oLastNode = _getLastChildNode(aGrandParentHere[iGrandparentHere - 1]);
+                    _setCaretPositionAccordingToObject(oLastNode);
+
+                    aGrandParentHere.splice(iGrandparentHere, 1);
+                    _.assign(aGrandParentHere, aGrandParentHere.concat(restPara));
+                    //_triggerChange();
+
+                  }else if(aGrandParentHere[iGrandparentHere-1].XMLElement){
+                    handleXMLOfBackSpace(aGrandParentHere, iGrandparentHere-1);
+                  }
+
+                }*/
 
               }
             }
@@ -1643,7 +1699,7 @@ var storyStore = (function () {
            * then remove current node and check, if next and previous node is same or not. If same charaStyle then combine.
            * Check for chara and XML tag.
            */
-          else if (iStartIndex && aParent[iParent].Content[0]['_'].length == 1) {
+          else if (iStartIndex > 0 && aParent[iParent].Content[0]['_'].length == 1) {
             if (aParent.length == 1) {
 
               var pathForChara = targetPath.split('/');
@@ -1670,8 +1726,8 @@ var storyStore = (function () {
                 /**               * if aGrandParent is having more than 1 child elements i.e. more than one characterStyleRanges.               */
                 if (aGrandParent.length > 1) {
                   /**                 * if next charaStyle and previous charaStyle are same, then remove current node and combine                 */
-                  if (aGrandParent[iGrandIndex + 1] && aGrandParent[iGrandIndex - 1].CharacterStyleRange
-                      && aGrandParent[iGrandIndex - 1] && aGrandParent[iGrandIndex + 1].CharacterStyleRange
+                  if (aGrandParent[iGrandIndex + 1] && aGrandParent[iGrandIndex + 1].CharacterStyleRange
+                      && aGrandParent[iGrandIndex - 1] && aGrandParent[iGrandIndex - 1].CharacterStyleRange
                       && (aGrandParent[iGrandIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle == aGrandParent[iGrandIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle)) {
                     /**                   * if next nodes are present ,then store it to rest to append.                   */
                     if (aGrandParent[iGrandIndex + 2]) {
@@ -1715,8 +1771,15 @@ var storyStore = (function () {
                     //_triggerChange();
                   }
                   else if (iGrandIndex == (aGrandParent.length - 1) || iGrandIndex == 0) {
-                    _setCaretPosition(aGrandParent, iGrandIndex, pathForChara, currentStory);
-                    aGrandParent.splice(iGrandIndex, 1);
+                    if(aGrandParent[iGrandIndex+1]){
+                      var oFirstNode = _getFirstChildNode(aGrandParent[iGrandIndex+1]);
+                      _setCaretPositionAccordingToObject(oFirstNode, 0);
+
+                    }else{
+                      _setCaretPosition(aGrandParent, iGrandIndex, pathForChara, currentStory);
+                    }
+
+                    aGrandParent.splice(iGrandIndex, 1);                                                            ///zzzzzzzzzzzzzz
                   }
                 }
                 /**
