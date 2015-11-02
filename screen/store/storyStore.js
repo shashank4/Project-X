@@ -405,7 +405,18 @@ var storyStore = (function () {
         oNode = _getLastChildNode(oNode);
         _setCaretPositionAccordingToObject(oNode);
       }
+
       aParent[i].XMLElement[0].Custom.splice(lastIndex-1, 1);
+
+      if(aParent[i].XMLElement[0].Custom.length == 0){                            /** *********************************************************************************  */
+        aParent[i].XMLElement[0].Custom.push(_createContentNode(""));
+        _setCaretPositionAccordingToObject(aParent[i].XMLElement[0].Custom[0]);
+      }
+
+
+      /*if(aParent[i+1].Content && aParent[i+1].Content[0]["_"].length == 0){
+        aParent.splice(i+1);
+      }*/
     }
 
     /** if last node is Content */
@@ -414,7 +425,7 @@ var storyStore = (function () {
       var str = aParent[i].XMLElement[0].Custom[lastIndex-1].Content[0]["_"];
 
       /** if content stringLength is greater than '1'*/
-      if (str.length != 1) {
+      if (str.length > 1) {
         aParent[i].XMLElement[0].Custom[lastIndex-1].Content[0]["_"] = str.slice(0, str.length-1);
         oCaretPosition.focusId = aParent[i].XMLElement[0].Custom[lastIndex-1].Content[0]["$"]["data-uid"];
         oCaretPosition.indexToFocus = aParent[i].XMLElement[0].Custom[lastIndex-1].Content[0]["_"].length;
@@ -429,6 +440,16 @@ var storyStore = (function () {
           oNode = _getLastChildNode(aParent[i-1]);
           _setCaretPositionAccordingToObject(oNode);
         }
+
+        if(aParent[i].XMLElement[0].Custom.length == 0){                                   /** *********************************************************************************  */
+          aParent[i].XMLElement[0].Custom.push(_createContentNode(""));
+          _setCaretPositionAccordingToObject(aParent[i].XMLElement[0].Custom[0]);
+        }
+
+        /*if(aParent[i+1].Content && aParent[i+1].Content[0]["_"].length == 0){    *//** *********************************************************************************  *//*
+        aParent.splice(i+1);
+        }*/
+
       }
     }
 
@@ -449,9 +470,8 @@ var storyStore = (function () {
     var aCustom = oParentCustom.objectPos;
     var index = oParentCustom.indexPos;
     var uuid = path[path.length - 1];
-    /**
-     * if key is pressed on any BR node.
-     */
+
+    /** if key is pressed on any BR node. */
     if (oCurrentDom.className.indexOf('br') > (-1)) {
       //var newUid21 = utils.generateUUID();
       var newContentObj21 = _createContentNode(pressedChar);
@@ -1353,11 +1373,17 @@ var storyStore = (function () {
           }
 
           aParent.splice(iParent - 1, 1);
+
+          /*if(aParent[iParent].Content[0]["_"].length == 0){    *//** *********************************************************************************  *//*
+            aParent.splice(iParent);
+
+          }*/
         }
 
         /** if prev node is XMLElement*/
         else if (aParent[iParent - 1].XMLElement) {
           handleXMLOfBackSpace(aParent, iParent - 1);
+
         }
         /** if prev node is characterSrtleRange*/
         else if (aParent[iParent - 1].CharacterStyleRange) {
@@ -1381,6 +1407,8 @@ var storyStore = (function () {
         }
       }
     }
+
+
     /**
      * if there is only one character in the selected node and focusOffset is also 1
      * then remove current node and check, if next and previous node is same or not. If same charaStyle then combine.
@@ -1461,7 +1489,6 @@ var storyStore = (function () {
                 (aGrandParent[iGrandIndex - 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle != aGrandParent[iGrandIndex + 1].CharacterStyleRange[0]["$"].AppliedCharacterStyle)) {
               aGrandParent.splice(iGrandIndex, 1);
               _setCaretPosition(aGrandParent, iGrandIndex, pathForChara, currentStory);
-              //_triggerChange();
             }
             else if (iGrandIndex == (aGrandParent.length - 1) || iGrandIndex == 0) {
               if(aGrandParent[iGrandIndex+1]){
@@ -1518,7 +1545,7 @@ var storyStore = (function () {
         //Caret positioning
         var aPath = targetPath.split('/');
         aPath.splice(0, 1);
-        //TODO: Make Following API Reusable for backspaced
+
         _setCaretPosition(aParent, iParent, aPath, currentStory);
 
         aParent.splice(iParent, 1);
@@ -1526,7 +1553,6 @@ var storyStore = (function () {
         if (afterNodes) {
           _.assign(aParent, aParent.concat(afterNodes));
         }
-        //_triggerChange();
       }
     }
 
@@ -1542,7 +1568,149 @@ var storyStore = (function () {
     }
   };
 
+  var handleBrBackSpace = function(aParent, iParent, iStartIndex, targetPath, path, currentStory, currentStoryId, iRangeOffset, oCurrentDom){
 
+    if (aParent[iParent - 1] ) {
+
+      if(aParent[iParent - 1].Br){
+        aParent.splice(iParent, 1);
+
+        if(aParent[iParent-2] && aParent[iParent-2].Content){
+          oCaretPosition.focusId = aParent[iParent-2].Content[0]['$']['data-uid'];
+          oCaretPosition.indexToFocus = aParent[iParent-2].Content[0]['_'].length;
+        }else {
+          _setCaretPositionAccordingToObject(aParent[iParent - 1]);
+        }
+
+      }
+      else if(aParent[iParent - 1].Content){
+        var tempStr = aParent[iParent - 1].Content[0]['_'];
+
+        if(tempStr.length == 0 ){
+          path.splice(-1,1);
+          var oGrandParent = _searchClosestCustomOfLastInPath(currentStory, path);
+          var aGrandParent = oGrandParent.objectPos;
+          var iGrandParent = oGrandParent.indexPos;
+
+          if(aGrandParent[iGrandParent].XMLElement)
+          {
+            _setCaretPositionAccordingToObject(aParent[iParent-1]);
+          }
+          else
+          {
+            handleContentBackSpace(aParent, iParent-1, (tempStr.length), targetPath, path, currentStory, currentStoryId, iRangeOffset, oCurrentDom);
+          }
+        }
+        else
+        {
+          handleContentBackSpace(aParent, iParent-1, (tempStr.length), targetPath, path, currentStory, currentStoryId, iRangeOffset, oCurrentDom);
+        }
+
+
+
+      }else if(aParent[iParent - 1].XMLElement){
+
+        var oLastOfXML = _getLastChildNodeParent(aParent[iParent - 1]);
+        var aLastOfXML = oLastOfXML.array;
+        var iLastOfXML = oLastOfXML.index;
+
+        //if(aLastOfXML){}
+
+
+        if(aLastOfXML[iLastOfXML-1].Content){
+          _setCaretPositionAccordingToObject(aLastOfXML[iLastOfXML-1]);
+          aLastOfXML.splice(iLastOfXML, 1);
+        }else{
+          console.log("Agar tune yeh bug solve kiya tohi manunga tuze");
+        }
+      }
+    }
+
+    /** go to check current nodes prev charaStyle. */
+    else if (!aParent[iParent - 1]) {
+      var newPath = targetPath.split("/");
+      newPath.splice(0, 1);
+      newPath.splice(-1, 1);
+      var oReturnedParent = _searchClosestCustomOfLastInPath(currentStory, newPath);
+      var aReturnParent = oReturnedParent.objectPos;
+      var iReturnParent = oReturnedParent.indexPos;
+
+      if (aReturnParent[iReturnParent - 1]) {
+
+        if(aReturnParent[iReturnParent - 1].CharacterStyleRange) {
+          handleCharaOfBackSpace(aReturnParent, iReturnParent - 1);
+        } else if (aReturnParent[iReturnParent - 1].XMLElement) {
+          handleXMLOfBackSpace(aReturnParent, iReturnParent - 1);
+        } else if (aReturnParent[iReturnParent - 1].Content) {
+          _setCaretPositionAccordingToObject(aReturnParent[iReturnParent - 1]);
+          aReturnParent.splice(iReturnParent, 1);
+        } else if(aReturnParent[iReturnParent - 1].Br) {
+          _setCaretPositionAccordingToObject(aReturnParent[iReturnParent - 1]);
+          aReturnParent.splice(iReturnParent, 1);
+        }
+
+      }
+
+      /** go to check parent nodes of charastyle i.e. for para.*/
+      else if (!aReturnParent[iParent - 1]) {
+        var newPath2 = targetPath.split("/");
+        newPath2.splice(0, 1);
+        newPath2.splice(-1, 1);
+        newPath2.splice(-1, 1);
+
+        var oReturnedGrandParent = _searchClosestCustomOfLastInPath(currentStory, newPath2);
+        var aReturnedGrandParent = oReturnedGrandParent.objectPos;
+        var iGrandParent = oReturnedGrandParent.indexPos;
+        if (aReturnedGrandParent[iGrandParent - 1]) {
+          var lastChara = aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.length;
+          //var lastCustomOfChara = aReturnedGrandParent[iGrandParent-1].ParagraphStyleRange[0].Custom[lastChara-1].CharacterStyleRange[0].Custom.length;
+
+          aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom[lastChara - 1].CharacterStyleRange[0].Custom.splice(-1, 1);
+          if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom[lastChara - 1].CharacterStyleRange[0].Custom.length == 0) {
+            var oPreviousSiblingAcrossGrandParents;
+            aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.splice(-1, 1);
+            if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.length == 0) {
+              if (aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.length == 0) {
+
+                _setCaretPosition(aReturnedGrandParent, iGrandParent - 1, newPath2, currentStory);
+
+                aReturnedGrandParent.splice(iGrandParent - 1, 1);
+              }
+              else if (aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom) {
+                oPreviousSiblingAcrossGrandParents = _getLastChildNode(aReturnedGrandParent[iGrandParent - 1]);
+                _setCaretPositionAccordingToObject(oPreviousSiblingAcrossGrandParents);
+
+                /*************Merging Two ParagraphStyleRange **************/
+                _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom,
+                    aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(
+                        aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom
+                    )
+                );
+
+                aReturnedGrandParent.splice(iGrandParent, 1);
+              }
+            }
+          } else {
+            oPreviousSiblingAcrossGrandParents = _getLastChildNode(aReturnedGrandParent[iGrandParent - 1]);
+            _setCaretPositionAccordingToObject(oPreviousSiblingAcrossGrandParents);
+
+            /*************Merging Two ParagraphStyleRange **************/
+            _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom,
+                aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(
+                    aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom
+                )
+            );
+
+            aReturnedGrandParent.splice(iGrandParent, 1);
+          }
+
+        }
+
+
+      }
+    }
+
+  };
 
 
   var storyStore =  {
@@ -1616,8 +1784,6 @@ var storyStore = (function () {
         var newBrObj5 = _createBrNode();
         aParent.splice(iIndex,0,newBrObj5);
         oCaretPosition.focusId = newBrObj5.Br[0]["$"]["data-uid"];
-        _triggerChange();
-        return null;
       }
       /** if key is down on content node */
       else {
@@ -1626,8 +1792,6 @@ var storyStore = (function () {
           var newBrObj6 = _createBrNode();
           aParent.splice(iIndex, 0, newBrObj6);
           oCaretPosition.focusId = newBrObj6.Br[0]["$"]["data-uid"];
-          _triggerChange();
-          return null;
         }
         /** if  it is NOT first node of character style or xmlElement   */
         else {
@@ -1643,9 +1807,10 @@ var storyStore = (function () {
             newContentObjAfter = _createContentNode("");
             _setCaretPositionAccordingToObject(newContentObjAfter);
             aParent.push(newContentObjAfter);
-            aParent.push(rest);
+            _.assign(aParent, aParent.concat(rest));
 
-          } else{
+          }
+          else/* if(aParent[iIndex].Content)*/{
 
             if (iStartRange != 0) {
               var newContentStringBefore = aContentData.substring(0, iStartRange);
@@ -1683,11 +1848,9 @@ var storyStore = (function () {
             oCaretPosition.focusId = rest.Br[0]["$"]["data-uid"];
           }*/
           _.assign(aParent, aParent.concat(rest));
-          _triggerChange();
         }
-
-
       }
+      _triggerChange();
     },
 
     handleBackspacePressed: function (oEvent, oCurrentDom, iStartIndex, targetPath, oSelection, iRangeOffset) {
@@ -1704,7 +1867,11 @@ var storyStore = (function () {
 
         /**if current node is Br.*/
         if (aParent[iParent].Br) {
-          if (aParent[iParent - 1] ) {
+
+          handleBrBackSpace(aParent, iParent, iStartIndex, targetPath, path, currentStory, currentStoryId, iRangeOffset, oCurrentDom);
+
+
+          /*if (aParent[iParent - 1] ) {
 
             if(aParent[iParent - 1].Br){
               aParent.splice(iParent, 1);
@@ -1712,7 +1879,6 @@ var storyStore = (function () {
               if(aParent[iParent-2] && aParent[iParent-2].Content){
                 oCaretPosition.focusId = aParent[iParent-2].Content[0]['$']['data-uid'];
                 oCaretPosition.indexToFocus = aParent[iParent-2].Content[0]['_'].length;
-                //_setCaretPositionAccordingToObject(aParent[iParent - 2]);
               }else {
                 _setCaretPositionAccordingToObject(aParent[iParent - 1]);
               }
@@ -1738,7 +1904,7 @@ var storyStore = (function () {
 
           }
 
-          /** go to check current nodes prev charaStyle. */
+          *//** go to check current nodes prev charaStyle. *//*
           else if (!aParent[iParent - 1]) {
             var newPath = targetPath.split("/");
             newPath.splice(0, 1);
@@ -1763,7 +1929,8 @@ var storyStore = (function () {
 
             }
 
-            /** go to check parent nodes of charastyle i.e. for para.*/
+            *//** go to check parent nodes of charastyle i.e. for para.*/
+          /*
             else if (!aReturnParent[iParent - 1]) {
               var newPath2 = targetPath.split("/");
               newPath2.splice(0, 1);
@@ -1792,7 +1959,7 @@ var storyStore = (function () {
                       oPreviousSiblingAcrossGrandParents = _getLastChildNode(aReturnedGrandParent[iGrandParent - 1]);
                       _setCaretPositionAccordingToObject(oPreviousSiblingAcrossGrandParents);
 
-                      /*************Merging Two ParagraphStyleRange **************/
+                      *//*************Merging Two ParagraphStyleRange **************//*
                       _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom,
                           aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(
                               aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom
@@ -1806,7 +1973,7 @@ var storyStore = (function () {
                   oPreviousSiblingAcrossGrandParents = _getLastChildNode(aReturnedGrandParent[iGrandParent - 1]);
                   _setCaretPositionAccordingToObject(oPreviousSiblingAcrossGrandParents);
 
-                  /*************Merging Two ParagraphStyleRange **************/
+                  *//*************Merging Two ParagraphStyleRange **************//*
                   _.assign(aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom,
                       aReturnedGrandParent[iGrandParent - 1].ParagraphStyleRange[0].Custom.concat(
                           aReturnedGrandParent[iGrandParent].ParagraphStyleRange[0].Custom
@@ -1820,12 +1987,16 @@ var storyStore = (function () {
 
 
             }
-          }
+          }*/
+
+
         }
 
         /**if current node is not br i.e. it is a content node*/
 
         else if(aParent[iParent].Content ){
+
+
           handleContentBackSpace(aParent, iParent, iStartIndex, targetPath, path, currentStory, currentStoryId, iRangeOffset, oCurrentDom);
         }
 
@@ -2098,13 +2269,6 @@ var storyStore = (function () {
         var oRangeObject = _getDeepestDOM(oRange.startContainer, oRange.startOffset, oRange.commonAncestorContainer);
         var oCurrentDom = oRangeObject.currentDOM;
         var iStartRange = oRangeObject.startRange;
-
-/*        if(oSel.focusNode.nodeName != "#text" ){
-          oCurrentDom = oRange.commonAncestorContainer.childNodes[oRange.startOffset];
-        }
-        else{
-          oCurrentDom = oRange.commonAncestorContainer.parentNode;
-        }*/
 
         var sTargetUID = oCurrentDom.getAttribute("data-uid");
         var sPath = oCurrentDom.getAttribute("data-path");
