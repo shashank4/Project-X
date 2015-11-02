@@ -1619,13 +1619,9 @@ var storyStore = (function () {
         _triggerChange();
         return null;
       }
-      /**
-       * if key is down on content node
-       */
+      /** if key is down on content node */
       else {
-        /**
-         * if offset is 0 and first node of character style or xmlElement
-         */
+        /** if offset is 0 and first node of character style or xmlElement */
         if (iIndex == 0 && iStartRange == 0 ) {
           var newBrObj6 = _createBrNode();
           aParent.splice(iIndex, 0, newBrObj6);
@@ -1633,48 +1629,44 @@ var storyStore = (function () {
           _triggerChange();
           return null;
         }
-        /**
-         * if  it is NOT first node of character style or xmlElement
-         */
+        /** if  it is NOT first node of character style or xmlElement   */
         else {
           var rest = aParent.splice(iIndex + 1);
-          aParent.splice(iIndex, 1);
+          var currentNode = aParent.splice(iIndex, 1);
           var newBrObj = _createBrNode();
-
+          var newContentObjAfter={} ;
 
           if (aContentData == "" || aContentData == null ||
               (aContentData.length == 1 && (aContentData.charCodeAt(0) >= 0 && aContentData.charCodeAt(0) <= 32))) {
+            aParent.push(currentNode[0]);
             aParent.push(newBrObj);
-            aParent.push(rest);0
-            _setCaretPositionAccordingToObject(newBrObj);
-            _triggerChange();
-            return;
-          } else if (iStartRange != 0) {
-            var newContentStringBefore = aContentData.substring(0, iStartRange);
-            var newContentObjBefore = _createContentNode(newContentStringBefore);
-            aParent.push(newContentObjBefore);
+            newContentObjAfter = _createContentNode("");
+            _setCaretPositionAccordingToObject(newContentObjAfter);
+            aParent.push(newContentObjAfter);
+            aParent.push(rest);
+
+          } else{
+
+            if (iStartRange != 0) {
+              var newContentStringBefore = aContentData.substring(0, iStartRange);
+              var newContentObjBefore = _createContentNode(newContentStringBefore);
+              aParent.push(newContentObjBefore);
+            }
+
+            aParent.push(newBrObj);
+
+
+            /** if cursor is not at the last position of the current content node.
+             * then break the string insert one br and append next string   */
+            /** according to new assumption , now append each time a conetnt node after a br. So no need of If condition in this*/
+            var newContentStringAfter = aContentData.substring(iStartRange, aContentData.length);
+            newContentObjAfter = _createContentNode(newContentStringAfter);
+            _setCaretPositionAccordingToObject(newContentObjAfter, 0);
+            aParent.push(newContentObjAfter);
           }
 
-          aParent.push(newBrObj);
-
-
-          /**
-           * if cursor is not at the last position of the current content node.
-           * then break the string insert one br and append next string
-           */
-          //if (iOffset < aContentData.length) {
-            //var newUid3 = utils.generateUUID();
-          var newContentStringAfter = aContentData.substring(iStartRange, aContentData.length);
-          var newContentObjAfter = _createContentNode(newContentStringAfter);
-          _setCaretPositionAccordingToObject(newContentObjAfter, 0);
-          aParent.push(newContentObjAfter);
-          //}
-
-
-          /**
-           * if enter is pressed on extreme last position i.e. after last content or br of last Paragraph Node
-           * then push one extra br to get cursor on new line.
-           */
+          /** if enter is pressed on extreme last position i.e. after last content or br of last Paragraph Node
+           * then push one extra br to get cursor on new line.   */
           /*if (oSel.focusNode.length == oSel.focusOffset
               && oSel.focusNode.parentNode.nextSibling == null
               && oSel.focusNode.parentNode.parentNode.nextSibling == null
