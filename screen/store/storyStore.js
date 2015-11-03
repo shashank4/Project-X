@@ -1573,25 +1573,30 @@ var storyStore = (function () {
            */
           else if (aGrandParent.length == 1) {
 
-            aGrandParent.splice(iGrandIndex, 1);
 
-            if (aGrandParent[iGrandIndex - 1]) {
-              var oNodeToCaret = _getLastChildNode(aGrandParent[iGrandIndex - 1]);
-              _setCaretPositionAccordingToObject(oNodeToCaret);
-            } else {
 
-              var pathForPara2 = targetPath.split('/');
-              pathForPara2.splice(0, 1);
-              pathForPara2.splice(-1, 1);
-              pathForPara2.splice(-1, 1);
-              var oUltimateParentForPara = _searchClosestCustomOfLastInPath(currentStory, pathForPara2);
-              var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
-              var jIndexForPara = oUltimateParentForPara.indexPos;
+            var pathForPara2 = targetPath.split('/');
+            pathForPara2.splice(0, 1);
+            pathForPara2.splice(-1, 1);
+            pathForPara2.splice(-1, 1);
+            var oUltimateParentForPara = _searchClosestCustomOfLastInPath(currentStory, pathForPara2);
+            var aUltimateCustomForPara = oUltimateParentForPara.objectPos;
+            var jIndexForPara = oUltimateParentForPara.indexPos;
 
+
+            if(aUltimateCustomForPara[jIndexForPara].XMLElement){
+
+              aParent.splice(iParent, 1);
+              var blankXMLNode = _createContentNode("");
+              aParent.push(blankXMLNode);
+              _setCaretPositionAccordingToObject(blankXMLNode);
+
+            }
+            else{
+              aGrandParent.splice(iGrandIndex, 1);
               aUltimateCustomForPara.splice(jIndexForPara, 1);
               _setCaretPosition(aUltimateCustomForPara, jIndexForPara, pathForPara2, currentStory);
             }
-
           }
         }
 
@@ -1951,10 +1956,14 @@ var storyStore = (function () {
 
         else if(aParent[iParent].Content ){
 
+          if(aParent[iParent-1] && aParent[iParent-1].Br
+              && aParent[iParent].Content[0]['_'].length==0){
+            var isEnterGeneratedSpan = true;
+          }
 
           var iParentCloneChanged = handleContentBackSpace(aParent, iParent, iStartIndex, targetPath, path, currentStory, currentStoryId, iRangeOffset, oCurrentDom);
 
-          if(aParent[iParentCloneChanged] && aParent[iParentCloneChanged].Content
+          if(isEnterGeneratedSpan && aParent[iParentCloneChanged] && aParent[iParentCloneChanged].Content
               && aParent[iParentCloneChanged].Content[0]['_'].length==0)
           {
             var oGrandObj = _getGrandParent(currentStory, targetPath);
