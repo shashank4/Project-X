@@ -646,7 +646,8 @@ var storyStore = (function () {
 
     if (aGrandparent.length == 0) {
       _ifOnlyChildDelete(currentStory, aGrandparent, path);
-    }else{
+    }
+    else{
       if(aGrandparent[iGrandparent]){
         _handleCaretIfNotOnlyChildDelete(aGrandparent, iGrandparent);
       }
@@ -1297,7 +1298,8 @@ var storyStore = (function () {
       oCustomLength = oNode.ParagraphStyleRange[0].Custom.length;
       return _getLastChildNodeParent(oNode.ParagraphStyleRange[0].Custom[oCustomLength-1]);
 
-    } else if(oNode.CharacterStyleRange) {
+    }
+    else if(oNode.CharacterStyleRange) {
       oCustomLength = oNode.CharacterStyleRange[0].Custom.length;
       oTemp = oNode.CharacterStyleRange[0].Custom[oCustomLength-1];
       if(oTemp.Content || oTemp.Br){
@@ -1311,7 +1313,8 @@ var storyStore = (function () {
       }
 
 
-    } else if(oNode.XMLElement) {
+    }
+    else if(oNode.XMLElement) {
       oCustomLength = oNode.XMLElement[0].Custom.length;
       oTemp = oNode.XMLElement[0].Custom[oCustomLength-1];
 
@@ -1363,19 +1366,43 @@ var storyStore = (function () {
       if (iGrandparentHere != 0) {
 
         if (aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange) {
+
+          /*var oLastNode = _getLastChildNode(aGrandParentHere[iGrandparentHere - 1]);
+          _setCaretPositionAccordingToObject(oLastNode);*/
+
+          var oLastParent = _getLastChildNodeParent(aGrandParentHere[iGrandparentHere - 1]);
+
+          var aLast = oLastParent.array;
+          var iLast = oLastParent.index;
+
           var last1 = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom.length;
           var last2 = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange.length;
           var last3 = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.length;
-          aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.splice(last3 - 1, 1);
-          aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom.concat(aGrandParentHere[iGrandparentHere].ParagraphStyleRange[0].Custom);
-          var restPara = aGrandParentHere.splice(iGrandparentHere + 1);
 
-          var oLastNode = _getLastChildNode(aGrandParentHere[iGrandparentHere - 1]);
-          _setCaretPositionAccordingToObject(oLastNode);
+          if(last3==1 && last2==1 && last1==1){
+            var temp = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom[last3-1];
+            if(temp.Br){
+              aGrandParentHere.splice(iGrandparentHere-1, 1);
+              var FirstOfPara = _getFirstChildNode(aGrandParentHere[iGrandparentHere-1]);
+              _setCaretPositionAccordingToObject(FirstOfPara, 0);
+            }
+          }
+          else{
 
-          aGrandParentHere.splice(iGrandparentHere, 1);
-          _.assign(aGrandParentHere, aGrandParentHere.concat(restPara));
+            aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[last1 - 1].CharacterStyleRange[last2 - 1].Custom.splice(last3 - 1, 1);
 
+            var preParaCustomLength = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom.length;
+
+            aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom = aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom.concat(aGrandParentHere[iGrandparentHere].ParagraphStyleRange[0].Custom);
+            var restPara = aGrandParentHere.splice(iGrandparentHere + 1);
+
+            var firstNode = _getFirstChildNode(aGrandParentHere[iGrandparentHere - 1].ParagraphStyleRange[0].Custom[preParaCustomLength]);
+            _setCaretPositionAccordingToObject(firstNode, 0);
+
+            aGrandParentHere.splice(iGrandparentHere, 1);
+            _.assign(aGrandParentHere, aGrandParentHere.concat(restPara));
+
+          }
         }
         else if (aGrandParentHere[iGrandparentHere - 1].XMLElement) {
 
@@ -1402,13 +1429,13 @@ var storyStore = (function () {
   };
 
 
-  var handleContentBackSpace = function(aParent, iParent, iStartIndex, targetPath, path, currentStory, currentStoryId, iRangeOffset, oCurrentDom){
+  var handleContentBackSpace = function(aParent, iParent, iStartIndex, targetPath, path, currentStory, currentStoryId, iRangeOffset, oCurrentDom, selFocusOffset){
 
     var iParentClone = iParent;
 
 
     /**And its rangeOffSet is '0'*/
-    if ((iStartIndex == 0 || iRangeOffset == 0)) {
+    if (iStartIndex == 0 || iRangeOffset == 0 || selFocusOffset==0) {
 
       /**
        * if iIndex th node is not the start node.....then do normal processing
@@ -1615,10 +1642,37 @@ var storyStore = (function () {
         }
 
         //Caret positioning
-        var aPath = targetPath.split('/');
-        aPath.splice(0, 1);
 
-        _setCaretPosition(aParent, iParent, aPath, currentStory);
+        if(aParent[iParent-1]){
+          if(aParent[iParent-1].Content ){
+            _setCaretPositionAccordingToObject(aParent[iParent-1]);
+          }
+          else if(aParent[iParent-1].Br ){
+            var tempEmptySpan = _createContentNode("");
+            aParent.splice(iParent, 0, tempEmptySpan);
+            _setCaretPositionAccordingToObject(tempEmptySpan);
+            iParent++;
+
+          }
+          else{
+            var lastContBr = _getLastChildNode(aParent[iParent-1]);
+            _setCaretPositionAccordingToObject(lastContBr);
+          }
+        }
+        else{
+          if(aParent[iParent+1]){
+            if(aParent[iParent+1].Content || aParent[iParent+1].Br){
+              _setCaretPositionAccordingToObject(aParent[iParent+1]);
+            }else{
+              var firstContBr = _getFirstChildNode(aParent[iParent+1]);
+              _setCaretPositionAccordingToObject(firstContBr, 0);
+            }
+          }
+          var aPath = targetPath.split('/');
+          aPath.splice(0, 1);
+          _setCaretPosition(aParent, iParent, aPath, currentStory);
+        }
+
 
         aParent.splice(iParent, 1);
 
@@ -1956,7 +2010,8 @@ var storyStore = (function () {
             var isEnterGeneratedSpan = true;
           }
 
-          var iParentCloneChanged = handleContentBackSpace(aParent, iParent, iStartIndex, targetPath, path, currentStory, currentStoryId, iRangeOffset, oCurrentDom);
+          var focusOffset = oSelection.focusOffset;
+          var iParentCloneChanged = handleContentBackSpace(aParent, iParent, iStartIndex, targetPath, path, currentStory, currentStoryId, iRangeOffset, oCurrentDom, focusOffset);
 
           if(isEnterGeneratedSpan && aParent[iParentCloneChanged] && aParent[iParentCloneChanged].Content
               && aParent[iParentCloneChanged].Content[0]['_'].length==0)
@@ -2320,7 +2375,6 @@ var storyStore = (function () {
   return storyStore;
 
 })();
-
 
 MicroEvent.mixin(storyStore);
 
