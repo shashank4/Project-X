@@ -1668,9 +1668,9 @@ var storyStore = (function () {
               _setCaretPositionAccordingToObject(firstContBr, 0);
             }
           }
-          var aPath = targetPath.split('/');
+          /*var aPath = targetPath.split('/');
           aPath.splice(0, 1);
-          _setCaretPosition(aParent, iParent, aPath, currentStory);
+          _setCaretPosition(aParent, iParent, aPath, currentStory);*/
         }
 
 
