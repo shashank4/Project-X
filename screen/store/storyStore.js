@@ -1182,7 +1182,12 @@ var storyStore = (function () {
       oCurrentDOM = _getFirstDeepChildNodeFromDOM(oCurrentDOM);
       var aDOMClassList = oCurrentDOM.classList;
       if(_.includes(aDOMClassList, "content")) {
-        iStartRange = oCurrentDOM.firstChild.data.length;
+        if(oCurrentDOM.firstChild){
+          iStartRange = oCurrentDOM.firstChild.data.length;
+        }else{
+          iStartRange = 0;
+        }
+
       } else if(_.includes(aDOMClassList, "br")){
         iStartRange = _.indexOf(oCurrentDOM.parentNode.childNodes, oCurrentDOM);
       }
@@ -1343,7 +1348,7 @@ var storyStore = (function () {
     var aGrandParentHere = oGrandParentHere.objectPos;
     var iGrandparentHere = oGrandParentHere.indexPos;
 
-    if(isFromRecursion && aGrandParentHere[iGrandparentHere].XMLElement){
+    if(/*isFromRecursion && */aGrandParentHere[iGrandparentHere].XMLElement){
       if(iGrandparentHere != 0){
         var lastNode = _getLastChildNode(aGrandParentHere[iGrandparentHere-1]);
         _setCaretPositionAccordingToObject(lastNode);
@@ -1430,7 +1435,7 @@ var storyStore = (function () {
         /** if prev node is XMLElement*/
         else if (aParent[iParent - 1].XMLElement) {
 
-          var lastOfXML = _getLastChildNode(aParent[iParent - 1].XMLElement);
+          var lastOfXML = _getLastChildNode(aParent[iParent - 1]);
           _setCaretPositionAccordingToObject(lastOfXML);
 
 
@@ -1455,11 +1460,11 @@ var storyStore = (function () {
 
         /**  Paragraph Handling*/
 
-        if (oCurrentDom.parentNode.className.indexOf("characterContainer") > (-1)) {
+        //if (oCurrentDom.parentNode.className.indexOf("characterContainer") > (-1)) {
 
           handleParagraphBackSpace(path, currentStory );
 
-        }
+        //}
       }
     }
 
@@ -1642,15 +1647,8 @@ var storyStore = (function () {
     if (aParent[iParent - 1] ) {
 
       if(aParent[iParent - 1].Br){
-        aParent.splice(iParent, 1);
-
-        if(aParent[iParent-2] && aParent[iParent-2].Content){
-          oCaretPosition.focusId = aParent[iParent-2].Content[0]['$']['data-uid'];
-          oCaretPosition.indexToFocus = aParent[iParent-2].Content[0]['_'].length;
-        }else {
-          _setCaretPositionAccordingToObject(aParent[iParent - 1]);
-        }
-
+        aParent.splice(iParent-1, 1);
+        _setCaretPositionAccordingToObject(aParent[iParent - 1]);
       }
       else if(aParent[iParent - 1].Content){
         var tempStr = aParent[iParent - 1].Content[0]['_'];
@@ -1677,20 +1675,17 @@ var storyStore = (function () {
 
 
 
-      }else if(aParent[iParent - 1].XMLElement){
+      }
+      else if(aParent[iParent - 1].XMLElement){
+        var lastOfXML = _getLastChildNode(aParent[iParent - 1]);
 
-        var oLastOfXML = _getLastChildNodeParent(aParent[iParent - 1]);
-        var aLastOfXML = oLastOfXML.array;
-        var iLastOfXML = oLastOfXML.index;
-
-        //if(aLastOfXML){}
-
-
-        if(aLastOfXML[iLastOfXML-1].Content){
-          _setCaretPositionAccordingToObject(aLastOfXML[iLastOfXML-1]);
-          aLastOfXML.splice(iLastOfXML, 1);
+        if(lastOfXML.Br){
+          var lastXMLParent = _getLastChildNodeParent(aParent[iParent - 1]);
+          var tempBlankContent = _createContentNode("");
+          lastXMLParent.array.push(tempBlankContent);
+          _setCaretPositionAccordingToObject(tempBlankContent);
         }else{
-          console.log("Agar tune yeh bug solve kiya tohi manunga tuze");
+          _setCaretPositionAccordingToObject(lastOfXML);
         }
       }
     }
