@@ -153,24 +153,7 @@ var Story = React.createClass({
   },
 
   handleKeyDown: function (oEvent) {
-    /*if (oEvent.keyCode == 13) {
-     this.handleEnterKeyPress(oEvent);
-     }
-
-     if (oEvent.keyCode == 8) {
-     this.handleBackspacePress(oEvent);
-     }
-
-     if (oEvent.keyCode == 46) {
-     this.handleDeletePress(oEvent);
-     }
-
-     if (oEvent.keyCode == 9) {
-     this.handleTabPress(oEvent);
-     }*/
-
     EventDispatcher.dispatch(Events.ON_KEY_DOWN, this, oEvent);
-
   },
 
   componentDidUpdate: function () {
@@ -185,7 +168,7 @@ var Story = React.createClass({
       document.selection.empty();
     }*/
 
-   /* var oOldSelection = this.props.caretPosition.oSelection;
+    /* var oOldSelection = this.props.caretPosition.oSelection;
     if (oOldSelection.rangeCount) {
       var oRange = this.props.caretPosition.oRange;
       var iOffset = this.props.caretPosition.endOffset;
