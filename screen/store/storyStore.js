@@ -1012,6 +1012,7 @@ var storyStore = (function () {
 
       if (aGrandParent[iGrandParent].CharacterStyleRange) {
         var currentStyleId = aGrandParent[iGrandParent].CharacterStyleRange[0]['$'].AppliedCharacterStyle;
+        var currentDataUId = aGrandParent[iGrandParent].CharacterStyleRange[0]['$']['data-uid'];
       }
 
       if (strDataPre.length != 0) {
@@ -1025,7 +1026,7 @@ var storyStore = (function () {
       }
 
       if (aSelf[iSelf + 1]) {
-        var rest = aSelf.splice(iSelf + 1);
+        var restSelfXml = aSelf.splice(iSelf + 1);
       }
 
       aSelf.splice(iSelf);
@@ -1038,8 +1039,8 @@ var storyStore = (function () {
       if (postContent)
         aSelf.push(postContent);
 
-      if (rest) {
-        _.assign(aSelf, aSelf.concat(rest));
+      if (restSelfXml) {
+        _.assign(aSelf, aSelf.concat(restSelfXml));
       }
 
       if (!isMultiSel)
@@ -1047,7 +1048,7 @@ var storyStore = (function () {
 
 
       var nextNodes = aParent.splice(iParent + 1);
-      var nextCharaStyle = _createCharacterStyleRange(currentStyleId, nextNodes);
+      var nextCharaStyle = _createCharacterStyleRange(currentStyleId, nextNodes, currentDataUId);
       var currentNode = aParent.splice(iParent, 1);
       var prevCharaStyle = _createCharacterStyleRange(currentStyleId, aParent);
 
@@ -1099,13 +1100,13 @@ var storyStore = (function () {
       aParent.push(middleNewChara);
 
 
-      if(restSelf){
+      if(restSelfXml){
         if(postChara){
-          _.assign(postChara.CharacterStyleRange[0].Custom, postChara.CharacterStyleRange[0].Custom.concat(restSelf));
+          _.assign(postChara.CharacterStyleRange[0].Custom, postChara.CharacterStyleRange[0].Custom.concat(restSelfXml));
           restParent = null;
         }
         else{
-          var restChara = _createCharacterStyleRange(existingStyleId, restSelf, existingDataID);
+          var restChara = _createCharacterStyleRange(existingStyleId, restSelfXml, existingDataID);
         }
       }
 
@@ -1116,7 +1117,7 @@ var storyStore = (function () {
         aParent.push(restChara);
 
       if(restParent)
-        aParent.push(restParent);
+        _.assign(aParent, aParent.concat(restParent));
 
       var middleNewCharaFirstChild = _getFirstChildNode(middleNewChara);
       if(!isMultiSel){
@@ -1131,7 +1132,7 @@ var storyStore = (function () {
       return oDOM;
     }
     if(oDOM.nextSibling) {
-      return oDOM.nextSibling;
+      return _getFirstDeepChildNodeFromDOM(oDOM.nextSibling);
     } else {
       var oParentNode = oDOM.parentNode;
       if(oParentNode.nextSibling) {
