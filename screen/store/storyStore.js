@@ -91,13 +91,20 @@ var storyStore = (function () {
     };
   };
 
-  var _createCharacterStyleRange = function (sStyleId, aCustom) {
+  var _createCharacterStyleRange = function (sStyleId, aCustom, existingDataID) {
+    var data_uid;
+    if(existingDataID){
+      data_uid = existingDataID;
+    }else{
+      data_uid = utils.generateUUID()
+    }
+
     return {
       "CharacterStyleRange": [
         {
           "Custom": aCustom ? aCustom : [],
           "$": {
-            "data-uid": utils.generateUUID(),
+            "data-uid": data_uid,
             "AppliedCharacterStyle": sStyleId
           }
         }
@@ -875,11 +882,70 @@ var storyStore = (function () {
     }else{
 
       _handleStartContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
-      //TODO:   _handleMiddleAll();
+      _handleMiddleAll(oRange, sStyleId, oCurrentStory);
       _handleEndContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
 
     }
 
+
+  };
+
+  var _handleMiddleAll = function(oRange, sStyleId, oCurrentStory){
+    var oStartDOM = _getDeepestDOM(oRange.startContainer, oRange.startOffset, oRange.commonAncestorContainer).currentDOM;
+    var oEndDOM = _getDeepestDOM(oRange.endContainer, oRange.endOffset, oRange.commonAncestorContainer).currentDOM;
+
+    var aPaths = _createPathForRange(oStartDOM, oEndDOM);
+    /** trace array ,except 1st and last node*/
+    for(var i=1; i<aPaths.length-1; i++){
+      var oParent = _getClosestCharaStyle(aPaths[i], oCurrentStory);
+      var aParent = oParent.objectPos;
+      var iParent = oParent.indexPos;
+      aParent[iParent].CharacterStyleRange[0]['$'].AppliedCharacterStyle = sStyleId;
+
+      if(aParent[iParent-1] && aParent[iParent-1].CharacterStyleRange
+          && aParent[iParent-1].CharacterStyleRange[0]['$'].AppliedCharacterStyle ==
+              aParent[iParent].CharacterStyleRange[0]['$'].AppliedCharacterStyle){
+
+        _mergeCharacterStyles(aParent[iParent-1], aParent[iParent]);
+        aParent.splice(iParent, 1);
+      }
+    }
+
+
+
+  };
+
+
+  var _mergeCharacterStyles = function(charaStyle1, charaStyle2){
+
+    var lastOfChara1 = _getLastChildNode(charaStyle1);
+    var firstOfChara2 = _getFirstChildNode(charaStyle2);
+
+    if(lastOfChara1.Content && firstOfChara2.Content){
+      lastOfChara1.Content[0]['_'] = lastOfChara1.Content[0]['_'] + firstOfChara2.Content[0]['_'];
+      var oParentOfFirstOfChara2 = _getFirstChildNodeParent(charaStyle2);
+      var aParentOfFirstOfChara2 = oParentOfFirstOfChara2.array;
+      var iParentOfFirstOfChara2 = oParentOfFirstOfChara2.index;
+      aParentOfFirstOfChara2.splice(iParentOfFirstOfChara2, 1);
+    }
+
+    _.assign(charaStyle1.CharacterStyleRange[0].Custom,
+        charaStyle1.CharacterStyleRange[0].Custom.concat(charaStyle2.CharacterStyleRange[0].Custom));
+  };
+
+
+  var _getClosestCharaStyle = function(path, oCurrentStory){
+
+    path.splice(-1, 1);
+    var oParent = _searchClosestCustomOfLastInPath(oCurrentStory, path);
+    var aParent = oParent.objectPos;
+    var iParent = oParent.indexPos;
+
+    if(aParent[iParent].CharacterStyleRange){
+      return oParent; //aParent[iParent].CharacterStyleRange[0];
+    }else {
+      return _getClosestCharaStyle(path, oCurrentStory);
+    }
 
   };
 
@@ -895,13 +961,19 @@ var storyStore = (function () {
     _handleCharaStyleInSameContent(startOffset, oRange.endOffset, aEndDOMPath, sStyleId, oCurrentStory, isMultiSel);
   };
 
-  var _createCharacterStyleRangeWithContent = function(sStyleId, strData){
+  var _createCharacterStyleRangeWithContent = function(sStyleId, strData, existingDataID){
+    var data_uid;
+    if(existingDataID){
+      data_uid = existingDataID;
+    }else{
+      data_uid = utils.generateUUID()
+    }
 
     return {
       "CharacterStyleRange": [{
         "$": {
           "AppliedCharacterStyle": sStyleId,
-          "data-uid": utils.generateUUID()
+          "data-uid": data_uid
         },
         "Custom": [{
           "Content": [{
@@ -914,12 +986,13 @@ var storyStore = (function () {
 
   };
 
-  var _handleCharaStyleInSameContent = function(startOffset, endOffset, selfPath, sStyleID, oCurrentStory, isMultiSel){
+  var _handleCharaStyleInSameContent = function(startOffset, endOffset, selfPath, sStyleID, oCurrentStory, isMultiSel, isForward){
     var oSelf = _searchClosestCustomOfLastInPath(oCurrentStory, selfPath);
     var aSelf = oSelf.objectPos;
     var iSelf = oSelf.indexPos;
 
-    selfPath.splice(-1,1);
+    var selfPathClone = selfPath;
+    selfPathClone.splice(-1,1);
     var oParent = _searchClosestCustomOfLastInPath(oCurrentStory, selfPath);
     var aParent = oParent.objectPos;
     var iParent = oParent.indexPos;
@@ -931,48 +1004,82 @@ var storyStore = (function () {
     var strDataMiddle = strData.slice(startOffset, endOffset);
 
     /** A content can have only two parents, either XMLElement or CharacterStyleRange*/
-    /** If Content's parent is XML element, then just do breakDown and create ne charaStyle*/
+    /** If Content's parent is XML element, then just do breakDown and create new charaStyle*/
     if(aParent[iParent].XMLElement){
-      if(strDataPre.length != 0){
-        var preContent = _createContentNode(strDataPre);
-      }
-
-      var middleChara = _createCharacterStyleRangeWithContent(sStyleID, strDataMiddle);
-
-      if(strDataPost.length !=0){
-        var postContent = _createContentNode(strDataPost);
-      }
-
-      if(aSelf[iSelf+1]){
-        var rest = aSelf.splice(iSelf+1);
-      }
-
-      aSelf.splice(iSelf);
-
-      if(preContent)
-        aSelf.push(preContent);
-
-      aSelf.push(middleChara);
-
-      if(postContent)
-        aSelf.push(postContent);
-
-      if(rest){
-        _.assign(aSelf, aSelf.concat(rest));
-      }
-
       if(!isMultiSel){
+
+        selfPathClone.splice(-1,1);
+        var oGrandParent = _searchClosestCustomOfLastInPath(oCurrentStory, selfPath);
+        var aGrandParent = oGrandParent.objectPos;
+        var iGrandParent = oGrandParent.indexPos;
+
+        if(aGrandParent[iGrandParent].CharacterStyleRange){
+          var currentStyleId = aGrandParent[iGrandParent].CharacterStyleRange[0]['$'].AppliedCharacterStyle;
+        }
+
+        if(strDataPre.length != 0){
+          var preContent = _createCharacterStyleRangeWithContent(currentStyleId, strDataPre);
+        }
+
+        var middleChara = _createCharacterStyleRangeWithContent(sStyleID, strDataMiddle);
+
+        if(strDataPost.length !=0){
+          var postContent = _createCharacterStyleRangeWithContent(currentStyleId, strDataPost);
+        }
+
+        if(aSelf[iSelf+1]){
+          var rest = aSelf.splice(iSelf+1);
+        }
+
+        aSelf.splice(iSelf);
+
+        if(preContent)
+          aSelf.push(preContent);
+
+        aSelf.push(middleChara);
+
+        if(postContent)
+          aSelf.push(postContent);
+
+        if(rest){
+          _.assign(aSelf, aSelf.concat(rest));
+        }
+
         _setCaretPositionAccordingToObject(postContent, 0);
+
+
+        var nextNodes = aParent.splice(iParent+1);
+        var nextCharaStyle = _createCharacterStyleRange(currentStyleId, nextNodes);
+        var currentNode = aParent.splice(iParent, 1);
+        var prevCharaStyle = _createCharacterStyleRange(currentStyleId, aParent);
+
+
+        if(aGrandParent[iGrandParent+1]){
+          var restGrandParent = aGrandParent.splice(iGrandParent+1);
+        }
+
+        aGrandParent.splice(iGrandParent,1);
+        aGrandParent.push(prevCharaStyle);
+        aGrandParent.push(currentNode);
+        aGrandParent.push(nextCharaStyle);
+        if(restGrandParent){
+          _.assign(aGrandParent, aGrandParent.concat(restGrandParent));
+        }
       }
 
     }
     /** if CONTENT's parent is CharacterStyleRange , then create 3 different charaStyles*/
     else if(aParent[iParent].CharacterStyleRange){
 
+      if(aSelf[iSelf+1]){
+        var restSelf = aSelf.splice(iSelf+1);
+      }
+
       if(aParent[iParent+1]){
         var restParent = aParent.splice(iParent+1);
       }
       var existingStyleId = aParent[iParent].CharacterStyleRange[0]['$'].AppliedCharacterStyle;
+      var existingDataID = aParent[iParent].CharacterStyleRange[0]['$']['data-uid'];
 
       if(strDataPre.length!=0){
         var preChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPre);
@@ -982,7 +1089,7 @@ var storyStore = (function () {
       var middleNewChara = _createCharacterStyleRangeWithContent(sStyleID, strDataMiddle);
 
       if(strDataPost!=0){
-        var postChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPost);
+        var postChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPost, existingDataID);
       }
 
 
@@ -994,12 +1101,25 @@ var storyStore = (function () {
 
       aParent.push(middleNewChara);
 
+
+      if(restSelf){
+        if(postChara){
+          _.assign(postChara.CharacterStyleRange[0].Custom, postChara.CharacterStyleRange[0].Custom.concat(restSelf));
+          restParent = null;
+        }
+        else{
+          var restChara = _createCharacterStyleRange(existingStyleId, restSelf, existingDataID);
+        }
+      }
+
       if(postChara)
         aParent.push(postChara);
 
-      if(restParent){
-        _.assign(aParent, aParent.concat(restParent));
-      }
+      if(restChara)
+        aParent.push(restChara);
+
+      if(restParent)
+        aParent.push(restParent);
 
       var middleNewCharaFirstChild = _getFirstChildNode(middleNewChara);
       if(!isMultiSel){
@@ -1481,6 +1601,37 @@ var storyStore = (function () {
       }
       else{
         return _getLastChildNodeParent(oNode.XMLElement[0].Custom[oCustomLength-1]);
+      }
+    }
+  };
+
+  var _getFirstChildNodeParent = function(oNode){
+    var oTemp;
+    if(oNode.ParagraphStyleRange) {
+      return _getFirstChildNodeParent(oNode.ParagraphStyleRange[0].Custom[0]);
+    }
+    else if(oNode.CharacterStyleRange) {
+      oTemp = oNode.CharacterStyleRange[0].Custom[0];
+      if(oTemp.Content || oTemp.Br){
+        return {
+          array: oNode.CharacterStyleRange[0].Custom,
+          index: 0
+        }
+      }
+      else{
+        return _getFirstChildNodeParent(oNode.CharacterStyleRange[0].Custom[0]);
+      }
+    }
+    else if(oNode.XMLElement) {
+      oTemp = oNode.XMLElement[0].Custom[0];
+      if(oTemp.Content || oTemp.Br){
+        return {
+          array: oNode.XMLElement[0].Custom,
+          index: 0
+        }
+      }
+      else{
+        return _getFirstChildNodeParent(oNode.XMLElement[0].Custom[0]);
       }
     }
   };
