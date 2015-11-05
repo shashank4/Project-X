@@ -855,18 +855,27 @@ var storyStore = (function () {
 
   var _applyCharacterStyleToSelectedNode = function (oRange, sStyleId, oCurrentStory, aStartDOMPath, aEndDOMPath) {
 
-    var startDataUID;
-    var endDataUID;
+    /*var oStartDOM = _getDeepestDOM(oRange.startContainer, oRange.startOffset, oRange.commonAncestorContainer).currentDOM;
+    var oEndDOM = _getDeepestDOM(oRange.endContainer, oRange.endOffset, oRange.commonAncestorContainer).currentDOM;*/
+
+    var startDataUID, oStartDom ;
+    var endDataUID, oEndDom ;
 
     if(oRange.startContainer.nodeName == '#text'){  /** Content node*/
+      oStartDom = oRange.startContainer.parentNode;
       startDataUID = oRange.startContainer.parentNode.attributes[1].nodeValue;
-    }else {  /** Br node*/
+    }
+    else {  /** Br node*/
+      oStartDom = oRange.startContainer.childNodes[oRange.startOffset];
       startDataUID = oRange.startContainer.childNodes[oRange.startOffset].attributes[1].nodeValue;
     }
 
     if(oRange.endContainer.nodeName == '#text'){  /** Content node*/
+      oEndDom = oRange.endContainer.parentNode;
       endDataUID = oRange.endContainer.parentNode.attributes[1].nodeValue;
-    }else{  /** Br node*/
+    }
+    else{  /** Br node*/
+      oEndDom = oRange.endContainer.childNodes[oRange.endOffset];
       endDataUID = oRange.endContainer.childNodes[oRange.endOffset].attributes[1].nodeValue;
     }
 
@@ -881,22 +890,51 @@ var storyStore = (function () {
       _handleCharaStyleInSameContent(startOffset, endOffset, aStartDOMPath, sStyleId, oCurrentStory, isMultiSel);
     }else{
 
-      _handleStartContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
-      _handleMiddleAll(oRange, sStyleId, oCurrentStory);
-      _handleEndContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
+      var startBrFlag, endBrFlag;
+      if(_.includes(oStartDom.classList, "brContainer")){
+        startBrFlag = true;
+      }
+
+      if(_.includes(oEndDom.classList, "brContainer")){
+        endBrFlag = true;
+      }
+
+      if(!startBrFlag){
+        _handleStartContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
+      }
+
+      _handleMiddleAll(oRange, sStyleId, oCurrentStory, oStartDom, oEndDom,startBrFlag, endBrFlag);
+
+      if(!endBrFlag){
+        _handleEndContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
+      }
+
 
     }
 
 
   };
 
-  var _handleMiddleAll = function(oRange, sStyleId, oCurrentStory){
-    var oStartDOM = _getDeepestDOM(oRange.startContainer, oRange.startOffset, oRange.commonAncestorContainer).currentDOM;
-    var oEndDOM = _getDeepestDOM(oRange.endContainer, oRange.endOffset, oRange.commonAncestorContainer).currentDOM;
+  var _handleMiddleAll = function(oRange, sStyleId, oCurrentStory, oStartDOM, oEndDOM, startBrFlag, endBrFlag){
+    //var oStartDOM = _getDeepestDOM(oRange.startContainer, oRange.startOffset, oRange.commonAncestorContainer).currentDOM;
+    //var oEndDOM = _getDeepestDOM(oRange.endContainer, oRange.endOffset, oRange.commonAncestorContainer).currentDOM;
 
     var aPaths = _createPathForRange(oStartDOM, oEndDOM);
     /** trace array ,except 1st and last node*/
-    for(var i=1; i<aPaths.length-1; i++){
+    var j, aPathLength;
+    if(startBrFlag){
+      j=0;
+    }else{
+      j=1;
+    }
+
+    if(endBrFlag){
+      aPathLength = aPaths.length;
+    }else{
+      aPathLength = aPaths.length-1;
+    }
+
+    for(var i=j; i<aPathLength; i++){
       var oParent = _getClosestCharaStyle(aPaths[i], oCurrentStory);
       var aParent = oParent.objectPos;
       var iParent = oParent.indexPos;
@@ -948,7 +986,11 @@ var storyStore = (function () {
   };
 
   var _handleStartContainer = function(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory){
-    var endOffset = oRange.startContainer.data.length;
+    var endOffset = null;
+    if(oRange.startContainer.data){
+      endOffset = oRange.startContainer.data.length;
+    }
+
     var isMultiSel = true;
     _handleCharaStyleInSameContent(oRange.startOffset, endOffset, aStartDOMPath, sStyleId, oCurrentStory, isMultiSel);
   };
@@ -1070,7 +1112,13 @@ var storyStore = (function () {
     else if(aParent[iParent].CharacterStyleRange){
 
       if(aSelf[iSelf+1]){
-        var restSelf = aSelf.splice(iSelf+1);
+        var aRestSelf = aSelf.splice(iSelf+1);
+      }
+
+      var aCurrentSelf = aSelf.splice(iSelf);
+
+      if(aSelf.length>0){
+        var aPrevSelf = aSelf;
       }
 
       if(aParent[iParent+1]){
@@ -1094,19 +1142,28 @@ var storyStore = (function () {
 
       aParent.splice(iParent);
 
+      if(aPrevSelf){
+        var prevSelfChara = _createCharacterStyleRange(existingStyleId, aPrevSelf);
+        if(preChara){
+          _.assign(prevSelfChara.CharacterStyleRange[0].Custom,
+              prevSelfChara.CharacterStyleRange[0].Custom.concat(preChara.CharacterStyleRange[0].Custom));
+          preChara = null;
+        }
+        aParent.push(prevSelfChara);
+      }
+
       if(preChara)
         aParent.push(preChara);
 
       aParent.push(middleNewChara);
 
 
-      if(restSelfXml){
+      if(aRestSelf){
         if(postChara){
-          _.assign(postChara.CharacterStyleRange[0].Custom, postChara.CharacterStyleRange[0].Custom.concat(restSelfXml));
-          restParent = null;
+          _.assign(postChara.CharacterStyleRange[0].Custom, postChara.CharacterStyleRange[0].Custom.concat(aRestSelf));
         }
         else{
-          var restChara = _createCharacterStyleRange(existingStyleId, restSelfXml, existingDataID);
+          var restChara = _createCharacterStyleRange(existingStyleId, aRestSelf, existingDataID);
         }
       }
 
