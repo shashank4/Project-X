@@ -911,8 +911,6 @@ var storyStore = (function () {
       }
     }
 
-
-
   };
 
 
@@ -1006,65 +1004,64 @@ var storyStore = (function () {
     /** A content can have only two parents, either XMLElement or CharacterStyleRange*/
     /** If Content's parent is XML element, then just do breakDown and create new charaStyle*/
     if(aParent[iParent].XMLElement){
-      if(!isMultiSel){
 
-        selfPathClone.splice(-1,1);
-        var oGrandParent = _searchClosestCustomOfLastInPath(oCurrentStory, selfPath);
-        var aGrandParent = oGrandParent.objectPos;
-        var iGrandParent = oGrandParent.indexPos;
+      selfPathClone.splice(-1, 1);
+      var oGrandParent = _searchClosestCustomOfLastInPath(oCurrentStory, selfPath);
+      var aGrandParent = oGrandParent.objectPos;
+      var iGrandParent = oGrandParent.indexPos;
 
-        if(aGrandParent[iGrandParent].CharacterStyleRange){
-          var currentStyleId = aGrandParent[iGrandParent].CharacterStyleRange[0]['$'].AppliedCharacterStyle;
-        }
+      if (aGrandParent[iGrandParent].CharacterStyleRange) {
+        var currentStyleId = aGrandParent[iGrandParent].CharacterStyleRange[0]['$'].AppliedCharacterStyle;
+      }
 
-        if(strDataPre.length != 0){
-          var preContent = _createCharacterStyleRangeWithContent(currentStyleId, strDataPre);
-        }
+      if (strDataPre.length != 0) {
+        var preContent = _createCharacterStyleRangeWithContent(currentStyleId, strDataPre);
+      }
 
-        var middleChara = _createCharacterStyleRangeWithContent(sStyleID, strDataMiddle);
+      var middleChara = _createCharacterStyleRangeWithContent(sStyleID, strDataMiddle);
 
-        if(strDataPost.length !=0){
-          var postContent = _createCharacterStyleRangeWithContent(currentStyleId, strDataPost);
-        }
+      if (strDataPost.length != 0) {
+        var postContent = _createCharacterStyleRangeWithContent(currentStyleId, strDataPost);
+      }
 
-        if(aSelf[iSelf+1]){
-          var rest = aSelf.splice(iSelf+1);
-        }
+      if (aSelf[iSelf + 1]) {
+        var rest = aSelf.splice(iSelf + 1);
+      }
 
-        aSelf.splice(iSelf);
+      aSelf.splice(iSelf);
 
-        if(preContent)
-          aSelf.push(preContent);
+      if (preContent)
+        aSelf.push(preContent);
 
-        aSelf.push(middleChara);
+      aSelf.push(middleChara);
 
-        if(postContent)
-          aSelf.push(postContent);
+      if (postContent)
+        aSelf.push(postContent);
 
-        if(rest){
-          _.assign(aSelf, aSelf.concat(rest));
-        }
+      if (rest) {
+        _.assign(aSelf, aSelf.concat(rest));
+      }
 
+      if (!isMultiSel)
         _setCaretPositionAccordingToObject(postContent, 0);
 
 
-        var nextNodes = aParent.splice(iParent+1);
-        var nextCharaStyle = _createCharacterStyleRange(currentStyleId, nextNodes);
-        var currentNode = aParent.splice(iParent, 1);
-        var prevCharaStyle = _createCharacterStyleRange(currentStyleId, aParent);
+      var nextNodes = aParent.splice(iParent + 1);
+      var nextCharaStyle = _createCharacterStyleRange(currentStyleId, nextNodes);
+      var currentNode = aParent.splice(iParent, 1);
+      var prevCharaStyle = _createCharacterStyleRange(currentStyleId, aParent);
 
 
-        if(aGrandParent[iGrandParent+1]){
-          var restGrandParent = aGrandParent.splice(iGrandParent+1);
-        }
+      if (aGrandParent[iGrandParent + 1]) {
+        var restGrandParent = aGrandParent.splice(iGrandParent + 1);
+      }
 
-        aGrandParent.splice(iGrandParent,1);
-        aGrandParent.push(prevCharaStyle);
-        aGrandParent.push(currentNode);
-        aGrandParent.push(nextCharaStyle);
-        if(restGrandParent){
-          _.assign(aGrandParent, aGrandParent.concat(restGrandParent));
-        }
+      aGrandParent.splice(iGrandParent, 1);
+      aGrandParent.push(prevCharaStyle);
+      aGrandParent.push(currentNode[0]);
+      aGrandParent.push(nextCharaStyle);
+      if (restGrandParent) {
+        _.assign(aGrandParent, aGrandParent.concat(restGrandParent));
       }
 
     }
