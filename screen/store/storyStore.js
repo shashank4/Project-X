@@ -965,6 +965,7 @@ var storyStore = (function () {
       aParentOfFirstOfChara2.splice(iParentOfFirstOfChara2, 1);
     }
 
+    charaStyle1.CharacterStyleRange[0]['$']['data-uid'] = charaStyle2.CharacterStyleRange[0]['$']['data-uid'];
     _.assign(charaStyle1.CharacterStyleRange[0].Custom,
         charaStyle1.CharacterStyleRange[0].Custom.concat(charaStyle2.CharacterStyleRange[0].Custom));
   };
