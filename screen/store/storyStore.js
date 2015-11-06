@@ -899,20 +899,13 @@ var storyStore = (function () {
         endBrFlag = true;
       }
 
-      if(!startBrFlag){
-        _handleStartContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
-      }
+      _handleStartContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
 
       _handleMiddleAll(oRange, sStyleId, oCurrentStory, oStartDom, oEndDom,startBrFlag, endBrFlag);
 
-      if(!endBrFlag){
-        _handleEndContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
-      }
-
+      _handleEndContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
 
     }
-
-
   };
 
   var _handleMiddleAll = function(oRange, sStyleId, oCurrentStory, oStartDOM, oEndDOM, startBrFlag, endBrFlag){
@@ -921,8 +914,9 @@ var storyStore = (function () {
 
     var aPaths = _createPathForRange(oStartDOM, oEndDOM);
     /** trace array ,except 1st and last node*/
-    var j, aPathLength;
-    if(startBrFlag){
+    var j=1;
+    var aPathLength=aPaths.length-1;
+    /*if(startBrFlag){
       j=0;
     }else{
       j=1;
@@ -932,7 +926,7 @@ var storyStore = (function () {
       aPathLength = aPaths.length;
     }else{
       aPathLength = aPaths.length-1;
-    }
+    }*/
 
     for(var i=j; i<aPathLength; i++){
       var oParent = _getClosestCharaStyle(aPaths[i], oCurrentStory);
@@ -1038,11 +1032,14 @@ var storyStore = (function () {
     var aParent = oParent.objectPos;
     var iParent = oParent.indexPos;
 
-    var strData = aSelf[iSelf].Content[0]['_'];
+    if(aSelf[iSelf].Content){
+      var strData = aSelf[iSelf].Content[0]['_'];
 
-    var strDataPre = strData.slice(0, startOffset);
-    var strDataPost = strData.slice(endOffset, strData.length);
-    var strDataMiddle = strData.slice(startOffset, endOffset);
+      var strDataPre = strData.slice(0, startOffset);
+      var strDataPost = strData.slice(endOffset, strData.length);
+      var strDataMiddle = strData.slice(startOffset, endOffset);
+    }
+
 
     /** A content can have only two parents, either XMLElement or CharacterStyleRange*/
     /** If Content's parent is XML element, then just do breakDown and create new charaStyle*/
@@ -1058,13 +1055,14 @@ var storyStore = (function () {
         var currentDataUId = aGrandParent[iGrandParent].CharacterStyleRange[0]['$']['data-uid'];
       }
 
-      if (strDataPre.length != 0) {
+      if (strDataPre && strDataPre.length != 0) {
         var preContent = _createCharacterStyleRangeWithContent(currentStyleId, strDataPre);
       }
 
-      var middleChara = _createCharacterStyleRangeWithContent(sStyleID, strDataMiddle);
+      if(strDataMiddle)
+        var middleChara = _createCharacterStyleRangeWithContent(sStyleID, strDataMiddle);
 
-      if (strDataPost.length != 0) {
+      if (strDataPost && strDataPost.length != 0) {
         var postContent = _createCharacterStyleRangeWithContent(currentStyleId, strDataPost);
       }
 
@@ -1072,12 +1070,18 @@ var storyStore = (function () {
         var restSelfXml = aSelf.splice(iSelf + 1);
       }
 
-      aSelf.splice(iSelf);
+      var currentContentOrBr = aSelf.splice(iSelf);
 
       if (preContent)
         aSelf.push(preContent);
 
-      aSelf.push(middleChara);
+      if(middleChara){
+        aSelf.push(middleChara);
+      }
+      else{
+        var BrCharacterStyle = _createCharacterStyleRange(sStyleID, currentContentOrBr );
+        aSelf.push(BrCharacterStyle);
+      }
 
       if (postContent)
         aSelf.push(postContent);
@@ -1128,18 +1132,17 @@ var storyStore = (function () {
       var existingStyleId = aParent[iParent].CharacterStyleRange[0]['$'].AppliedCharacterStyle;
       var existingDataID = aParent[iParent].CharacterStyleRange[0]['$']['data-uid'];
 
-      if(strDataPre.length!=0){
+      if(strDataPre && strDataPre.length!=0){
         var preChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPre);
       }
 
-
-      var middleNewChara = _createCharacterStyleRangeWithContent(sStyleID, strDataMiddle);
-
-      if(strDataPost!=0){
-        var postChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPost, existingDataID);
+      if(strDataMiddle){
+        var middleNewChara = _createCharacterStyleRangeWithContent(sStyleID, strDataMiddle);
       }
 
-
+      if(strDataPost && strDataPost.length!=0){
+        var postChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPost, existingDataID);
+      }
 
       aParent.splice(iParent);
 
@@ -1156,8 +1159,12 @@ var storyStore = (function () {
       if(preChara)
         aParent.push(preChara);
 
-      aParent.push(middleNewChara);
-
+      if(middleNewChara){
+        aParent.push(middleNewChara);
+      }else{
+        var newBrCharacterStyle = _createCharacterStyleRange(sStyleID, aCurrentSelf);
+        aParent.push(newBrCharacterStyle);
+      }
 
       if(aRestSelf){
         if(postChara){
@@ -1177,8 +1184,11 @@ var storyStore = (function () {
       if(restParent)
         _.assign(aParent, aParent.concat(restParent));
 
-      var middleNewCharaFirstChild = _getFirstChildNode(middleNewChara);
-      if(!isMultiSel){
+      if(middleNewChara){
+        var middleNewCharaFirstChild = _getFirstChildNode(middleNewChara);
+      }
+
+      if(!isMultiSel && middleNewCharaFirstChild){
         _setCaretPositionAccordingToObject(middleNewCharaFirstChild);
       }
     }
