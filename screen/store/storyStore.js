@@ -145,7 +145,6 @@ var storyStore = (function () {
     if(aGrandParent[iGrandIndex-1] ){
 
       if(aGrandParent[iGrandIndex-1].XMLElement && aGrandParent[iGrandIndex-1].XMLElement[0].Custom.length == 0){
-        //_handleCaretIfNotOnlyChildDelete(aParent, iIndex );
         _handlePrevGrandParent(aGrandParent, iGrandIndex-1)
       }
 
@@ -181,7 +180,6 @@ var storyStore = (function () {
           var focusID5 = aParent[iIndex-1].Content[0]['$']['data-uid'];
           var focusOffset5 = aParent[iIndex-1].Content[0]['_'].length;
           _setCaretPositionAccordingToObjectDelete(focusID5, focusOffset5);
-          //return ;
         }
 
         /** to handle empty ContentNode*/
@@ -269,11 +267,26 @@ var storyStore = (function () {
         }
         else if(aParent.length != 0 && aParent[iIndex]){
           if(!aParent[iIndex].Br){
-            _handleCaretIfNotOnlyChildDelete(aParent, iIndex );
+            var nextNode;
+            if(aParent[iIndex].Content){
+              nextNode = aParent[iIndex];
+            }
+            else{
+              nextNode = _getFirstChildNode(aParent[iIndex]);
+            }
+
+            var focusID6 ;
+            var focusOff = null;
+            if(nextNode.Content){
+              focusID6 = nextNode.Content[0]['$']['data-uid'];
+              focusOff = 0 ;
+            }else if(nextNode.Br){
+              focusID6 = nextNode.Br[0]['$']['data-uid'];
+            }
+            _setCaretPositionAccordingToObjectDelete(focusID6, focusOff);
+
           }else{
-
             _handlePrevGrandParent(aGrandParent, iGrandIndex);
-
           }
 
         }
@@ -284,6 +297,7 @@ var storyStore = (function () {
     else if (aParent[iIndex].XMLElement)
     {
 
+
       var firstContBr = _getFirstChildNode(aParent[iIndex]);
 
       if(firstContBr.Br){
@@ -293,38 +307,9 @@ var storyStore = (function () {
       }
       else if(firstContBr.Content){
         var fID2 = firstContBr.Content[0]['$']['data-uid'];
-        var fOffset = firstContBr.Content[0]['_'].length;
-        _setCaretPositionAccordingToObjectDelete(fID2, fOffset);
+        //var fOffset = firstContBr.Content[0]['_'].length;
+        _setCaretPositionAccordingToObjectDelete(fID2, 0);
       }
-
-
-      /*if(aParent[iIndex].XMLElement[0].Custom.length!=0){
-        *//** if first node of XMLElement is CONTENT.   */
-    /*
-        if(aParent[iIndex].XMLElement[0].Custom[0].Content){
-          var str = aParent[iIndex].XMLElement[0].Custom[0].Content[0]["_"];
-          if (str.length != 1) {
-            aParent[iIndex].XMLElement[0].Custom[0].Content[0]["_"] = str.slice(1, str.length);
-          } else {
-            aParent[iIndex].XMLElement[0].Custom.splice(0, 1);
-          }
-        }
-        *//** if first node of XMLElement is BR.   *//*
-        else if (aParent[iIndex].XMLElement[0].Custom[0].Br){
-          aParent[iIndex].XMLElement[0].Custom.splice(0, 1);
-        }
-        *//** if first node of XMLElement is CharaStyle *//*
-        else if(aParent[iIndex].XMLElement[0].Custom[0].CharacterStyleRange){
-          handleCharaOfDelete(aParent[iIndex].XMLElement[0].Custom[0].CharacterStyleRange[0].Custom, 0, aParent[iIndex].XMLElement[0].Custom, 0);
-        }
-      }else {
-        if(aParent[iIndex+1]){
-          handleCharaOfDelete(aParent, iIndex+1, aGrandParent, iGrandIndex );
-        }else if(! aParent[iIndex + 1] && aGrandParent[iGrandIndex+1] ){
-          handleCharaOfDelete( aGrandParent, iGrandIndex+1 );
-        }
-
-      }*/
 
     }
 
@@ -901,9 +886,11 @@ var storyStore = (function () {
 
       _handleStartContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
 
+      _handleEndContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
+
       _handleMiddleAll(oRange, sStyleId, oCurrentStory, oStartDom, oEndDom,startBrFlag, endBrFlag);
 
-      _handleEndContainer(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory);
+
 
     }
   };
@@ -987,12 +974,14 @@ var storyStore = (function () {
     }
 
     var isMultiSel = true;
-    _handleCharaStyleInSameContent(oRange.startOffset, endOffset, aStartDOMPath, sStyleId, oCurrentStory, isMultiSel);
+    var isForward = true;
+    _handleCharaStyleInSameContent(oRange.startOffset, endOffset, aStartDOMPath, sStyleId, oCurrentStory, isMultiSel, isForward);
   };
 
   var _handleEndContainer = function(oRange, aStartDOMPath, aEndDOMPath, sStyleId, oCurrentStory){
     var startOffset = 0;
     var isMultiSel = true;
+
     _handleCharaStyleInSameContent(startOffset, oRange.endOffset, aEndDOMPath, sStyleId, oCurrentStory, isMultiSel);
   };
 
@@ -1132,8 +1121,16 @@ var storyStore = (function () {
       var existingStyleId = aParent[iParent].CharacterStyleRange[0]['$'].AppliedCharacterStyle;
       var existingDataID = aParent[iParent].CharacterStyleRange[0]['$']['data-uid'];
 
+
+
+
       if(strDataPre && strDataPre.length!=0){
-        var preChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPre);
+        var preChara;
+        if(isForward)
+          preChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPre);
+        else{
+          preChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPre, existingDataID);
+        }
       }
 
       if(strDataMiddle){
@@ -1141,13 +1138,29 @@ var storyStore = (function () {
       }
 
       if(strDataPost && strDataPost.length!=0){
-        var postChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPost, existingDataID);
+        var postChara;
+        if(isForward)
+          postChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPost, existingDataID);
+        else{
+          postChara = _createCharacterStyleRangeWithContent(existingStyleId, strDataPost);
+        }
       }
 
       aParent.splice(iParent);
 
+      /*if(!isForward && aPrevSelf){
+        var aPrevRestParent = aParent;
+        var prevRestParentCharaStyle = _createCharacterStyleRange(existingStyleId, aParent,)
+      }*/
+
       if(aPrevSelf){
-        var prevSelfChara = _createCharacterStyleRange(existingStyleId, aPrevSelf);
+        var prevSelfChara;
+        if(isForward){
+          prevSelfChara = _createCharacterStyleRange(existingStyleId, aPrevSelf);
+        }else{
+          prevSelfChara = _createCharacterStyleRange(existingStyleId, aPrevSelf, existingDataID);
+        }
+
         if(preChara){
           _.assign(prevSelfChara.CharacterStyleRange[0].Custom,
               prevSelfChara.CharacterStyleRange[0].Custom.concat(preChara.CharacterStyleRange[0].Custom));
@@ -2529,9 +2542,9 @@ var storyStore = (function () {
           {
             /** if current node has next node. (Current node will always be CONTENT and next will always be either XMLTag or Br)  */
             if (aParent[iIndex + 1]) {
-              var focusID = aParent[iIndex].Content[0]["$"]["data-uid"];
+              /*var focusID = aParent[iIndex].Content[0]["$"]["data-uid"];
               var indexToFocus = aParent[iIndex].Content[0]["_"].length;
-              _setCaretPositionAccordingToObjectDelete(focusID, indexToFocus);
+              _setCaretPositionAccordingToObjectDelete(focusID, indexToFocus);*/
               handleCharaOfDelete(aParent, iIndex + 1);
             }
 
