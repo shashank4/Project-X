@@ -516,9 +516,12 @@ var storyStore = (function () {
     }
   };
 
-  var handleContentTextChangedForRangeSelection = function (oSelection, targetPath, pressedChar) {
+  var handleContentTextChangedForRangeSelection = function (oSelection, targetPath, pressedChar, isFromEnter) {
     var oSelectionStartNode = oSelection.anchorNode;
+    var oStartOffset = oSelection.anchorOffset;
     var oSelectionEndNode = oSelection.focusNode;
+    var oEndOffset = oSelection.focusOffset;
+
 
     if (oSelectionStartNode == oSelectionEndNode) {
       var iSelectionStartPosition = Math.min(oSelection.anchorOffset, oSelection.focusOffset);
@@ -571,7 +574,24 @@ var storyStore = (function () {
           oCaretPosition.indexToFocus = 0;
         }
       }
-    } else {
+    }
+    else if(!isFromEnter) {
+
+
+      /**  STEPS:-
+       * % handle last node
+       *      handle current node(trimming etc).
+       *      get next Br node and.
+       *      After br make new para as current para.
+       * % handle middle nodes
+       *      remove all middle nodes.(including XMLtag)
+       *
+       * % handle start node
+       *
+       * */
+
+      //var oNextBrOfLastDOM = _getNextBrNode(oSelectionEndNode);
+
 
 
 
@@ -2278,90 +2298,100 @@ var storyStore = (function () {
       _triggerChange();
     },
 
-    handleEnterKeyPress: function (oCurrentDOM, iStartRange, targetPath) {
-      var path = targetPath.split("/");
-      var currentStoryId = path.splice(0, 1);
-      var currentStory = oStoryData[currentStoryId]["idPkg:Story"]["Story"][0];
-      var returnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
-      var aContentData = oCurrentDOM.firstChild ? oCurrentDOM.firstChild.data : null;
-      var aParent = returnedObject.objectPos;
-      var iIndex = returnedObject.indexPos;
-      var bFlag = returnedObject.flag;
+    handleEnterKeyPress: function (oCurrentDOM, iStartRange, targetPath, oSelection) {
 
-      /**
-       * true = 'BR' node....if key is down on Br node
-       * append directly
-       */
-      if (bFlag == true) {
-        var newBrObj5 = _createBrNode();
-        aParent.splice(iIndex,0,newBrObj5);
-        oCaretPosition.focusId = newBrObj5.Br[0]["$"]["data-uid"];
-      }
-      /** if key is down on content node */
-      else {
-        /** if offset is 0 and first node of character style or xmlElement */
-        if (iIndex == 0 && iStartRange == 0 ) {
-          var newBrObj6 = _createBrNode();
-          aParent.splice(iIndex, 0, newBrObj6);
-          oCaretPosition.focusId = newBrObj6.Br[0]["$"]["data-uid"];
+      var sType = oSelection.type;
+      if(sType== "Caret"){
+
+        var path = targetPath.split("/");
+        var currentStoryId = path.splice(0, 1);
+        var currentStory = oStoryData[currentStoryId]["idPkg:Story"]["Story"][0];
+        var returnedObject = _searchClosestCustomOfLastInPath(currentStory, path);
+        var aContentData = oCurrentDOM.firstChild ? oCurrentDOM.firstChild.data : null;
+        var aParent = returnedObject.objectPos;
+        var iIndex = returnedObject.indexPos;
+        var bFlag = returnedObject.flag;
+
+        /**
+         * true = 'BR' node....if key is down on Br node
+         * append directly
+         */
+        if (bFlag == true) {
+          var newBrObj5 = _createBrNode();
+          aParent.splice(iIndex,0,newBrObj5);
+          oCaretPosition.focusId = newBrObj5.Br[0]["$"]["data-uid"];
         }
-        /** if  it is NOT first node of character style or xmlElement   */
+        /** if key is down on content node */
         else {
-          var rest = aParent.splice(iIndex + 1);
-          var currentNode = aParent.splice(iIndex, 1);
-          var newBrObj = _createBrNode();
-          var newContentObjAfter={} ;
-
-          if (aContentData == "" || aContentData == null ||
-              (aContentData.length == 1 && (aContentData.charCodeAt(0) >= 0 && aContentData.charCodeAt(0) <= 32))) {
-            aParent.push(currentNode[0]);
-            aParent.push(newBrObj);
-            newContentObjAfter = _createContentNode("");
-            _setCaretPositionAccordingToObject(newContentObjAfter);
-            aParent.push(newContentObjAfter);
-            //_.assign(aParent, aParent.concat(rest));
-
+          /** if offset is 0 and first node of character style or xmlElement */
+          if (iIndex == 0 && iStartRange == 0 ) {
+            var newBrObj6 = _createBrNode();
+            aParent.splice(iIndex, 0, newBrObj6);
+            oCaretPosition.focusId = newBrObj6.Br[0]["$"]["data-uid"];
           }
-          else/* if(aParent[iIndex].Content)*/{
+          /** if  it is NOT first node of character style or xmlElement   */
+          else {
+            var rest = aParent.splice(iIndex + 1);
+            var currentNode = aParent.splice(iIndex, 1);
+            var newBrObj = _createBrNode();
+            var newContentObjAfter={} ;
 
-            if (iStartRange != 0) {
-              var newContentStringBefore = aContentData.substring(0, iStartRange);
-              var newContentObjBefore = _createContentNode(newContentStringBefore);
-              aParent.push(newContentObjBefore);
+            if (aContentData == "" || aContentData == null ||
+                (aContentData.length == 1 && (aContentData.charCodeAt(0) >= 0 && aContentData.charCodeAt(0) <= 32))) {
+              aParent.push(currentNode[0]);
+              aParent.push(newBrObj);
+              newContentObjAfter = _createContentNode("");
+              _setCaretPositionAccordingToObject(newContentObjAfter);
+              aParent.push(newContentObjAfter);
+              //_.assign(aParent, aParent.concat(rest));
+
+            }
+            else/* if(aParent[iIndex].Content)*/{
+
+              if (iStartRange != 0) {
+                var newContentStringBefore = aContentData.substring(0, iStartRange);
+                var newContentObjBefore = _createContentNode(newContentStringBefore);
+                aParent.push(newContentObjBefore);
+              }
+
+              aParent.push(newBrObj);
+
+
+              /** if cursor is not at the last position of the current content node.
+               * then break the string insert one br and append next string   */
+              /** according to new assumption , now append each time a conetnt node after a br. So no need of If condition in this*/
+              var newContentStringAfter = aContentData.substring(iStartRange, aContentData.length);
+              newContentObjAfter = _createContentNode(newContentStringAfter);
+              _setCaretPositionAccordingToObject(newContentObjAfter, 0);
+              aParent.push(newContentObjAfter);
             }
 
-            aParent.push(newBrObj);
+            /** if enter is pressed on extreme last position i.e. after last content or br of last Paragraph Node
+             * then push one extra br to get cursor on new line.   */
+            /*if (oSel.focusNode.length == oSel.focusOffset
+             && oSel.focusNode.parentNode.nextSibling == null
+             && oSel.focusNode.parentNode.parentNode.nextSibling == null
+             && oSel.focusNode.parentNode.parentNode.parentNode.nextSibling == null ) {
+             /!*var newBrObjExtremeLast = createBrNode();
+             oCaretPosition.focusId = newBrObjExtremeLast.Br[0]["$"]["data-uid"];*!/
+             var newSecondContentObjAfter = createContentNode('');
+             oCaretPosition.focusId = newSecondContentObjAfter.Content[0]["$"]["data-uid"];
+             oCaretPosition.indexToFocus = 0;
+             aParent.push(newSecondContentObjAfter);
+             }
 
-
-            /** if cursor is not at the last position of the current content node.
-             * then break the string insert one br and append next string   */
-            /** according to new assumption , now append each time a conetnt node after a br. So no need of If condition in this*/
-            var newContentStringAfter = aContentData.substring(iStartRange, aContentData.length);
-            newContentObjAfter = _createContentNode(newContentStringAfter);
-            _setCaretPositionAccordingToObject(newContentObjAfter, 0);
-            aParent.push(newContentObjAfter);
+             if(rest.Br) {
+             oCaretPosition.focusId = rest.Br[0]["$"]["data-uid"];
+             }*/
+            _.assign(aParent, aParent.concat(rest));
           }
-
-          /** if enter is pressed on extreme last position i.e. after last content or br of last Paragraph Node
-           * then push one extra br to get cursor on new line.   */
-          /*if (oSel.focusNode.length == oSel.focusOffset
-              && oSel.focusNode.parentNode.nextSibling == null
-              && oSel.focusNode.parentNode.parentNode.nextSibling == null
-              && oSel.focusNode.parentNode.parentNode.parentNode.nextSibling == null ) {
-            /!*var newBrObjExtremeLast = createBrNode();
-            oCaretPosition.focusId = newBrObjExtremeLast.Br[0]["$"]["data-uid"];*!/
-            var newSecondContentObjAfter = createContentNode('');
-            oCaretPosition.focusId = newSecondContentObjAfter.Content[0]["$"]["data-uid"];
-            oCaretPosition.indexToFocus = 0;
-            aParent.push(newSecondContentObjAfter);
-          }
-
-          if(rest.Br) {
-            oCaretPosition.focusId = rest.Br[0]["$"]["data-uid"];
-          }*/
-          _.assign(aParent, aParent.concat(rest));
         }
+
       }
+      else{
+        handleContentTextChangedForRangeSelection(oSelection, targetPath, "", true);
+      }
+
       _triggerChange();
     },
 
@@ -2412,7 +2442,8 @@ var storyStore = (function () {
 
         _triggerChange();
 
-      } else {
+      }
+      else {
         handleContentTextChangedForRangeSelection(oSelection, targetPath, "");
       }
 
@@ -2717,7 +2748,7 @@ var storyStore = (function () {
 
 
         if (oEvent.keyCode == 13) { //ENTER
-          this.handleEnterKeyPress(oCurrentDom, iStartRange, sPath);
+          this.handleEnterKeyPress(oCurrentDom, iStartRange, sPath, oSelection);
         }
 
         else if (oEvent.keyCode == 8) { //backSpace
