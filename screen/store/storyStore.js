@@ -296,8 +296,6 @@ var storyStore = (function () {
     /**if next node is XMLElement.  */
     else if (aParent[iIndex].XMLElement)
     {
-
-
       var firstContBr = _getFirstChildNode(aParent[iIndex]);
 
       if(firstContBr.Br){
@@ -307,7 +305,6 @@ var storyStore = (function () {
       }
       else if(firstContBr.Content){
         var fID2 = firstContBr.Content[0]['$']['data-uid'];
-        //var fOffset = firstContBr.Content[0]['_'].length;
         _setCaretPositionAccordingToObjectDelete(fID2, 0);
       }
 
@@ -1851,7 +1848,7 @@ var storyStore = (function () {
           _setCaretPositionAccordingToObject(lastOfXML);
 
 
-          /**   major change is here....*/
+
           //handleXMLOfBackSpace(aParent, iParent - 1);
 
         }
@@ -2227,6 +2224,7 @@ var storyStore = (function () {
   };
 
 
+
   var storyStore =  {
 
     setStoreData: function (data1) {
@@ -2542,55 +2540,61 @@ var storyStore = (function () {
           {
             /** if current node has next node. (Current node will always be CONTENT and next will always be either XMLTag or Br)  */
             if (aParent[iIndex + 1]) {
-              /*var focusID = aParent[iIndex].Content[0]["$"]["data-uid"];
-              var indexToFocus = aParent[iIndex].Content[0]["_"].length;
-              _setCaretPositionAccordingToObjectDelete(focusID, indexToFocus);*/
               handleCharaOfDelete(aParent, iIndex + 1);
             }
 
             /** if current node is the last node of its parent , i.e. it is the last node of current characterStyle.  */
             else if (iIndex == aParent.length - 1) {
 
+
+
+
               var pathForChara = targetPath.split("/");
               pathForChara.splice(0,1);
               pathForChara.splice(-1,1);
+
               var oParentOfCharacter = _searchClosestCustomOfLastInPath(currentStory,pathForChara);
               var aCustom = oParentOfCharacter.objectPos;
               var charIndex = oParentOfCharacter.indexPos;
 
-              /*aCustom.splice(charIndex, 1);
-               charIndex = charIndex - 1;    //local temp soln.
-               */
               /**if parent node has next node*/
               if (aCustom[charIndex + 1]) {
 
-                pathForChara.splice(-1,1);
-                var oParentOfXML = _searchClosestCustomOfLastInPath(currentStory,pathForChara);
-                var aCustomXML = oParentOfXML.objectPos;
-                var charIndexXML = oParentOfXML.indexPos;
+                if(aCustom[charIndex].XMLElement ){
+                  var firstChildContentBr = _getFirstChildNode(aCustom[charIndex + 1]);
+                  var offset = null;
+                  if(firstChildContentBr.Content){
+                    offset = 0;
+                  }
+                  _setCaretPositionAccordingToObject(firstChildContentBr, offset);
+                }
+                else{
+
+                  pathForChara.splice(-1,1);
+                  var oParentOfXML = _searchClosestCustomOfLastInPath(currentStory,pathForChara);
+                  var aCustomXML = oParentOfXML.objectPos;
+                  var charIndexXML = oParentOfXML.indexPos;
 
 
 
-                if(aCustom[charIndex + 1].CharacterStyleRange){
-                  /*aCustom.splice(charIndex, 1);
-                   charIndex = charIndex - 1;    //local temp soln.*/
+                  if(aCustom[charIndex + 1].CharacterStyleRange){
 
-                  if(aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content){
-                    var focusID2 = aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["$"]["data-uid"];
-                    var indexToFocus2 = 0;
-                    _setCaretPositionAccordingToObjectDelete(focusID2, indexToFocus2);
-                  }else if(aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Br){
-                    var focusID3 = aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Br[0]["$"]["data-uid"];
-                    _setCaretPositionAccordingToObjectDelete(focusID3);
+                    if(aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content){
+                      var focusID2 = aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Content[0]["$"]["data-uid"];
+                      var indexToFocus2 = 0;
+                      _setCaretPositionAccordingToObjectDelete(focusID2, indexToFocus2);
+                    }else if(aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Br){
+                      var focusID3 = aCustom[charIndex + 1].CharacterStyleRange[0].Custom[0].Br[0]["$"]["data-uid"];
+                      _setCaretPositionAccordingToObjectDelete(focusID3);
+                    }
+
+                    handleCharaOfDelete(aCustom[charIndex + 1].CharacterStyleRange[0].Custom, 0, aCustom, charIndex + 1);
+
+                  }else /*if(aCustom[charIndex + 1].XMLElement)*/{
+                    handleCharaOfDelete(aCustom, charIndex + 1, aCustomXML, charIndexXML);
                   }
 
-                  handleCharaOfDelete(aCustom[charIndex + 1].CharacterStyleRange[0].Custom, 0, aCustom, charIndex + 1);
-
-                }else /*if(aCustom[charIndex + 1].XMLElement)*/{
-                  handleCharaOfDelete(aCustom, charIndex + 1, aCustomXML, charIndexXML);
                 }
-
-
               }
               /**if this is the last CharacterStyle.  handle paragraph merging*/
               else if(!aCustom[charIndex+1]){
@@ -2605,25 +2609,19 @@ var storyStore = (function () {
                 /** next paraIndex exists*/
                 if(aCustomPara[paraIndex+1]){
 
-                  if(aCustomPara[paraIndex+1].ParagraphStyleRange && aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange){
-
-                    if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Br){
-                      aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom.splice(0,1);
-
-                      if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom.length == 0){
-                        aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom.splice(0,1);
-
-                        if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom.length == 0){
-                          aCustomPara.splice(paraIndex+1,1);
-                        }
-                      }
+                  if(aCustomPara[paraIndex].XMLElement ){
+                    var firstChildContentOrBr = _getFirstChildNode(aCustomPara[paraIndex+1]);
+                    var offsetPara = null;
+                    if(firstChildContentOrBr.Content){
+                      offsetPara = 0;
                     }
-                    else if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Content){
-                      var tempStr = aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Content[0]["_"];
-                      if(tempStr.length>1){
-                        aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Content[0]["_"] = tempStr.slice(1,tempStr.length);
-                      }else if(tempStr.length == 1){
+                    _setCaretPositionAccordingToObject(firstChildContentOrBr , offsetPara);
+                  }
+                  else{
 
+                    if(aCustomPara[paraIndex+1].ParagraphStyleRange && aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange){
+
+                      if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Br){
                         aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom.splice(0,1);
 
                         if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom.length == 0){
@@ -2634,14 +2632,36 @@ var storyStore = (function () {
                           }
                         }
                       }
-                      _.assign(aCustomPara[paraIndex].ParagraphStyleRange[0].Custom, aCustomPara[paraIndex].ParagraphStyleRange[0].Custom.concat(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom));
-                      aCustomPara.splice(paraIndex+1,1);
+                      else if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Content){
+                        var tempStr = aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Content[0]["_"];
+                        if(tempStr.length>1){
+                          aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom[0].Content[0]["_"] = tempStr.slice(1,tempStr.length);
+                        }else if(tempStr.length == 1){
+
+                          aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom.splice(0,1);
+
+                          if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom[0].CharacterStyleRange[0].Custom.length == 0){
+                            aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom.splice(0,1);
+
+                            if(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom.length == 0){
+                              aCustomPara.splice(paraIndex+1,1);
+                            }
+                          }
+                        }
+                        _.assign(aCustomPara[paraIndex].ParagraphStyleRange[0].Custom, aCustomPara[paraIndex].ParagraphStyleRange[0].Custom.concat(aCustomPara[paraIndex+1].ParagraphStyleRange[0].Custom));
+                        aCustomPara.splice(paraIndex+1,1);
+                      }
                     }
+
+                    else if(aCustomPara[paraIndex+1].CharacterStyleRange){
+                      handleCharaOfDelete(aCustomPara, paraIndex+1);
+                    }
+
+
                   }
 
-                  else if(aCustomPara[paraIndex+1].CharacterStyleRange){
-                    handleCharaOfDelete(aCustomPara, paraIndex+1);
-                  }
+
+
                 }
               }
             }
